@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.DropdownMenu
@@ -60,49 +62,58 @@ fun OwnerWorkersScreen(
                 .padding(innerPadding)
                 .padding(16.dp)
         ) {
-            Text(
-                text = "Trabajadores",
-                style = MaterialTheme.typography.headlineMedium
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // CAPA 4: invitación por código. Convive temporalmente con el listado
-            // de [TrabajadorStore] (modelo viejo de CAPA 0). Ver nota de conflicto
-            // al final de este archivo: no se decidió aún cuál reemplaza a cuál.
-            Button(
-                onClick = { mostrandoInvitar = !mostrandoInvitar },
-                modifier = Modifier.fillMaxWidth()
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .verticalScroll(rememberScrollState())
             ) {
-                Text(text = if (mostrandoInvitar) "Cerrar invitación" else "Invitar trabajador")
-            }
-            if (mostrandoInvitar) {
-                Spacer(modifier = Modifier.height(16.dp))
-                InvitarTrabajadorScreen(
-                    onCerrar = { mostrandoInvitar = false }
+                Text(
+                    text = "Trabajadores",
+                    style = MaterialTheme.typography.headlineMedium
                 )
                 Spacer(modifier = Modifier.height(16.dp))
-            }
 
-            if (mostrandoFormulario) {
-                FormularioAgregarTrabajador(
-                    onAgregar = { nombre, modo ->
-                        businessViewModel.agregarTrabajador(nombre, modo)
-                        mostrandoFormulario = false
-                    },
-                    onCancelar = { mostrandoFormulario = false }
-                )
+                // CAPA 4: invitación por código. Convive temporalmente con el listado
+                // de [TrabajadorStore] (modelo viejo de CAPA 0). Ver nota de conflicto
+                // al final de este archivo: no se decidió aún cuál reemplaza a cuál.
+                Button(
+                    onClick = { mostrandoInvitar = !mostrandoInvitar },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(text = if (mostrandoInvitar) "Cerrar invitación" else "Invitar trabajador")
+                }
+                if (mostrandoInvitar) {
+                    Spacer(modifier = Modifier.height(16.dp))
+                    InvitarTrabajadorScreen(
+                        onCerrar = { mostrandoInvitar = false }
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
+
+                if (mostrandoFormulario) {
+                    FormularioAgregarTrabajador(
+                        onAgregar = { nombre, modo ->
+                            businessViewModel.agregarTrabajador(nombre, modo)
+                            mostrandoFormulario = false
+                        },
+                        onCancelar = { mostrandoFormulario = false }
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
+
+                Button(
+                    onClick = { mostrandoFormulario = true },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(text = "Agregar trabajador")
+                }
                 Spacer(modifier = Modifier.height(16.dp))
             }
 
-            Button(
-                onClick = { mostrandoFormulario = true },
-                modifier = Modifier.fillMaxWidth()
+            LazyColumn(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Text(text = "Agregar trabajador")
-            }
-            Spacer(modifier = Modifier.height(16.dp))
-
-            LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 items(trabajadores, key = { it.id }) { trabajador ->
                     TrabajadorCard(
                         trabajador = trabajador,
