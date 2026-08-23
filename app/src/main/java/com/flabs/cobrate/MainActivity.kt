@@ -57,6 +57,7 @@ import com.flabs.cobrate.features.business.OwnerHistoryScreen
 import com.flabs.cobrate.features.business.OwnerPanelScreen
 import com.flabs.cobrate.features.business.OwnerWorkersScreen
 import com.flabs.cobrate.features.business.PaymentMethodsScreen
+import com.flabs.cobrate.features.permisos.DiagnosticoPermisosScreen
 import com.flabs.cobrate.features.worker.PayScreen
 import com.flabs.cobrate.features.worker.WorkerOperationsScreen
 import com.flabs.cobrate.features.worker.WorkerViewModel
@@ -105,6 +106,7 @@ private object Routes {
     const val ESTADISTICAS_DUENO = "estadisticas_dueno"
     const val ESTABLECIMIENTOS_DUENO = "establecimientos_dueno"
     const val PLAN_FACTURACION_DUENO = "plan_facturacion_dueno"
+    const val PERMISOS_DUENO = "permisos_dueno"
 }
 
 @Composable
@@ -271,6 +273,9 @@ fun CobrateApp() {
                 onVerPlanFacturacion = {
                     navController.navigate(Routes.PLAN_FACTURACION_DUENO)
                 },
+                onVerPermisos = {
+                    navController.navigate(Routes.PERMISOS_DUENO)
+                },
                 onCerrarSesion = { authViewModel.cerrarSesion() }
             )
         }
@@ -301,6 +306,14 @@ fun CobrateApp() {
 
         composable(Routes.PLAN_FACTURACION_DUENO) {
             BillingPlanScreen()
+        }
+
+        composable(Routes.PERMISOS_DUENO) {
+            DiagnosticoPermisosScreen(
+                onVolver = {
+                    navController.popBackStack()
+                }
+            )
         }
     }
 }

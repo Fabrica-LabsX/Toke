@@ -8,6 +8,9 @@ local.properties
 .externalNativeBuild
 .cxx
 
+# Capturas de depuración (logcat exportado, no es código)
+*.logcat
+
 # IDE - Android Studio (ignorar .idea salvo lo esencial)
 .idea/
 !.idea/.gitignore

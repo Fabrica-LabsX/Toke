@@ -37,6 +37,7 @@ fun OwnerPanelScreen(
     onVerEstadisticas: () -> Unit,
     onVerEstablecimientos: () -> Unit,
     onVerPlanFacturacion: () -> Unit,
+    onVerPermisos: () -> Unit,
     onCerrarSesion: () -> Unit
 ) {
     val resumen by businessViewModel.resumenDelDia.collectAsState()
@@ -79,6 +80,9 @@ fun OwnerPanelScreen(
             BotonNavegacion("Plan y facturación", onVerPlanFacturacion)
 
             Spacer(modifier = Modifier.height(24.dp))
+
+            // Permisos (CAPA 5): acceso a notificaciones, batería.
+            BotonNavegacion("Permisos", onVerPermisos)
 
             // Controles "Próximamente" (solo visuales, muestran un Toast).
             Text(
