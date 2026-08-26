@@ -4,7 +4,14 @@ import android.app.Notification
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import android.util.Log
+import com.flabs.cobrate.core.data.AlertaStore
 import com.flabs.cobrate.core.data.EventoDeNotificacionStore
+import com.flabs.cobrate.core.data.MetodoDeCobroStore
+import com.flabs.cobrate.core.logic.AppsDePagoConfiables
+import com.flabs.cobrate.core.logic.MapeoAppsMetodoDeCobro
+import com.flabs.cobrate.core.logic.NivelConfianzaParseo
+import com.flabs.cobrate.core.logic.NotificationParser
+import com.flabs.cobrate.core.logic.ResultadoParseo
 import com.flabs.cobrate.core.model.EventoDeNotificacion
 import java.util.UUID
 
@@ -26,31 +33,42 @@ class TokeNotificationListenerService : NotificationListenerService() {
         // Inicializa los stores con el contexto del servicio (mismo patrón que
         // InMemoryOperationStore.init(context)).
         EventoDeNotificacionStore.init(this)
+        AlertaStore.init(this)
         Log.d(TAG, "Listener conectado y stores inicializados.")
     }
 
     override fun onNotificationPosted(sbn: StatusBarNotification) {
-        // LOG TEMPORAL DE CALIBRACIÓN (se retirará en el siguiente paso):
-        // muestra SIEMPRE el paqueteOrigen exacto de cada notificación, sin
-        // ningún filtro de contenido, para identificar los paquetes reales
-        // que emiten los avisos de pago en el dispositivo.
-        Log.d(TAG_CALIBRACION, "Paquete: ${sbn.packageName}")
-
-        // Filtro base de ruido: ignorar nuestras propias notificaciones y las
-        // que no tienen contenido legible (título o texto). NO intentamos
-        // decidir aquí si es un pago o no — eso es CAPA 6c.
         val paquete = sbn.packageName
+
+        // REGLA DE SEGURIDAD (CAPA 6c-2), se evalúa ANTES que cualquier otra
+        // cosa, incluso antes del filtro de ruido: el paqueteOrigen no puede
+        // ser falsificado por otra app; esta es la defensa real contra
+        // mensajes de pago falsos vía SMS/WhatsApp/Telegram/shell/etc. Si la
+        // notificación NO viene de un paquete de la whitelist, se descarta por
+        // completo sin guardarla (ni siquiera como evento crudo), sin importar
+        // lo que diga el texto.
+        if (!AppsDePagoConfiables.esFuenteConfiables(paquete)) {
+            // NOTA de depuración: este log NO debe interpretarse como "posible
+            // pago perdido"; es tráfico ajeno al sistema de pagos.
+            Log.d(TAG, "Ignorado (fuente no confiable): $paquete")
+            return
+        }
+
+        // Filtro base de ruido (CAPA 6b): ignorar nuestras propias
+        // notificaciones y las que no tienen contenido legible (título o
+        // texto).
         if (paquete == applicationContext.packageName) {
             Log.d(TAG, "Notificación propia ignorada ($paquete)")
             return
         }
 
-        val titulo = sbn.notification.extras
+        val extras = sbn.notification.extras
+        val titulo = extras
             .getCharSequence(Notification.EXTRA_TITLE)
             ?.toString()
             ?.trim()
             .orEmpty()
-        val texto = sbn.notification.extras
+        val texto = extras
             .getCharSequence(Notification.EXTRA_TEXT)
             ?.toString()
             ?.trim()
@@ -61,6 +79,12 @@ class TokeNotificationListenerService : NotificationListenerService() {
             return
         }
 
+        // CAPA 6c-2: captura de extras enriquecidos. Reúne el contenido
+        // adicional que algunas apps ponen SOLO en subtítulo, big text o líneas
+        // múltiples (p. ej. el detalle completo o el código de seguridad de
+        // Yape). Se guarda en [EventoDeNotificacion.datosAdicionales].
+        val datosAdicionales = capturarExtras(sbn)
+
         // PLACEHOLDER CAPA 1: mismo negocio por defecto que WorkerViewModel.
         // TODO(CAPA posterior): resolver el negocio activo cuando exista
         // selección real de negocio en segundo plano.
@@ -70,12 +94,96 @@ class TokeNotificationListenerService : NotificationListenerService() {
             paqueteOrigen = paquete,
             titulo = titulo,
             texto = texto,
+            datosAdicionales = datosAdicionales,
             fechaHora = sbn.postTime,
             procesado = false
         )
 
         EventoDeNotificacionStore.agregar(evento)
         Log.d(TAG, "Evento capturado de: $paquete -> \"$titulo: $texto\"")
+
+        // CAPA 6c: aplica el parser sobre el evento recién capturado y marca el
+        // evento como procesado según el resultado. No se crea ninguna
+        // operación todavía.
+        when (val resultado = NotificationParser.parsear(titulo, texto, paquete, datosAdicionales)) {
+            is ResultadoParseo.MontoDetectado -> {
+                if (resultado.confianza == NivelConfianzaParseo.ALTA) {
+                    // CAPA 6c-3: pago real (confianza ALTA) desde método
+                    // configurado o no.
+                    procesarPagoConfianzaAlta(evento, resultado.monto, paquete)
+                } else {
+                    Log.d(TAG, "Posible pago detectado: S/ ${resultado.monto} (confianza MEDIA)")
+                }
+            }
+            ResultadoParseo.NoEsPago -> {
+                Log.d(TAG, "Descartado como ruido ($paquete)")
+            }
+        }
+        EventoDeNotificacionStore.marcarProcesado(evento.id)
+    }
+
+    /**
+     * CAPA 6c-3: maneja un pago detectado con confianza ALTA desde un paquete
+     * confiable. Si el método de cobro asociado está activo en el negocio,
+     * continúa el flujo normal; si NO está activo, genera una alerta discreta
+     * SOLO para el Dueño (el Trabajador no debe ver nada).
+     */
+    private fun procesarPagoConfianzaAlta(
+        evento: EventoDeNotificacion,
+        monto: Double,
+        paquete: String
+    ) {
+        val metodo = MapeoAppsMetodoDeCobro.metodoDeCobroPara(paquete)
+        if (metodo == null) {
+            // Caso sin mapeo (p. ej. Plin aún sin entrada): no se puede
+            // determinar el método. NO se genera alerta ni se bloquea el flujo.
+            Log.d(TAG, "Posible pago detectado: S/ $monto (confianza ALTA, método no determinable)")
+            return
+        }
+
+        val activo = MetodoDeCobroStore.estaActivo(metodo)
+        if (activo == true) {
+            // Método configurado y activo: flujo normal.
+            Log.d(TAG, "Posible pago detectado: S/ $monto (confianza ALTA)")
+        } else {
+            // Método NO activo (o no configurado): alerta discreta al Dueño.
+            // El Trabajador jamás ve esto.
+            val mensaje = "Se detectó un pago de S/ $monto por $metodo, un método " +
+                "que no está activo en tu negocio. Revisa tu cuenta de $metodo " +
+                "directamente."
+            AlertaStore.crear(mensaje, evento.id)
+            Log.d(TAG, "Alerta generada: pago por método no configurado ($metodo)")
+        }
+    }
+
+    /**
+     * Reúne el contenido adicional de la notificación (subtítulo, big text y
+     * líneas múltiples) y lo devuelve concatenado en un solo String, o null si
+     * no hay ninguno. CAPA 6c-2.
+     */
+    private fun capturarExtras(sbn: StatusBarNotification): String? {
+        val extras = sbn.notification.extras
+        val partes = mutableListOf<String>()
+
+        extras.getCharSequence(Notification.EXTRA_SUB_TEXT)?.toString()?.trim()?.let {
+            if (it.isNotEmpty()) partes.add(it)
+        }
+        extras.getCharSequence(Notification.EXTRA_BIG_TEXT)?.toString()?.trim()?.let {
+            if (it.isNotEmpty()) partes.add(it)
+        }
+
+        // EXTRA_TEXT_LINES es un array de CharSequence; se unen por salto de línea.
+        @Suppress("DEPRECATION")
+        val lineas = extras.getCharSequenceArray(Notification.EXTRA_TEXT_LINES)
+        if (lineas != null) {
+            val textoLineas = lineas
+                .filterNotNull()
+                .joinToString("\n") { it.toString().trim() }
+                .trim()
+            if (textoLineas.isNotEmpty()) partes.add(textoLineas)
+        }
+
+        return partes.takeIf { it.isNotEmpty() }?.joinToString("\n")
     }
 
     override fun onNotificationRemoved(sbn: StatusBarNotification) {
@@ -84,9 +192,6 @@ class TokeNotificationListenerService : NotificationListenerService() {
 
     companion object {
         private const val TAG = "TokeListener"
-
-        // Tag exclusivo para el log temporal de calibración.
-        private const val TAG_CALIBRACION = "TokeCalibracion"
 
         // Mismo placeholder de negocio único que WorkerViewModel
         // ("NEGOCIO_DEFAULT"), pendiente de resolverse cuando exista selección
