@@ -21,5 +21,14 @@ enum class TipoMetodoCobro {
     TRANSFERENCIA,
     BCP,
     INTERBANK,
-    BIM
+    BIM,
+    // Valores añadidos en CAPA 6c-2 (extensión aditiva del enum).
+    AGORA_TUNKI,
+    BBVA,
+    BANBIF,
+    LIGO,
+    SCOTIABANK,
+    PICHINCHA,
+    SIP,
+    LEMON_CASH
 }

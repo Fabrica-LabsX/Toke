@@ -31,6 +31,13 @@ object MetodoDeCobroStore {
         _metodos.value = transform(_metodos.value)
     }
 
+    /**
+     * ¿El método [tipo] está activo en el negocio? Devuelve null si el tipo no
+     * está configurado en absoluto (p. ej. no se ha añadido aún).
+     */
+    fun estaActivo(tipo: TipoMetodoCobro): Boolean? =
+        _metodos.value.find { it.tipo == tipo }?.activo
+
     /** Cambia el flag [MetodoDeCobro.activo] de un método por su tipo. */
     fun cambiarActivo(tipo: TipoMetodoCobro, activo: Boolean) {
         actualizar { lista ->

@@ -52,6 +52,7 @@ internal class EventoDeNotificacionLocalStore(private val context: Context) {
         val paqueteOrigen: String,
         val titulo: String,
         val texto: String,
+        val datosAdicionales: String? = null,
         val fechaHora: Long,
         val procesado: Boolean = false
     )
@@ -66,6 +67,7 @@ private fun EventoDeNotificacion.aDto(): EventoDeNotificacionLocalStore.EventoDe
         paqueteOrigen = paqueteOrigen,
         titulo = titulo,
         texto = texto,
+        datosAdicionales = datosAdicionales,
         fechaHora = fechaHora,
         procesado = procesado
     )
@@ -77,6 +79,7 @@ internal fun EventoDeNotificacionLocalStore.EventoDeNotificacionDto.aModelo(): E
         paqueteOrigen = paqueteOrigen,
         titulo = titulo,
         texto = texto,
+        datosAdicionales = datosAdicionales,
         fechaHora = fechaHora,
         procesado = procesado
     )

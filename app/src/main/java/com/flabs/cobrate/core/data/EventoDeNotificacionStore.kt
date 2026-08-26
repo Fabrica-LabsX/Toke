@@ -53,6 +53,17 @@ object EventoDeNotificacionStore {
         persistir()
     }
 
+    /**
+     * Marca un evento como procesado (procesado = true). No-op si el id no
+     * existe. Persiste el cambio.
+     */
+    fun marcarProcesado(id: String) {
+        _eventos.value = _eventos.value.map { evento ->
+            if (evento.id == id) evento.copy(procesado = true) else evento
+        }
+        persistir()
+    }
+
     private fun persistir() {
         localStore?.let { store ->
             val snapshot = _eventos.value
