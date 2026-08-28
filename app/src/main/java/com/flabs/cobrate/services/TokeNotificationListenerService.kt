@@ -14,6 +14,11 @@ import com.flabs.cobrate.core.logic.NotificationParser
 import com.flabs.cobrate.core.logic.ResultadoParseo
 import com.flabs.cobrate.core.model.EventoDeNotificacion
 import java.util.UUID
+import com.flabs.cobrate.core.data.InMemoryOperationStore
+import com.flabs.cobrate.core.model.Operacion
+import com.flabs.cobrate.core.model.EstadoOperacion
+import com.flabs.cobrate.core.model.OrigenOperacion
+import com.flabs.cobrate.core.model.CambioDeEstado
 
 /**
  * NotificationListenerService de TOKE (CAPA 6b).
@@ -145,6 +150,18 @@ class TokeNotificationListenerService : NotificationListenerService() {
         if (activo == true) {
             // Método configurado y activo: flujo normal.
             Log.d(TAG, "Posible pago detectado: S/ $monto (confianza ALTA)")
+            // Crear una operación cuando el método de cobro esté activo.
+            val operacion = Operacion(
+                id = UUID.randomUUID().toString(),
+                negocioId = evento.negocioId,
+                trabajadorAsignadoId = null,
+                monto = monto,
+                estado = EstadoOperacion.SIN_ASIGNAR,
+                origen = OrigenOperacion.Detectada(evento.id),
+                fechaHora = System.currentTimeMillis(),
+                historial = listOf(CambioDeEstado(System.currentTimeMillis(), EstadoOperacion.SIN_ASIGNAR))
+            )
+            InMemoryOperationStore.agregar(operacion)
         } else {
             // Método NO activo (o no configurado): alerta discreta al Dueño.
             // El Trabajador jamás ve esto.
