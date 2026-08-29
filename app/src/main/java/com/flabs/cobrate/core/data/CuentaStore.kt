@@ -37,23 +37,38 @@ object CuentaStore {
     private val _hashes = mutableMapOf<String, String>()
 
     private var localStore: CuentaLocalStore? = null
+    private var sesionSegura: SesionSeguraStore? = null
 
     /**
      * Inicializa el store con el contexto de la app, carga las cuentas
      * persistidas y restaura la última sesión activa si existía. Llamar varias
      * veces es seguro (solo inicializa una vez).
+     *
+     * La sesión activa se lee de [SesionSeguraStore] (almacenamiento cifrado).
+     * Si aún no existe ahí pero sí en el DataStore viejo, se migra una sola vez.
      */
     fun init(context: Context) {
         val appContext = context.applicationContext
         if (localStore == null) {
             val store = CuentaLocalStore(appContext)
             localStore = store
+            val segura = SesionSeguraStore(appContext)
+            sesionSegura = segura
             scope.launch {
                 val dtos = store.leerUnaVez()
                 _cuentas.value = dtos.map { it.aModelo() }
                 dtos.forEach { _hashes[it.id] = it.hashPassword }
 
-                val sesionId = store.leerSesionActiva()
+                var sesionId = segura.leerSesionActiva()
+                if (sesionId == null) {
+                    // Migración única: si había una sesión activa en el DataStore
+                    // viejo, muévela al almacenamiento cifrado y elimínala de ahí.
+                    val sesionVieja = store.leerSesionActivaViejaYLimpiar()
+                    if (sesionVieja != null) {
+                        segura.guardarSesionActiva(sesionVieja)
+                        sesionId = sesionVieja
+                    }
+                }
                 if (sesionId != null) {
                     _sesionActual.value = _cuentas.value.find { it.id == sesionId }
                 }
@@ -78,19 +93,19 @@ object CuentaStore {
     /** Hash de contraseña de una cuenta por su id. Null si no existe. */
     fun hashDe(cuentaId: String): String? = _hashes[cuentaId]
 
-    /** Establece la sesión activa y la persiste como última sesión. */
+    /** Establece la sesión activa y la persiste (cifrada) como última sesión. */
     fun iniciarSesion(cuenta: Cuenta) {
         _sesionActual.value = cuenta
-        localStore?.let { store ->
-            scope.launch { store.guardarSesionActiva(cuenta.id) }
+        sesionSegura?.let { segura ->
+            runCatching { segura.guardarSesionActiva(cuenta.id) }
         }
     }
 
-    /** Limpia la sesión activa (y su registro persistido). */
+    /** Limpia la sesión activa (y su registro persistido cifrado). */
     fun cerrarSesion() {
         _sesionActual.value = null
-        localStore?.let { store ->
-            scope.launch { store.limpiarSesion() }
+        sesionSegura?.let { segura ->
+            runCatching { segura.limpiarSesion() }
         }
     }
 

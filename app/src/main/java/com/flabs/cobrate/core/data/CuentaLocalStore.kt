@@ -70,24 +70,22 @@ internal class CuentaLocalStore(private val context: Context) {
         }
     }
 
-    // ---- Última sesión activa ----
+    // ---- Última sesión activa (SOLO lectura/migración; la escritura actual
+    //      vive en SesionSeguraStore, almacenamiento cifrado) ----
 
-    /** Id de la cuenta de la última sesión activa (null si no hay). */
-    suspend fun leerSesionActiva(): String? =
-        context.dataStore.data.map { prefs -> prefs[sesionActivaIdKey] }.first()
-
-    /** Guarda el id de la sesión activa. */
-    suspend fun guardarSesionActiva(cuentaId: String) {
-        context.dataStore.edit { prefs ->
-            prefs[sesionActivaIdKey] = cuentaId
+    /**
+     * Lee y elimina una posible sesión activa persistida en el DataStore viejo.
+     * Se usa UNA vez al arrancar para migrar ese valor al almacenamiento
+     * cifrado ([SesionSeguraStore]). Devuelve null si no había nada.
+     */
+    suspend fun leerSesionActivaViejaYLimpiar(): String? {
+        val sesionId = context.dataStore.data
+            .map { prefs -> prefs[sesionActivaIdKey] }
+            .first()
+        if (sesionId != null) {
+            context.dataStore.edit { prefs -> prefs.remove(sesionActivaIdKey) }
         }
-    }
-
-    /** Deja sin sesión activa guardada. */
-    suspend fun limpiarSesion() {
-        context.dataStore.edit { prefs ->
-            prefs.remove(sesionActivaIdKey)
-        }
+        return sesionId
     }
 
     // ---- DTO serializable (espejo del dominio + hash) ----

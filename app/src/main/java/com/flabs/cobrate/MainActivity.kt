@@ -34,6 +34,7 @@ import androidx.navigation.navArgument
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.flabs.cobrate.core.data.CuentaStore
 import com.flabs.cobrate.core.data.InMemoryOperationStore
+import com.flabs.cobrate.core.data.EstadoServiciosStore
 import com.flabs.cobrate.core.data.InvitacionStore
 import com.flabs.cobrate.core.data.NegocioStore
 import com.flabs.cobrate.core.data.RelacionCuentaNegocioStore
@@ -75,6 +76,8 @@ class MainActivity : ComponentActivity() {
         RelacionCuentaNegocioStore.init(applicationContext)
         // Carga invitaciones persistidas (CAPA 4).
         InvitacionStore.init(applicationContext)
+        // Carga el estado de SERVICIOS persistido (CAPA 5b).
+        EstadoServiciosStore.init(applicationContext)
         setContent {
             CobrateTheme {
                 CobrateApp()
