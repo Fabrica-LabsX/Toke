@@ -37,7 +37,7 @@ fun reproducir(context: Context, resourceId: Int) {
     if (sampleId == 0) return
 
     pool.setOnLoadCompleteListener { _, loadedId, status ->
-        if (loadedId == sampleId && status == 0) {
+        if ((loadedId == sampleId) && (status == 0)) {
             pool.play(sampleId, 1f, 1f, 1, 0, 1f)
         }
     }
