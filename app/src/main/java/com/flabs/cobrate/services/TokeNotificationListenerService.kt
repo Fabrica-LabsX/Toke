@@ -15,7 +15,11 @@ import com.flabs.cobrate.core.logic.ResultadoParseo
 import com.flabs.cobrate.core.model.EventoDeNotificacion
 import java.util.UUID
 import com.flabs.cobrate.core.data.InMemoryOperationStore
+import com.flabs.cobrate.core.data.RelacionCuentaNegocioStore
+import com.flabs.cobrate.core.logic.AssignmentEngine
+import com.flabs.cobrate.core.model.EstadoRelacion
 import com.flabs.cobrate.core.model.Operacion
+import com.flabs.cobrate.core.model.RolCuentaNegocio
 import com.flabs.cobrate.core.model.EstadoOperacion
 import com.flabs.cobrate.core.model.OrigenOperacion
 import com.flabs.cobrate.core.model.CambioDeEstado
@@ -161,7 +165,21 @@ class TokeNotificationListenerService : NotificationListenerService() {
                 fechaHora = System.currentTimeMillis(),
                 historial = listOf(CambioDeEstado(System.currentTimeMillis(), EstadoOperacion.SIN_ASIGNAR))
             )
-            InMemoryOperationStore.agregar(operacion)
+
+            // CAPA 8: asignación automática. Si el negocio tiene exactamente 1
+            // trabajador activo (relación rol=TRABAJADOR, estado=ACTIVA), la
+            // operación se asigna a ese único trabajador antes de guardarse.
+            // Si hay 0 o 2+ trabajadores, se devuelve SIN_ASIGNAR (el caso 2+
+            // es CAPA 9, fuera de alcance).
+            val trabajadoresActivos = RelacionCuentaNegocioStore.relaciones
+                .value
+                .filter {
+                    it.negocioId == evento.negocioId &&
+                        it.rol == RolCuentaNegocio.TRABAJADOR &&
+                        it.estado == EstadoRelacion.ACTIVA
+                }
+            val operacionFinal = AssignmentEngine.asignarSiCorresponde(operacion, trabajadoresActivos)
+            InMemoryOperationStore.agregar(operacionFinal)
         } else {
             // Método NO activo (o no configurado): alerta discreta al Dueño.
             // El Trabajador jamás ve esto.

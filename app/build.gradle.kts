@@ -50,6 +50,7 @@ dependencies {
     implementation(libs.lifecycleViewmodelCompose)
     implementation(libs.lifecycleRuntimeCompose)
     implementation(libs.datastorePreferences)
+    implementation(libs.androidx.security.crypto)
     implementation(libs.kotlinxSerializationJson)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.espresso.core)

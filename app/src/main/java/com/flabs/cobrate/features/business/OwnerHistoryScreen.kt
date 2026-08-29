@@ -17,6 +17,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.flabs.cobrate.components.OperacionCard
+import com.flabs.cobrate.core.model.OrigenOperacion
 import com.flabs.cobrate.core.model.Operacion
 
 /**
@@ -46,10 +47,29 @@ fun OwnerHistoryScreen(
             } else {
                 LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     items(operaciones, key = { it.id }) { operacion: Operacion ->
-                        OperacionCard(
-                            operacion = operacion,
-                            mostrarId = true
-                        )
+                        Column {
+                            OperacionCard(
+                                operacion = operacion,
+                                mostrarId = true
+                            )
+                            Spacer(modifier = Modifier.height(4.dp))
+                            // Asignación: "Sin asignar" si no hay trabajador.
+                            Text(
+                                text = operacion.trabajadorAsignadoId
+                                    ?.let { "Asignada a: $it" }
+                                    ?: "Sin asignar",
+                                style = MaterialTheme.typography.labelMedium
+                            )
+                            // Origen: pequeño indicador de cómo se creó la operación.
+                            Text(
+                                text = when (operacion.origen) {
+                                    is OrigenOperacion.Detectada -> "Detectado"
+                                    is OrigenOperacion.VaAPagar -> "Manual"
+                                },
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
                     }
                 }
             }
