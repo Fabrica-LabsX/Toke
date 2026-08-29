@@ -18,6 +18,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -25,10 +26,17 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.flabs.cobrate.components.ProximamenteCard
 import com.flabs.cobrate.core.data.AlertaStore
+import com.flabs.cobrate.core.data.CuentaStore
+import com.flabs.cobrate.core.data.EstadoServiciosStore
+import com.flabs.cobrate.core.data.NegocioStore
+import com.flabs.cobrate.core.data.RelacionCuentaNegocioStore
+import com.flabs.cobrate.core.model.EstadoRelacion
+import com.flabs.cobrate.core.model.RolCuentaNegocio
 
 /**
  * Panel del dueño: resumen del día calculado a partir de las operaciones reales.
@@ -66,6 +74,14 @@ fun OwnerPanelScreen(
                 text = "Panel del Dueño",
                 style = MaterialTheme.typography.headlineMedium
             )
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // SERVICIOS (CAPA 5b): control de EJECUCIÓN, no de identidad.
+            // Desactivarlo NUNCA cierra sesión, NUNCA expulsa trabajadores y NUNCA
+            // borra datos históricos. Solo construye el switch y su estado local;
+            // la distribución remota real (Supabase en standby) queda fuera de alcance.
+            ControlServicios()
+
             Spacer(modifier = Modifier.height(16.dp))
 
             // Resumen del día.
@@ -170,6 +186,82 @@ private fun DatoResumen(etiqueta: String, valor: String) {
             text = valor,
             style = MaterialTheme.typography.bodyLarge
         )
+    }
+}
+
+/**
+ * Control "SERVICIOS" (CAPA 5b): switch de EJECUCIÓN, no de identidad.
+ *
+ * Apagarlo NUNCA cierra sesión, NUNCA expulsa trabajadores y NUNCA borra datos
+ * históricos. Aquí solo se construye el switch y su estado local; la
+ * distribución REMOTA real (Supabase en standby) queda fuera de alcance.
+ *
+ * // TODO: cuando exista distribución remota (post-Supabase), verificar
+ * // EstadoServiciosStore.activado antes de enviar eventos a otros dispositivos.
+ */
+@Composable
+private fun ControlServicios() {
+    // Negocio actual: el primer negocio donde la cuenta activa es ADMINISTRADOR
+    // (misma lógica que en la pantalla de invitación).
+    val sesion by CuentaStore.sesionActual.collectAsState()
+    val relaciones by RelacionCuentaNegocioStore.relaciones.collectAsState()
+    val negocios by NegocioStore.negocios.collectAsState()
+
+    val negocioActual = remember(sesion?.id, relaciones, negocios) {
+        val cuentaId = sesion?.id ?: return@remember null
+        relaciones
+            .filter {
+                it.cuentaId == cuentaId &&
+                    it.estado == EstadoRelacion.ACTIVA &&
+                    it.rol == RolCuentaNegocio.ADMINISTRADOR
+            }
+            .mapNotNull { negocio -> negocios.find { it.id == negocio.negocioId } }
+            .firstOrNull()
+    }
+
+    val negocio = negocioActual
+
+    Card(modifier = Modifier.fillMaxWidth()) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(
+                text = "SERVICIOS",
+                style = MaterialTheme.typography.titleLarge
+            )
+            if (negocio == null) {
+                Text(
+                    text = "Sin negocio asociado",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            } else {
+                val estado by EstadoServiciosStore.estados.collectAsState()
+                val activado = estado.firstOrNull { it.negocioId == negocio.id }?.activado ?: true
+                val colorEstado =
+                    if (activado) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = if (activado) "ACTIVADO" else "APAGADO",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = colorEstado
+                    )
+                    Switch(
+                        checked = activado,
+                        onCheckedChange = {
+                            EstadoServiciosStore.alternar(negocio.id)
+                        }
+                    )
+                }
+                Text(
+                    text = "Los eventos de pago se detectan localmente; la distribución remota a otros dispositivos respetará este estado cuando exista (post-Supabase).",
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
+        }
     }
 }
 

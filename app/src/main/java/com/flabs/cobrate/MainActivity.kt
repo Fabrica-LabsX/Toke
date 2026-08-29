@@ -32,6 +32,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.flabs.cobrate.core.data.ConfiguracionDeVozStore
 import com.flabs.cobrate.core.data.CuentaStore
 import com.flabs.cobrate.core.data.InMemoryOperationStore
 import com.flabs.cobrate.core.data.EstadoServiciosStore
@@ -78,6 +79,8 @@ class MainActivity : ComponentActivity() {
         InvitacionStore.init(applicationContext)
         // Carga el estado de SERVICIOS persistido (CAPA 5b).
         EstadoServiciosStore.init(applicationContext)
+        // Carga la configuración de voz persistida (CAPA 14).
+        ConfiguracionDeVozStore.init(applicationContext)
         setContent {
             CobrateTheme {
                 CobrateApp()

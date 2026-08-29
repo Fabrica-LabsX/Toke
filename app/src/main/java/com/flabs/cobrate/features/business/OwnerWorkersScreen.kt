@@ -31,8 +31,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.flabs.cobrate.core.data.CuentaStore
+import com.flabs.cobrate.core.data.EstadoServiciosStore
+import com.flabs.cobrate.core.data.NegocioStore
+import com.flabs.cobrate.core.data.RelacionCuentaNegocioStore
+import com.flabs.cobrate.core.model.EstadoRelacion
 import com.flabs.cobrate.core.model.EstadoTrabajador
 import com.flabs.cobrate.core.model.ModoRegistro
+import com.flabs.cobrate.core.model.RolCuentaNegocio
 import com.flabs.cobrate.core.model.Trabajador
 
 /**
@@ -54,6 +60,29 @@ fun OwnerWorkersScreen(
     val trabajadores by businessViewModel.trabajadores.collectAsState()
     var mostrandoFormulario by remember { mutableStateOf(false) }
     var mostrandoInvitar by remember { mutableStateOf(false) }
+
+    // SERVICIOS (CAPA 5b): estado del control de EJECUCIÓN para el negocio actual.
+    // Se refleja aquí para que el trabajador entienda por qué no recibe eventos si
+    // está apagado. Solo lectura del estado; no altera datos históricos ni sesión.
+    val sesion by CuentaStore.sesionActual.collectAsState()
+    val relaciones by RelacionCuentaNegocioStore.relaciones.collectAsState()
+    val negocios by NegocioStore.negocios.collectAsState()
+    val estadosServicios by EstadoServiciosStore.estados.collectAsState()
+
+    val negocioActual = remember(sesion?.id, relaciones, negocios) {
+        val cuentaId = sesion?.id ?: return@remember null
+        relaciones
+            .filter {
+                it.cuentaId == cuentaId &&
+                    it.estado == EstadoRelacion.ACTIVA &&
+                    it.rol == RolCuentaNegocio.ADMINISTRADOR
+            }
+            .mapNotNull { negocio -> negocios.find { it.id == negocio.negocioId } }
+            .firstOrNull()
+    }
+    val servicioActivado = negocioActual?.let { negocio ->
+        estadosServicios.firstOrNull { it.negocioId == negocio.id }?.activado ?: true
+    }
 
     Scaffold { innerPadding ->
         Column(
@@ -117,6 +146,7 @@ fun OwnerWorkersScreen(
                 items(trabajadores, key = { it.id }) { trabajador ->
                     TrabajadorCard(
                         trabajador = trabajador,
+                        servicioActivado = servicioActivado,
                         onAlternarEstado = {
                             val nuevoEstado = if (trabajador.estado == EstadoTrabajador.ACTIVO) {
                                 EstadoTrabajador.PAUSADO
@@ -201,6 +231,8 @@ private fun FormularioAgregarTrabajador(
 @Composable
 private fun TrabajadorCard(
     trabajador: Trabajador,
+    // SERVICIOS (CAPA 5b): refleja el estado del control de ejecución del negocio.
+    servicioActivado: Boolean?,
     onAlternarEstado: () -> Unit
 ) {
     Card(modifier = Modifier.fillMaxWidth()) {
@@ -209,6 +241,19 @@ private fun TrabajadorCard(
                 text = trabajador.nombre,
                 style = MaterialTheme.typography.titleMedium
             )
+            // Indicador SERVICIOS: le explica al trabajador por qué no recibe eventos
+            // remotos si el control está apagado (CAPA 5b, sin distribución real aún).
+            servicioActivado?.let { activado ->
+                Text(
+                    text = if (activado) "Servicio activado" else "Servicio desactivado",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = if (activado) {
+                        MaterialTheme.colorScheme.primary
+                    } else {
+                        MaterialTheme.colorScheme.outline
+                    }
+                )
+            }
             Text(
                 text = "Modo: ${trabajador.modo.name}",
                 style = MaterialTheme.typography.bodyMedium

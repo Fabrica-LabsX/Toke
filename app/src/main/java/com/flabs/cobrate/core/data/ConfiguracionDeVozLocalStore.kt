@@ -44,7 +44,7 @@ internal class ConfiguracionDeVozLocalStore(private val context: Context) {
 
     /** Guarda la configuración, sobrescribiendo lo anterior. */
     suspend fun guardar(config: ConfiguracionDeVoz) {
-        val raw = json.encodeToString(ConfiguracionDeVozDto.serializer(), config.aDto())
+        val raw = json.encodeToString(config.aDto())
         context.dataStore.edit { prefs ->
             prefs[configKey] = raw
         }
