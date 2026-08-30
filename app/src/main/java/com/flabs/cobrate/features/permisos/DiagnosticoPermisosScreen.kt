@@ -34,12 +34,13 @@ import com.flabs.cobrate.core.logic.PermisosChecker
 /**
  * Diagnóstico de permisos (CAPA 5).
  *
- * Solo diagnostica si el permiso de acceso a notificaciones está concedido;
- * no implementa el NotificationListenerService (eso es CAPA 6). El chequeo de
- * batería se muestra como recomendación secundaria no bloqueante.
+ * Diagnostica si el permiso de acceso a notificaciones está concedido (este
+ * sigue siendo el único chequeo BLOQUEANTE) y muestra información sobre el
+ * estado de batería como RECOMENDACIÓN NO BLOQUEANTE.
  *
- * Al regresar de Ajustes (que se abren con el botón "Solucionar"), la pantalla
- * se revalida automáticamente vía el observer de lifecycle al volver a RESUMED.
+ * Al regresar de Ajustes (ya sea desde el botón "Solucionar" de notificaciones
+ * o el botón "Permitir" de batería), la pantalla se revalida automáticamente
+ * vía el observer de lifecycle al volver a RESUMED.
  */
 @Composable
 fun DiagnosticoPermisosScreen(
@@ -51,14 +52,20 @@ fun DiagnosticoPermisosScreen(
     var accesoNotificaciones by remember {
         mutableStateOf(PermisosChecker.accesoNotificacionesConcedido(context))
     }
+    var sinRestriccionesBateria by remember {
+        mutableStateOf(PermisosChecker.segundoPlanoSinRestricciones(context))
+    }
 
     // Revalida el estado real cada vez que la pantalla vuelve a primer plano
-    // (por ejemplo, al regresar de los Ajustes de acceso a notificaciones).
+    // (por ejemplo, al regresar desde los Ajustes de notificaciones o de
+    // batería). Mismo patrón que el chequeo de notificaciones.
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
                 accesoNotificaciones =
                     PermisosChecker.accesoNotificacionesConcedido(context)
+                sinRestriccionesBateria =
+                    PermisosChecker.segundoPlanoSinRestricciones(context)
             }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
@@ -81,11 +88,20 @@ fun DiagnosticoPermisosScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             if (accesoNotificaciones) {
-                EstadoListoCard()
+                EstadoListoCard(
+                    sinRestriccionesBateria = sinRestriccionesBateria,
+                    onPermitirBateria = {
+                        abrirAjustesBateria(context)
+                    }
+                )
             } else {
                 EstadoRequiereAtencionCard(
+                    sinRestriccionesBateria = sinRestriccionesBateria,
                     onSolucionar = {
                         abrirAjustesAccesoNotificaciones(context)
+                    },
+                    onPermitirBateria = {
+                        abrirAjustesBateria(context)
                     }
                 )
             }
@@ -104,7 +120,10 @@ fun DiagnosticoPermisosScreen(
 
 /** Estado positivo: la app está lista para la detección automática. */
 @Composable
-private fun EstadoListoCard() {
+private fun EstadoListoCard(
+    sinRestriccionesBateria: Boolean,
+    onPermitirBateria: () -> Unit
+) {
     Card(modifier = Modifier.fillMaxWidth()) {
         Column(
             modifier = Modifier.padding(16.dp),
@@ -120,10 +139,9 @@ private fun EstadoListoCard() {
                 style = MaterialTheme.typography.bodyMedium
             )
             // Recomendación secundaria (no bloqueante): batería.
-            Text(
-                text = "Recomendación opcional: permite que TOKE funcione sin " +
-                    "restricciones de batería para una detección más fiable.",
-                style = MaterialTheme.typography.bodySmall
+            SeccionBateria(
+                sinRestriccionesBateria = sinRestriccionesBateria,
+                onPermitirBateria = onPermitirBateria
             )
         }
     }
@@ -132,8 +150,18 @@ private fun EstadoListoCard() {
 /** Estado pendiente: acceso a notificaciones no concedido. */
 @Composable
 private fun EstadoRequiereAtencionCard(
-    onSolucionar: () -> Unit
+    sinRestriccionesBateria: Boolean,
+    onSolucionar: () -> Unit,
+    onPermitirBateria: () -> Unit
 ) {
+    // El acceso a notificaciones es el único chequeo bloqueante. La batería se
+    // trata como recomendación, pero si ambas fallan a la vez conviene ser
+    // preciso sobre cuál es la recomendación pendiente.
+    val mensaje = when (sinRestriccionesBateria) {
+        true -> "Acceso a notificaciones no concedido"
+        false -> "Acceso a notificaciones no concedido · batería sin restricciones pendiente"
+    }
+
     Card(modifier = Modifier.fillMaxWidth()) {
         Column(
             modifier = Modifier.padding(16.dp),
@@ -144,7 +172,7 @@ private fun EstadoRequiereAtencionCard(
                 style = MaterialTheme.typography.titleMedium
             )
             Text(
-                text = "Acceso a notificaciones no concedido",
+                text = mensaje,
                 style = MaterialTheme.typography.bodyLarge,
                 textAlign = TextAlign.Start
             )
@@ -161,6 +189,50 @@ private fun EstadoRequiereAtencionCard(
             ) {
                 Text(text = "Solucionar")
             }
+            // Recomendación secundaria (no bloqueante): batería.
+            SeccionBateria(
+                sinRestriccionesBateria = sinRestriccionesBateria,
+                onPermitirBateria = onPermitirBateria
+            )
+        }
+    }
+}
+
+/**
+ * Sección de batería (recomendación NO BLOQUEANTE).
+ *
+ * Elección de intent: usamos
+ * [Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS] en lugar de
+ * [Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS]. La variante directa
+ * requiere declarar `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS` en el manifiesto,
+ * que es un permiso sensible en las políticas de algunas tiendas, y además
+ * abriría un diálogo del sistema dirigido específicamente a nuestro paquete.
+ * Al ser la batería una recomendación OPCIONAL y no un requisito, preferimos
+ * la pantalla genérica de optimización de batería, que no exige el permiso y
+ * no presiona al usuario de forma intrusiva.
+ */
+@Composable
+private fun SeccionBateria(
+    sinRestriccionesBateria: Boolean,
+    onPermitirBateria: () -> Unit
+) {
+    if (sinRestriccionesBateria) {
+        Text(
+            text = "✅ Sin restricciones de batería",
+            style = MaterialTheme.typography.bodySmall
+        )
+    } else {
+        Text(
+            text = "Recomendación opcional: Android podría pausar la detección " +
+                "de pagos en segundo plano para ahorrar batería. Puedes permitir " +
+                "que TOKE funcione sin restricciones, aunque no es obligatorio.",
+            style = MaterialTheme.typography.bodySmall
+        )
+        OutlinedButton(
+            onClick = onPermitirBateria,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(text = "Permitir")
         }
     }
 }
@@ -168,6 +240,18 @@ private fun EstadoRequiereAtencionCard(
 /** Abre los Ajustes de acceso a notificaciones (listeners). */
 private fun abrirAjustesAccesoNotificaciones(context: Context) {
     val intent = Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)
+    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+    context.startActivity(intent)
+}
+
+/**
+ * Abre la pantalla genérica de optimización de batería.
+ *
+ * Ver [SeccionBateria] para la justificación de esta elección frente a
+ * [Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS].
+ */
+private fun abrirAjustesBateria(context: Context) {
+    val intent = Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS)
     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
     context.startActivity(intent)
 }
