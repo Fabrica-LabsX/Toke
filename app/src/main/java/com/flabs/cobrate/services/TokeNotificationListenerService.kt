@@ -5,6 +5,7 @@ import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import android.util.Log
 import com.flabs.cobrate.core.data.AlertaStore
+import com.flabs.cobrate.core.data.ConfiguracionDeVozStore
 import com.flabs.cobrate.core.data.EventoDeNotificacionStore
 import com.flabs.cobrate.core.data.MetodoDeCobroStore
 import com.flabs.cobrate.core.logic.AppsDePagoConfiables
@@ -16,11 +17,14 @@ import com.flabs.cobrate.core.model.EventoDeNotificacion
 import java.util.UUID
 import com.flabs.cobrate.core.data.InMemoryOperationStore
 import com.flabs.cobrate.core.data.RelacionCuentaNegocioStore
+import com.flabs.cobrate.core.logic.AndroidNotifier
 import com.flabs.cobrate.core.logic.AssignmentEngine
+import com.flabs.cobrate.core.logic.NotificacionesInternas
 import com.flabs.cobrate.core.model.EstadoRelacion
 import com.flabs.cobrate.core.model.Operacion
 import com.flabs.cobrate.core.model.RolCuentaNegocio
 import com.flabs.cobrate.core.model.EstadoOperacion
+import com.flabs.cobrate.core.model.ModoVoz
 import com.flabs.cobrate.core.model.OrigenOperacion
 import com.flabs.cobrate.core.model.CambioDeEstado
 
@@ -180,6 +184,29 @@ class TokeNotificationListenerService : NotificationListenerService() {
                 }
             val operacionFinal = AssignmentEngine.asignarSiCorresponde(operacion, trabajadoresActivos)
             InMemoryOperationStore.agregar(operacionFinal)
+
+            // CAPA 13: notificación interna local según el resultado de la
+            // asignación (CAPA 8). El modo cauteloso solo se consulta cuando
+            // ConfiguracionDeVozStore es accesible de forma segura; de lo
+            // contrario se usa false (la integración con voz B2 resolverá esto
+            // sin forzar la consulta aquí).
+            val modoCauteloso = consultarModoCauteloso()
+            when (operacionFinal.estado) {
+                EstadoOperacion.ASIGNADA -> {
+                    val contenido = NotificacionesInternas.notificacionPagoAsignado(monto, modoCauteloso)
+                    AndroidNotifier.mostrar(this, contenido.titulo, contenido.texto, NOTIF_PAGO_ASIGNADO)
+                    Log.d(TAG, "Notificación interna: pago asignado")
+                }
+                EstadoOperacion.SIN_ASIGNAR -> {
+                    val contenido = NotificacionesInternas.notificacionPagoSinAsignar(monto, modoCauteloso)
+                    AndroidNotifier.mostrar(this, contenido.titulo, contenido.texto, NOTIF_PAGO_SIN_ASIGNAR)
+                    Log.d(TAG, "Notificación interna: pago sin asignar")
+                }
+                else -> {
+                    // Único otro estado posible aquí (no se emite notificación).
+                    Log.d(TAG, "Operación creada sin notificación interna (estado ${operacionFinal.estado})")
+                }
+            }
         } else {
             // Método NO activo (o no configurado): alerta discreta al Dueño.
             // El Trabajador jamás ve esto.
@@ -188,7 +215,27 @@ class TokeNotificationListenerService : NotificationListenerService() {
                 "directamente."
             AlertaStore.crear(mensaje, evento.id)
             Log.d(TAG, "Alerta generada: pago por método no configurado ($metodo)")
+
+            // CAPA 13: notificación interna de alerta al Dueño (CAPA 6c-3).
+            val contenido = NotificacionesInternas.notificacionAlertaDueño(mensaje)
+            AndroidNotifier.mostrar(this, contenido.titulo, contenido.texto, NOTIF_ALERTA_DUENO)
+            Log.d(TAG, "Notificación interna: alerta al Dueño")
         }
+    }
+
+    /**
+     * Consulta el modo cauteloso de configuración de voz, si es accesible.
+     *
+     * CAPA 13: el modo CAUTELOSO de ConfiguracionDeVozStore oculta el monto en
+     * las notificaciones internas. Esta consulta NO crea dependencias
+     * circulares (solo lee la StateFlow pública). Si el store aún no está
+     * inicializado, su valor es el POR_DEFECTO (no cauteloso) y se considera
+     * false. La integración de voz (B2) refinará este flujo más adelante.
+     */
+    private fun consultarModoCauteloso(): Boolean {
+        // ConfiguracionDeVozStore.configuracion es una StateFlow pública; leer
+        // .value es seguro incluso sin init previo (usa POR_DEFECTO).
+        return ConfiguracionDeVozStore.configuracion.value.modo == ModoVoz.CAUTELOSO
     }
 
     /**
@@ -232,5 +279,12 @@ class TokeNotificationListenerService : NotificationListenerService() {
         // ("NEGOCIO_DEFAULT"), pendiente de resolverse cuando exista selección
         // real de negocio activo en segundo plano.
         private const val NEGOCIO_PLACEHOLDER = "NEGOCIO_DEFAULT"
+
+        // Ids de notificaciones internas (CAPA 13). Constantes fijas para que
+        // cada tipo reemplace la notificación previa del mismo tipo, evitando
+        // acumular cientos en la bandeja.
+        private const val NOTIF_PAGO_ASIGNADO = 1001
+        private const val NOTIF_PAGO_SIN_ASIGNAR = 1002
+        private const val NOTIF_ALERTA_DUENO = 1003
     }
 }
