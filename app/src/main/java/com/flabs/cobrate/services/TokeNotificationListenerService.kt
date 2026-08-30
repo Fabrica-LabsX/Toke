@@ -8,18 +8,20 @@ import com.flabs.cobrate.core.data.AlertaStore
 import com.flabs.cobrate.core.data.ConfiguracionDeVozStore
 import com.flabs.cobrate.core.data.EventoDeNotificacionStore
 import com.flabs.cobrate.core.data.MetodoDeCobroStore
-import com.flabs.cobrate.core.logic.AppsDePagoConfiables
-import com.flabs.cobrate.core.logic.MapeoAppsMetodoDeCobro
-import com.flabs.cobrate.core.logic.NivelConfianzaParseo
-import com.flabs.cobrate.core.logic.NotificationParser
-import com.flabs.cobrate.core.logic.ResultadoParseo
 import com.flabs.cobrate.core.model.EventoDeNotificacion
 import java.util.UUID
 import com.flabs.cobrate.core.data.InMemoryOperationStore
 import com.flabs.cobrate.core.data.RelacionCuentaNegocioStore
 import com.flabs.cobrate.core.logic.AndroidNotifier
+import com.flabs.cobrate.core.logic.AppsDePagoConfiables
 import com.flabs.cobrate.core.logic.AssignmentEngine
+import com.flabs.cobrate.core.logic.CoincidenciaVaAPagar
+import com.flabs.cobrate.core.logic.MapeoAppsMetodoDeCobro
+import com.flabs.cobrate.core.logic.NivelConfianzaParseo
+import com.flabs.cobrate.core.logic.NotificationParser
 import com.flabs.cobrate.core.logic.NotificacionesInternas
+import com.flabs.cobrate.core.logic.OperationHistory
+import com.flabs.cobrate.core.logic.ResultadoParseo
 import com.flabs.cobrate.core.model.EstadoRelacion
 import com.flabs.cobrate.core.model.Operacion
 import com.flabs.cobrate.core.model.RolCuentaNegocio
@@ -158,38 +160,72 @@ class TokeNotificationListenerService : NotificationListenerService() {
         if (activo == true) {
             // Método configurado y activo: flujo normal.
             Log.d(TAG, "Posible pago detectado: S/ $monto (confianza ALTA)")
-            // Crear una operación cuando el método de cobro esté activo.
-            val operacion = Operacion(
-                id = UUID.randomUUID().toString(),
-                negocioId = evento.negocioId,
-                trabajadorAsignadoId = null,
-                monto = monto,
-                estado = EstadoOperacion.SIN_ASIGNAR,
-                origen = OrigenOperacion.Detectada(evento.id),
-                fechaHora = System.currentTimeMillis(),
-                historial = listOf(CambioDeEstado(System.currentTimeMillis(), EstadoOperacion.SIN_ASIGNAR))
-            )
+            // CAPA 11: antes de crear una operación nueva, se comprueba si ya
+            // existe una "Va a pagar" pendiente (origen VaAPagar, estado
+            // ASIGNADA) del MISMO negocio y con el MISMO monto. Si hay una
+            // coincidencia inequívoca, el pago real se asocia a esa operación
+            // existente (se actualiza) en lugar de crear una operación
+            // duplicada con origen Detectada.
+            val pendientesDelNegocio = InMemoryOperationStore.operaciones.value.filter {
+                it.negocioId == evento.negocioId
+            }
+            val coincidencia = CoincidenciaVaAPagar.buscarCoincidencia(monto, pendientesDelNegocio)
 
-            // CAPA 8: asignación automática. Si el negocio tiene exactamente 1
-            // trabajador activo (relación rol=TRABAJADOR, estado=ACTIVA), la
-            // operación se asigna a ese único trabajador antes de guardarse.
-            // Si hay 0 o 2+ trabajadores, se devuelve SIN_ASIGNAR (el caso 2+
-            // es CAPA 9, fuera de alcance).
-            val trabajadoresActivos = RelacionCuentaNegocioStore.relaciones
-                .value
-                .filter {
-                    it.negocioId == evento.negocioId &&
-                        it.rol == RolCuentaNegocio.TRABAJADOR &&
-                        it.estado == EstadoRelacion.ACTIVA
+            val operacionFinal: Operacion
+            if (coincidencia != null) {
+                // CAPA 11: coincidencia "Va a pagar" -> TOKE asocia el pago
+                // real a la operación existente. Se conservan el mismo id y su
+                // trabajadorAsignadoId original (si "Va a pagar" asignó un
+                // trabajador al crearla, se conserva; si era null, se respeta
+                // ese null — NO se inventa ninguna asignación aquí). NO pasa
+                // por AssignmentEngine. Se registra el cambio en el historial
+                // con OperationHistory.registrarCambio para dejar constancia y
+                // resolver la operación de forma idéntica al resto del flujo.
+                Log.d(TAG, "CAPA 11: 'Va a pagar' asociada a la detección (monto S/ $monto)")
+                operacionFinal = OperationHistory.registrarCambio(
+                    operacion = coincidencia,
+                    nuevoEstado = EstadoOperacion.ASIGNADA,
+                    timestamp = System.currentTimeMillis()
+                )
+                InMemoryOperationStore.actualizar { lista ->
+                    lista.map { if (it.id == coincidencia.id) operacionFinal else it }
                 }
-            val operacionFinal = AssignmentEngine.asignarSiCorresponde(operacion, trabajadoresActivos)
-            InMemoryOperationStore.agregar(operacionFinal)
+            } else {
+                // SIN coincidencia: pago inesperado, flujo normal de CAPA 7/8.
+                // Crear una operación cuando el método de cobro esté activo.
+                val operacion = Operacion(
+                    id = UUID.randomUUID().toString(),
+                    negocioId = evento.negocioId,
+                    trabajadorAsignadoId = null,
+                    monto = monto,
+                    estado = EstadoOperacion.SIN_ASIGNAR,
+                    origen = OrigenOperacion.Detectada(evento.id),
+                    fechaHora = System.currentTimeMillis(),
+                    historial = listOf(CambioDeEstado(System.currentTimeMillis(), EstadoOperacion.SIN_ASIGNAR))
+                )
 
-            // CAPA 13: notificación interna local según el resultado de la
-            // asignación (CAPA 8). El modo cauteloso solo se consulta cuando
+                // CAPA 8: asignación automática. Si el negocio tiene exactamente 1
+                // trabajador activo (relación rol=TRABAJADOR, estado=ACTIVA), la
+                // operación se asigna a ese único trabajador antes de guardarse.
+                // Si hay 0 o 2+ trabajadores, se devuelve SIN_ASIGNAR (el caso 2+
+                // es CAPA 9, fuera de alcance).
+                val trabajadoresActivos = RelacionCuentaNegocioStore.relaciones
+                    .value
+                    .filter {
+                        it.negocioId == evento.negocioId &&
+                            it.rol == RolCuentaNegocio.TRABAJADOR &&
+                            it.estado == EstadoRelacion.ACTIVA
+                    }
+                operacionFinal = AssignmentEngine.asignarSiCorresponde(operacion, trabajadoresActivos)
+                InMemoryOperationStore.agregar(operacionFinal)
+            }
+
+            // CAPA 13: notificación interna local según el resultado (nueva o
+            // actualizada). El modo cauteloso solo se consulta cuando
             // ConfiguracionDeVozStore es accesible de forma segura; de lo
             // contrario se usa false (la integración con voz B2 resolverá esto
-            // sin forzar la consulta aquí).
+            // sin forzar la consulta aquí). Lógica única, compartida por los dos
+            // caminos, sin duplicarse.
             val modoCauteloso = consultarModoCauteloso()
             when (operacionFinal.estado) {
                 EstadoOperacion.ASIGNADA -> {
