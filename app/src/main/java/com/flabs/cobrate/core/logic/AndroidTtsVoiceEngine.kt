@@ -1,71 +1,36 @@
 package com.flabs.cobrate.core.logic
 
-import android.content.Context
-import android.speech.tts.TextToSpeech
-import android.speech.tts.UtteranceProgressListener
+import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import com.flabs.cobrate.core.data.ConfiguracionDeVozStore
-import com.flabs.cobrate.core.model.ConfiguracionDeVoz
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import java.util.Locale
 
 /**
- * Motor de voz (CAPA 14) que reproduce frases vía [TextToSpeech] de Android.
+ * Motor de voz (CAPA 14) que reproduce frases vía [TtsSpeaker].
  *
- * Es un [AndroidViewModel] con el [android.app.Application] como context, lo
- * que permite crear el [TextToSpeech] de forma asíncrona (el callback
- * `TextToSpeech(context) { status -> ... }` NO bloquea la UI) y liberarlo con
- * [TextToSpeech.shutdown] en [onCleared].
+ * Es un [AndroidViewModel] con el [Application] como context, pensado para la
+ * pantalla de configuración de voz
+ * ([com.flabs.cobrate.features.settings.VoiceSettingsScreen]).
+ *
+ * La lógica central de TextToSpeech NO vive aquí: se delega a [TtsSpeaker],
+ * una clase simple sin dependencia de ViewModel que también puede usar un
+ * [android.app.Service] (que no puede instanciar ViewModels fuera de su ciclo
+ * de vida). Este ViewModel solo expone esa instancia y la libera en [onCleared].
  *
  * Esta capa SOLO construye el motor y alimenta el botón "Probar voz" de la
- * pantalla de configuración. La integración real (disparar la voz al
- * confirmarse un pago) llega en una capa posterior.
+ * pantalla de configuración; la integración real en el flujo de confirmación
+ * de pago usa [TtsSpeaker] directamente desde el servicio.
  */
-class AndroidTtsVoiceEngine(application: android.app.Application) :
-    AndroidViewModel(application) {
+class AndroidTtsVoiceEngine(application: Application) : AndroidViewModel(application) {
 
-    private val _disponible = MutableStateFlow(false)
-    /** ¿El TTS está inicializado y listo para hablar? */
-    val disponible: StateFlow<Boolean> = _disponible
+    /** Speaker subyacente (comparte forma y lógica con el del servicio). */
+    private val speaker = TtsSpeaker(application.applicationContext)
 
-    private val _hablando = MutableStateFlow(false)
-    /** ¿Hay una frase en reproducción? (para p. ej. deshabilitar el botón). */
-    val hablando: StateFlow<Boolean> = _hablando
+    /** ¿El TTS está inicializado y listo para hablar? (reativo, delegado). */
+    val disponible: StateFlow<Boolean> = speaker.disponible
 
-    private var tts: TextToSpeech? = null
-
-    init {
-        val context: Context = application.applicationContext
-        tts = TextToSpeech(context) { status ->
-            if (status == TextToSpeech.SUCCESS) {
-                val engine = tts ?: return@TextToSpeech
-                val resultado = engine.setLanguage(Locale.getDefault())
-                // El resultado puede ser LANG_MISSING_DATA o LANG_NOT_SUPPORTED:
-                // no bloquea la reproducción, seguimos igualmente.
-                _hablando.value = false
-                _disponible.value =
-                    resultado != TextToSpeech.LANG_MISSING_DATA &&
-                    resultado != TextToSpeech.LANG_NOT_SUPPORTED
-            } else {
-                _disponible.value = false
-            }
-        }
-        tts?.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
-            override fun onStart(utteranceId: String?) {
-                _hablando.value = true
-            }
-
-            override fun onDone(utteranceId: String?) {
-                _hablando.value = false
-            }
-
-            @Deprecated("Deprecated en versions recientes de API")
-            override fun onError(utteranceId: String?) {
-                _hablando.value = false
-            }
-        })
-    }
+    /** ¿Hay una frase en reproducción? (reativo, delegado). */
+    val hablando: StateFlow<Boolean> = speaker.hablando
 
     /**
      * Reproduce en voz alta la [frase] usando la configuración vigente de
@@ -76,30 +41,7 @@ class AndroidTtsVoiceEngine(application: android.app.Application) :
     fun hablar(frase: String) {
         val config = ConfiguracionDeVozStore.configuracion.value
         if (!config.activada) return
-
-        val engine = tts ?: return
-        if (!_disponible.value) return
-
-        engine.setSpeechRate(
-            ConfiguracionDeVoz.velocidadNormalizada(config.velocidad)
-        )
-
-        // Aplica la voz seleccionada si no es la del sistema por defecto.
-        config.vozSeleccionada?.let { voz ->
-            val soportada = engine
-                .voices
-                ?.firstOrNull { it.name == voz || it.locale.toLanguageTag() == voz }
-            if (soportada != null) {
-                engine.voice = soportada
-            }
-        }
-
-        engine.speak(
-            frase,
-            TextToSpeech.QUEUE_FLUSH,
-            null,
-            "cap14_prueba_voz"
-        )
+        speaker.hablar(frase, config.velocidad)
     }
 
     /** Frase de ejemplo usada por el botón "Probar voz". */
@@ -112,9 +54,7 @@ class AndroidTtsVoiceEngine(application: android.app.Application) :
 
     /** Libera los recursos del TTS. Se llama automáticamente al morir el ViewModel. */
     override fun onCleared() {
-        tts?.stop()
-        tts?.shutdown()
-        tts = null
+        speaker.liberar()
         super.onCleared()
     }
 }

@@ -22,6 +22,9 @@ import com.flabs.cobrate.core.logic.NotificationParser
 import com.flabs.cobrate.core.logic.NotificacionesInternas
 import com.flabs.cobrate.core.logic.OperationHistory
 import com.flabs.cobrate.core.logic.ResultadoParseo
+import com.flabs.cobrate.core.logic.TtsSpeaker
+import com.flabs.cobrate.core.logic.VoicePhraseBuilder
+import com.flabs.cobrate.core.logic.vibrar
 import com.flabs.cobrate.core.model.EstadoRelacion
 import com.flabs.cobrate.core.model.Operacion
 import com.flabs.cobrate.core.model.RolCuentaNegocio
@@ -43,13 +46,32 @@ import com.flabs.cobrate.core.model.CambioDeEstado
  */
 class TokeNotificationListenerService : NotificationListenerService() {
 
+    // CAPA 14+: speaker de voz reutilizado entre notificaciones. Se crea de
+    // forma perezosa con el context de la app y se conserva como propiedad del
+    // servicio, en lugar de crear un TextToSpeech nuevo por cada notificación
+    // (reinicializar el motor en cada pago sería costoso). El estado reactivo
+    // de disponibilidad vive en esta misma instancia.
+    private val ttsSpeaker: TtsSpeaker by lazy { TtsSpeaker(applicationContext) }
+    private var ttsSpeakerLiberado = false
+
     override fun onListenerConnected() {
         super.onListenerConnected()
         // Inicializa los stores con el contexto del servicio (mismo patrón que
         // InMemoryOperationStore.init(context)).
         EventoDeNotificacionStore.init(this)
         AlertaStore.init(this)
+        InMemoryOperationStore.init(this)
+        ConfiguracionDeVozStore.init(this)
         Log.d(TAG, "Listener conectado y stores inicializados.")
+    }
+
+    override fun onDestroy() {
+        // Libera el TextToSpeech del speaker reutilizado (si llegó a crearse).
+        if (!ttsSpeakerLiberado) {
+            ttsSpeakerLiberado = true
+            ttsSpeaker.liberar()
+        }
+        super.onDestroy()
     }
 
     override fun onNotificationPosted(sbn: StatusBarNotification) {
@@ -241,6 +263,35 @@ class TokeNotificationListenerService : NotificationListenerService() {
                 else -> {
                     // Único otro estado posible aquí (no se emite notificación).
                     Log.d(TAG, "Operación creada sin notificación interna (estado ${operacionFinal.estado})")
+                }
+            }
+
+            // CAPA 14+: integración de voz y vibración en el flujo real de
+            // confirmación de pago. Se disparan SOLO para los estados que
+            // representan una confirmación de pago al estilo trabajador
+            // (ASIGNADA/SIN_ASIGNAR). La "alerta al Dueño por método no
+            // configurado" NO se anuncia ni vibra: es información sensible de
+            // negocio, no una confirmación de pago para el trabajador, y se
+            // trata de forma exclusivamente visual/notificación.
+            if (operacionFinal.estado == EstadoOperacion.ASIGNADA ||
+                operacionFinal.estado == EstadoOperacion.SIN_ASIGNAR
+            ) {
+                // Vibración: configuración INDEPENDIENTE de la voz; vibra si
+                // está activada, haya o no voz.
+                val config = ConfiguracionDeVozStore.configuracion.value
+                if (config.vibrarAlAnunciar) {
+                    vibrar(applicationContext)
+                    Log.d(TAG, "Vibración al anunciar pago")
+                }
+
+                // Voz: solo si la configuración está activada. TextToSpeech
+                // puede no estar disponible en el dispositivo; en ese caso
+                // TtsSpeaker.hablar() no hace nada (igual que en la pantalla
+                // de configuración), retomando en silencio.
+                if (config.activada) {
+                    val frase = VoicePhraseBuilder.construirFrase(config, monto)
+                    ttsSpeaker.hablar(frase, config.velocidad)
+                    Log.d(TAG, "Voz de confirmación de pago")
                 }
             }
         } else {
