@@ -1,14 +1,15 @@
 package com.flabs.cobrate.core.data
 
 import io.github.jan.supabase.auth.auth
-import io.github.jan.supabase.auth.providers.Email
+import io.github.jan.supabase.auth.providers.builtin.Email
 import io.github.jan.supabase.auth.status.SessionStatus
-import io.github.jan.supabase.auth.user.User
+import io.github.jan.supabase.auth.user.UserInfo
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
 /**
@@ -19,8 +20,8 @@ import kotlinx.coroutines.flow.stateIn
  * sigue siendo el ÚNICO activo en la app; esta capa es de validación manual.
  *
  * Decisiones de producto confirmadas:
- *  - Dueño   -> email + contraseña reales (signUpWith/signInWith con Email).
- *  - Trabajador -> sesión anónima de Supabase (sin correo); su vínculo real
+ *  - Dueño        -> email + contraseña reales (signUpWith/signInWith con Email).
+ *  - Trabajador   -> sesión anónima de Supabase (sin correo); su vínculo real
  *    al negocio sigue siendo la invitación por código ya existente. La sesión
  *    anónima solo otorga una identidad válida de Supabase para habilitar RLS
  *    en el futuro.
@@ -36,7 +37,7 @@ object SupabaseAuthBridge {
      * Usuario autenticado actual en Supabase, o null si no hay sesión.
      * Observa `supabase.auth.sessionStatus` en tiempo real.
      */
-    val sesionActual: StateFlow<User?> =
+    val sesionActual: StateFlow<UserInfo?> =
         SupabaseClientProvider.supabase.auth.sessionStatus
             .map { status ->
                 when (status) {

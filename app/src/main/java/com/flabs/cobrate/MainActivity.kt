@@ -46,6 +46,7 @@ import com.flabs.cobrate.core.model.Negocio
 import com.flabs.cobrate.core.model.RolCuentaNegocio
 import com.flabs.cobrate.features.auth.AuthViewModel
 import com.flabs.cobrate.features.auth.LoginScreen
+import com.flabs.cobrate.features.debug.SupabaseAuthTestScreen
 import com.flabs.cobrate.features.business.CrearNegocioScreen
 import com.flabs.cobrate.features.business.NegocioViewModel
 import com.flabs.cobrate.features.onboarding.ConfirmarInvitacionScreen
@@ -113,6 +114,9 @@ private object Routes {
     const val ESTABLECIMIENTOS_DUENO = "establecimientos_dueno"
     const val PLAN_FACTURACION_DUENO = "plan_facturacion_dueno"
     const val PERMISOS_DUENO = "permisos_dueno"
+
+    // Herramientas de desarrollo (CAPA 7b-1): validación manual de Supabase Auth.
+    const val SUPABASE_DEBUG = "supabase_debug"
 }
 
 @Composable
@@ -188,6 +192,10 @@ fun CobrateApp() {
                 },
                 onSoyTrabajador = {
                     navController.navigate(Routes.INGRESAR_CODIGO)
+                },
+                // Herramientas de desarrollo (CAPA 7b-1).
+                onAbrirDebugSupabase = {
+                    navController.navigate(Routes.SUPABASE_DEBUG)
                 }
             )
         }
@@ -321,6 +329,13 @@ fun CobrateApp() {
                 }
             )
         }
+
+        // ---- Herramientas de desarrollo (CAPA 7b-1) ----
+        composable(Routes.SUPABASE_DEBUG) {
+            SupabaseAuthTestScreen(
+                onVolver = { navController.popBackStack() }
+            )
+        }
     }
 }
 
@@ -331,7 +346,8 @@ private fun InicioScreen(
     negocioViewModel: NegocioViewModel,
     onEntrarComoDueno: (Negocio?) -> Unit,
     onEntrarComoTrabajador: () -> Unit,
-    onSoyTrabajador: () -> Unit
+    onSoyTrabajador: () -> Unit,
+    onAbrirDebugSupabase: () -> Unit
 ) {
     // En las ramas que no requieren más datos (un solo negocio admin, o
     // trabajador), se navega automáticamente al flujo correspondiente.
@@ -355,7 +371,8 @@ private fun InicioScreen(
             SinNegociosScreen(
                 negocioViewModel = negocioViewModel,
                 onCrearNegocio = {},
-                onSoyTrabajador = onSoyTrabajador
+                onSoyTrabajador = onSoyTrabajador,
+                onAbrirDebugSupabase = onAbrirDebugSupabase
             )
         }
 
@@ -418,7 +435,8 @@ private fun SelectorNegocioScreen(
 private fun SinNegociosScreen(
     negocioViewModel: NegocioViewModel,
     onCrearNegocio: () -> Unit,
-    onSoyTrabajador: () -> Unit
+    onSoyTrabajador: () -> Unit,
+    onAbrirDebugSupabase: () -> Unit
 ) {
     var creandoNegocio by remember { mutableStateOf(false) }
 
@@ -454,6 +472,15 @@ private fun SinNegociosScreen(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(text = "Soy trabajador — tengo una invitación")
+                }
+
+                // Herramientas de desarrollo (CAPA 7b-1): acceso discreto para
+                // validar manualmente la conexión con Supabase Auth.
+                OutlinedButton(
+                    onClick = onAbrirDebugSupabase,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(text = "Herramientas (dev)")
                 }
             }
         }
