@@ -54,24 +54,49 @@ class TokeNotificationListenerService : NotificationListenerService() {
     private val ttsSpeaker: TtsSpeaker by lazy { TtsSpeaker(applicationContext) }
     private var ttsSpeakerLiberado = false
 
+    // DIAGNÓSTICO (temporal): logging instrumentado para investigar las
+    // reconexiones del NotificationListenerService observadas en Logcat
+    // (múltiples "Listener conectado y stores inicializados" en pocos segundos
+    // con distintos PID). Cada callback registra el PID del proceso y un
+    // timestamp legible para correlacionar cuándo y en qué proceso ocurre cada
+    // evento. NO es una corrección; se revisa en la fase de testing diferido.
+    override fun onCreate() {
+        super.onCreate()
+        Log.d(TAG, "[DIAG] onCreate() pid=${android.os.Process.myPid()} t=${marcaTiempo()}")
+    }
+
     override fun onListenerConnected() {
         super.onListenerConnected()
+        Log.d(TAG, "[DIAG] onListenerConnected() pid=${android.os.Process.myPid()} t=${marcaTiempo()}")
         // Inicializa los stores con el contexto del servicio (mismo patrón que
         // InMemoryOperationStore.init(context)).
         EventoDeNotificacionStore.init(this)
         AlertaStore.init(this)
         InMemoryOperationStore.init(this)
         ConfiguracionDeVozStore.init(this)
-        Log.d(TAG, "Listener conectado y stores inicializados.")
+        Log.d(TAG, "Listener conectado y stores inicializados. pid=${android.os.Process.myPid()} t=${marcaTiempo()}")
+    }
+
+    override fun onListenerDisconnected() {
+        Log.d(TAG, "[DIAG] onListenerDisconnected() pid=${android.os.Process.myPid()} t=${marcaTiempo()}")
+        super.onListenerDisconnected()
     }
 
     override fun onDestroy() {
+        Log.d(TAG, "[DIAG] onDestroy() pid=${android.os.Process.myPid()} t=${marcaTiempo()}")
         // Libera el TextToSpeech del speaker reutilizado (si llegó a crearse).
         if (!ttsSpeakerLiberado) {
             ttsSpeakerLiberado = true
             ttsSpeaker.liberar()
         }
         super.onDestroy()
+    }
+
+    // Helper temporal de diagnóstico: timestamp legible (hora:minuto:segundo)
+    // para correlacionar los eventos del servicio.
+    private fun marcaTiempo(): String {
+        val formato = java.text.SimpleDateFormat("HH:mm:ss", java.util.Locale.US)
+        return formato.format(java.util.Date())
     }
 
     override fun onNotificationPosted(sbn: StatusBarNotification) {
