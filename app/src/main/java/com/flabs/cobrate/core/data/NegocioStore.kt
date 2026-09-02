@@ -26,6 +26,8 @@ object NegocioStore {
 
     private var localStore: NegocioLocalStore? = null
 
+    private val repository = NegocioRepository()
+
     /**
      * Inicializa el store con el contexto de la app y carga los negocios
      * persistidos. Llamar varias veces es seguro (solo inicializa una vez).
@@ -42,19 +44,26 @@ object NegocioStore {
     }
 
     /**
-     * Crea un negocio nuevo (id autogenerado) y lo persiste.
-     * Devuelve el [Negocio] creado.
+     * Crea un negocio nuevo y lo persiste en Supabase y localmente.
+     * Si la escritura en Supabase falla, la operación falla completa.
+     * DECISIÓN CAPA 7d-1: No hay cola de sincronización; el servidor es fuente de verdad.
      */
-    fun crear(nombre: String, tipo: TipoNegocio, dueñoCuentaId: String): Negocio {
+    suspend fun crear(nombre: String, tipo: TipoNegocio, dueñoCuentaId: String): Result<Negocio> {
         val negocio = Negocio(
             id = UUID.randomUUID().toString(),
             nombre = nombre.trim(),
             tipo = tipo,
             dueñoCuentaId = dueñoCuentaId
         )
-        _negocios.value = _negocios.value + negocio
-        persistir()
-        return negocio
+        
+        val result = repository.crear(negocio)
+        if (result.isSuccess) {
+            val creado = result.getOrThrow()
+            _negocios.value = _negocios.value + creado
+            persistir()
+            return Result.success(creado)
+        }
+        return Result.failure(result.exceptionOrNull() ?: Exception("Error desconocido en Supabase"))
     }
 
     /** Busca un negocio por su id. Null si no existe. */

@@ -9,7 +9,6 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import java.util.UUID
 
 /**
  * Fuente de invitaciones de trabajador compartida en memoria (singleton) con
@@ -33,6 +32,8 @@ object InvitacionStore {
 
     private var localStore: InvitacionLocalStore? = null
 
+    private val repository = InvitacionRepository()
+
     /**
      * Inicializa el store con el contexto de la app y carga las invitaciones
      * persistidas. Llamar varias veces es seguro (solo inicializa una vez).
@@ -49,22 +50,23 @@ object InvitacionStore {
     }
 
     /**
-     * Crea una invitación nueva para [negocioId] con un código corto legible
-     * (6 caracteres alfanuméricos en mayúsculas) y expiración de ahora + 24 horas.
+     * Crea una invitación nueva en Supabase y localmente.
+     * Si falla en Supabase, la operación falla completa.
+     * DECISIÓN CAPA 7d-1: El servidor es la fuente de verdad.
      */
-    fun crear(negocioId: String): InvitacionTrabajador {
+    suspend fun crear(negocioId: String): Result<InvitacionTrabajador> {
         val ahora = System.currentTimeMillis()
-        val invitacion = InvitacionTrabajador(
-            id = UUID.randomUUID().toString(),
-            negocioId = negocioId,
-            codigo = generarCodigo(),
-            estado = EstadoInvitacion.PENDIENTE,
-            fechaCreacion = ahora,
-            expiracion = ahora + HORAS_VALIDEZ * 60 * 60 * 1000
-        )
-        _invitaciones.value = _invitaciones.value + invitacion
-        persistir()
-        return invitacion
+        val codigo = generarCodigo()
+        val expiracion = ahora + HORAS_VALIDEZ * 60 * 60 * 1000
+        
+        val result = repository.crear(negocioId, null, codigo, expiracion)
+        if (result.isSuccess) {
+            val creada = result.getOrThrow()
+            _invitaciones.value = _invitaciones.value + creada
+            persistir()
+            return Result.success(creada)
+        }
+        return Result.failure(result.exceptionOrNull() ?: Exception("Error en Supabase"))
     }
 
     /** Busca una invitación por su código (case-insensitive). Null si no existe. */
@@ -73,13 +75,21 @@ object InvitacionStore {
         return _invitaciones.value.find { it.codigo == normalizado }
     }
 
-    /** Marca una invitación como ACEPTADA dado su código (no-op si no existe). */
-    fun marcarAceptada(codigo: String) {
+    /** 
+     * Marca una invitación como ACEPTADA en Supabase y localmente.
+     * Si falla en Supabase, la operación falla completa.
+     */
+    suspend fun marcarAceptada(codigo: String): Result<Unit> {
         val normalizado = codigo.trim().uppercase()
-        _invitaciones.value = _invitaciones.value.map {
-            if (it.codigo == normalizado) it.copy(estado = EstadoInvitacion.ACEPTADA) else it
+        val result = repository.marcarAceptada(normalizado)
+        if (result.isSuccess) {
+            _invitaciones.value = _invitaciones.value.map {
+                if (it.codigo == normalizado) it.copy(estado = EstadoInvitacion.ACEPTADA) else it
+            }
+            persistir()
+            return Result.success(Unit)
         }
-        persistir()
+        return Result.failure(result.exceptionOrNull() ?: Exception("Error en Supabase"))
     }
 
     private fun generarCodigo(): String {

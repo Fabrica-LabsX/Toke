@@ -17,11 +17,13 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.launch
 import com.flabs.cobrate.core.data.CuentaStore
 import com.flabs.cobrate.core.data.InvitacionStore
 import com.flabs.cobrate.core.data.NegocioStore
@@ -48,6 +50,8 @@ fun InvitarTrabajadorScreen(
     val sesion by CuentaStore.sesionActual.collectAsState()
     val relaciones by RelacionCuentaNegocioStore.relaciones.collectAsState()
     val negocios by NegocioStore.negocios.collectAsState()
+
+    val scope = rememberCoroutineScope()
 
     val cuentaId = sesion?.id
     // Negocio actual: el primer negocio donde la cuenta activa es ADMINISTRADOR.
@@ -78,8 +82,12 @@ fun InvitarTrabajadorScreen(
 
                 Button(
                     onClick = {
-                        codigoGenerado = InvitacionStore.crear(negocio.id).codigo
-                        negocioNombre = negocio.nombre
+                        scope.launch {
+                            InvitacionStore.crear(negocio.id).onSuccess {
+                                codigoGenerado = it.codigo
+                                negocioNombre = negocio.nombre
+                            }
+                        }
                     },
                     modifier = Modifier.fillMaxWidth()
                 ) {

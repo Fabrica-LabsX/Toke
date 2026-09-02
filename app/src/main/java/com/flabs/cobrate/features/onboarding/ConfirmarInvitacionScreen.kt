@@ -16,8 +16,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.launch
 import com.flabs.cobrate.core.data.CuentaStore
 import com.flabs.cobrate.core.data.InvitacionStore
 import com.flabs.cobrate.core.data.NegocioStore
@@ -43,6 +45,7 @@ fun ConfirmarInvitacionScreen(
 ) {
     val negocios by NegocioStore.negocios.collectAsState()
     val cuentas by CuentaStore.cuentas.collectAsState()
+    val scope = rememberCoroutineScope()
 
     val negocio = negocios.find { it.id == invitacion.negocioId }
     val negocioNombre = negocio?.nombre ?: "Negocio"
@@ -101,14 +104,19 @@ fun ConfirmarInvitacionScreen(
                 onClick = {
                     val cuentaId = CuentaStore.sesionActual.value?.id
                     if (cuentaId != null) {
-                        // Crea la relación TRABAJADOR/ACTIVA y marca la invitación como aceptada.
-                        RelacionCuentaNegocioStore.crear(
-                            cuentaId = cuentaId,
-                            negocioId = invitacion.negocioId,
-                            rol = RolCuentaNegocio.TRABAJADOR
-                        )
-                        InvitacionStore.marcarAceptada(invitacion.codigo)
-                        onAceptada()
+                        scope.launch {
+                            // Crea la relación TRABAJADOR/ACTIVA y marca la invitación como aceptada.
+                            val resRel = RelacionCuentaNegocioStore.crear(
+                                cuentaId = cuentaId,
+                                negocioId = invitacion.negocioId,
+                                rol = RolCuentaNegocio.TRABAJADOR
+                            )
+                            if (resRel.isSuccess) {
+                                InvitacionStore.marcarAceptada(invitacion.codigo).onSuccess {
+                                    onAceptada()
+                                }
+                            }
+                        }
                     }
                 },
                 modifier = Modifier.fillMaxWidth()

@@ -27,6 +27,8 @@ object RelacionCuentaNegocioStore {
 
     private var localStore: RelacionCuentaNegocioLocalStore? = null
 
+    private val repository = RelacionCuentaNegocioRepository()
+
     /**
      * Inicializa el store con el contexto de la app y carga las relaciones
      * persistidas. Llamar varias veces es seguro (solo inicializa una vez).
@@ -42,8 +44,12 @@ object RelacionCuentaNegocioStore {
         }
     }
 
-    /** Crea (agrega) una relación nueva y la persiste. */
-    fun crear(cuentaId: String, negocioId: String, rol: RolCuentaNegocio) {
+    /** 
+     * Crea (agrega) una relación nueva en Supabase y localmente. 
+     * Si falla en Supabase, la operación falla completa.
+     * DECISIÓN CAPA 7d-1: El servidor es la fuente de verdad.
+     */
+    suspend fun crear(cuentaId: String, negocioId: String, rol: RolCuentaNegocio): Result<RelacionCuentaNegocio> {
         val relacion = RelacionCuentaNegocio(
             cuentaId = cuentaId,
             negocioId = negocioId,
@@ -51,8 +57,15 @@ object RelacionCuentaNegocioStore {
             estado = EstadoRelacion.ACTIVA,
             fechaVinculacion = System.currentTimeMillis()
         )
-        _relaciones.value = _relaciones.value + relacion
-        persistir()
+        
+        val result = repository.crear(relacion)
+        if (result.isSuccess) {
+            val creada = result.getOrThrow()
+            _relaciones.value = _relaciones.value + creada
+            persistir()
+            return Result.success(creada)
+        }
+        return Result.failure(result.exceptionOrNull() ?: Exception("Error en Supabase"))
     }
 
     /** Relaciones de una cuenta (todas, independientemente del estado). */

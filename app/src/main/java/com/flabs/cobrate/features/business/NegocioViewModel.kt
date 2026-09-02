@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
 /**
  * ViewModel de Negocios y relaciones, usado tanto por el flujo de Dueño como
@@ -82,11 +83,15 @@ class NegocioViewModel : ViewModel() {
      */
     fun crearNegocio(nombre: String, tipo: TipoNegocio) {
         val cuentaId = CuentaStore.sesionActual.value?.id ?: return
-        val negocio = NegocioStore.crear(nombre, tipo, cuentaId)
-        RelacionCuentaNegocioStore.crear(
-            cuentaId = cuentaId,
-            negocioId = negocio.id,
-            rol = RolCuentaNegocio.ADMINISTRADOR
-        )
+        viewModelScope.launch {
+            NegocioStore.crear(nombre, tipo, cuentaId)
+                .onSuccess { negocio ->
+                    RelacionCuentaNegocioStore.crear(
+                        cuentaId = cuentaId,
+                        negocioId = negocio.id,
+                        rol = RolCuentaNegocio.ADMINISTRADOR
+                    )
+                }
+        }
     }
 }
