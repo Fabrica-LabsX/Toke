@@ -1,6 +1,7 @@
 package com.flabs.cobrate.features.onboarding
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -9,33 +10,37 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import com.flabs.cobrate.core.data.CuentaStore
+import com.flabs.cobrate.core.data.InvitacionRepository
 import com.flabs.cobrate.core.data.InvitacionStore
-import com.flabs.cobrate.core.data.NegocioStore
 import com.flabs.cobrate.core.data.RelacionCuentaNegocioStore
 import com.flabs.cobrate.core.model.InvitacionTrabajador
+import com.flabs.cobrate.core.model.PreviewInvitacion
 import com.flabs.cobrate.core.model.RolCuentaNegocio
 
 /**
- * Pantalla de confirmación de la invitación (CAPA 4).
+ * Pantalla de confirmación de la invitación (CAPA 7d-3).
  *
- * Muestra el nombre del negocio y el usuario dueño antes de aceptar. Al
- * aceptar crea la [RelacionCuentaNegocio] con rol TRABAJADOR (ACTIVA), marca
- * la invitación como ACEPTADA y navega al flujo de Trabajador.
- *
- * La cuenta activa ya tiene sesión (CAPA 2 lo garantiza antes de llegar aquí),
- * por lo que [CuentaStore.sesionActual] debería estar poblada.
+ * Muestra el nombre del negocio y el usuario dueño obtenidos vía RPC seguro
+ * antes de aceptar. Esto permite que trabajadores nuevos vean los datos
+ * aunque RLS bloquee la lectura directa de las tablas.
  */
 @Composable
 fun ConfirmarInvitacionScreen(
@@ -43,15 +48,26 @@ fun ConfirmarInvitacionScreen(
     onAceptada: () -> Unit,
     onVolver: () -> Unit
 ) {
-    val negocios by NegocioStore.negocios.collectAsState()
-    val cuentas by CuentaStore.cuentas.collectAsState()
     val scope = rememberCoroutineScope()
+    val repository = remember { InvitacionRepository() }
 
-    val negocio = negocios.find { it.id == invitacion.negocioId }
-    val negocioNombre = negocio?.nombre ?: "Negocio"
-    val dueñoUsername = negocio
-        ?.let { cuentas.find { c -> c.id == it.dueñoCuentaId }?.username }
-        ?: "Dueño"
+    var preview by remember { mutableStateOf<PreviewInvitacion?>(null) }
+    var loading by remember { mutableStateOf(true) }
+    var errorPreview by remember { mutableStateOf<String?>(null) }
+
+    LaunchedEffect(invitacion.codigo) {
+        loading = true
+        repository.obtenerPreview(invitacion.codigo)
+            .onSuccess {
+                preview = it
+                loading = false
+                if (it == null) errorPreview = "No se pudo verificar esta invitación"
+            }
+            .onFailure {
+                errorPreview = "Error de conexión al verificar"
+                loading = false
+            }
+    }
 
     Scaffold { innerPadding ->
         Column(
@@ -70,33 +86,56 @@ fun ConfirmarInvitacionScreen(
                 style = MaterialTheme.typography.bodyMedium
             )
 
-            Card(modifier = Modifier.fillMaxWidth()) {
-                Column(
-                    modifier = Modifier.padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+            if (loading) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(160.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
+                }
+            } else if (errorPreview != null) {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer)
                 ) {
                     Text(
-                        text = "Negocio",
-                        style = MaterialTheme.typography.labelMedium
-                    )
-                    Text(
-                        text = negocioNombre,
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = "Dueño",
-                        style = MaterialTheme.typography.labelMedium
-                    )
-                    Text(
-                        text = dueñoUsername,
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = "Código: ${invitacion.codigo}",
+                        text = errorPreview!!,
+                        modifier = Modifier.padding(16.dp),
+                        color = MaterialTheme.colorScheme.onErrorContainer,
                         style = MaterialTheme.typography.bodyMedium
                     )
+                }
+            } else {
+                Card(modifier = Modifier.fillMaxWidth()) {
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(
+                            text = "Negocio",
+                            style = MaterialTheme.typography.labelMedium
+                        )
+                        Text(
+                            text = preview?.negocioNombre ?: "Desconocido",
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "Dueño",
+                            style = MaterialTheme.typography.labelMedium
+                        )
+                        Text(
+                            text = preview?.duenoUsername ?: "Desconocido",
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "Código: ${invitacion.codigo}",
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
                 }
             }
 
@@ -121,6 +160,7 @@ fun ConfirmarInvitacionScreen(
                         }
                     }
                 },
+                enabled = !loading && errorPreview == null,
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(text = "Aceptar y entrar como trabajador")
