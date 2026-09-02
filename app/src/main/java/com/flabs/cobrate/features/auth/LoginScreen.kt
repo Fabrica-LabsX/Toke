@@ -21,26 +21,20 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
 
-/**
- * Pantalla de entrada de TOKE V1 (CAPA 2 — autenticación local, sin backend).
- *
- * Muestra los campos username/contraseña en dos modos:
- *   - "Iniciar sesión" (por defecto), con botón para pasar a crear cuenta.
- *   - "Crear cuenta", con botón para volver a iniciar sesión.
- *
- * Los errores (username ya existe, usuario/contraseña incorrectos) se muestran
- * como un simple mensaje bajo los campos.
- */
+import com.flabs.cobrate.core.data.CuentaStore
+import com.flabs.cobrate.features.auth.AuthViewModel
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LoginScreen(
-    authViewModel: AuthViewModel
-) {
-    var username by remember { mutableStateOf("") }
+fun LoginScreen(authViewModel: AuthViewModel) {
+    var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var modoCrear by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
+    val scope = rememberCoroutineScope()
 
     Scaffold { innerPadding ->
         Column(
@@ -60,9 +54,9 @@ fun LoginScreen(
             )
 
             OutlinedTextField(
-                value = username,
-                onValueChange = { username = it; error = null },
-                label = { Text("Nombre de usuario") },
+                value = email,
+                onValueChange = { email = it; error = null },
+                label = { Text("Email") },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth()
             )
@@ -85,14 +79,16 @@ fun LoginScreen(
 
             Button(
                 onClick = {
-                    val resultado = if (modoCrear) {
-                        authViewModel.crearCuenta(username, password)
-                    } else {
-                        authViewModel.iniciarSesion(username, password)
+                    scope.launch {
+                        val result = if (modoCrear) {
+                            authViewModel.crearCuenta(email, password)
+                        } else {
+                            authViewModel.iniciarSesion(email, password)
+                        }
+                        result
+                            .onSuccess { }
+                            .onFailure { error = it.message }
                     }
-                    resultado
-                        .onSuccess { }
-                        .onFailure { error = it.message }
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {

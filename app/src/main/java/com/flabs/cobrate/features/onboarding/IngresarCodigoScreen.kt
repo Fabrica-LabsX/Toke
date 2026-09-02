@@ -18,21 +18,24 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.launch
+import com.flabs.cobrate.core.data.CuentaStore
+import com.flabs.cobrate.core.data.SupabaseAuthBridge
 import com.flabs.cobrate.core.data.InvitacionStore
 import com.flabs.cobrate.core.logic.InvitacionValidation
 import com.flabs.cobrate.core.logic.MotivoRechazo
+import com.flabs.cobrate.core.model.Cuenta
 import com.flabs.cobrate.core.model.InvitacionTrabajador
 
 /**
  * Pantalla "Soy trabajador" — captura el código de invitación (CAPA 4).
- *
- * Valida la invitación con [InvitacionValidation]. Si es válida, navega a la
- * confirmación; si no, muestra el motivo de rechazo.
+ * Se asegura de que exista una sesión anónima en Supabase antes de continuar.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -42,7 +45,7 @@ fun IngresarCodigoScreen(
 ) {
     var codigo by remember { mutableStateOf("") }
     var error by remember { mutableStateOf<String?>(null) }
-
+    val scope = rememberCoroutineScope()
     Scaffold { innerPadding ->
         Column(
             modifier = Modifier
@@ -59,7 +62,6 @@ fun IngresarCodigoScreen(
                 text = "Ingresa el código de invitación que te dio el dueño del negocio.",
                 style = MaterialTheme.typography.bodyMedium
             )
-
             OutlinedTextField(
                 value = codigo,
                 onValueChange = { codigo = it.uppercase(); error = null },
@@ -68,7 +70,6 @@ fun IngresarCodigoScreen(
                 keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Characters),
                 modifier = Modifier.fillMaxWidth()
             )
-
             error?.let { mensaje ->
                 Text(
                     text = mensaje,
@@ -76,7 +77,6 @@ fun IngresarCodigoScreen(
                     style = MaterialTheme.typography.bodyMedium
                 )
             }
-
             Button(
                 onClick = {
                     val invitacion = InvitacionStore.buscarPorCodigo(codigo)
@@ -85,7 +85,19 @@ fun IngresarCodigoScreen(
                         System.currentTimeMillis()
                     )
                     when (motivo) {
-                        null -> onCodigoValido(invitacion!!)
+                        null -> scope.launch {
+                            // Aseguramos sesión de trabajador anónimo en Supabase.
+                            // La persistencia y creación de la Cuenta local la maneja 
+                            // CuentaStore al observar SupabaseAuthBridge.sesionActual.
+                            if (CuentaStore.sesionActual.value == null) {
+                                val anonRes = SupabaseAuthBridge.iniciarSesionTrabajadorAnonimo()
+                                if (anonRes.isFailure) {
+                                    error = "Error iniciando sesión anónima: ${anonRes.exceptionOrNull()?.message}"
+                                    return@launch
+                                }
+                            }
+                            onCodigoValido(invitacion!!)
+                        }
                         MotivoRechazo.NO_EXISTE -> error = "Código incorrecto. Intenta de nuevo."
                         MotivoRechazo.NO_PENDIENTE -> error = "Esta invitación ya fue usada."
                         MotivoRechazo.EXPIRADA -> error = "La invitación ha expirado."
@@ -96,9 +108,7 @@ fun IngresarCodigoScreen(
             ) {
                 Text(text = "Continuar")
             }
-
             Spacer(modifier = Modifier.height(8.dp))
-
             OutlinedButton(
                 onClick = onVolver,
                 modifier = Modifier.fillMaxWidth()

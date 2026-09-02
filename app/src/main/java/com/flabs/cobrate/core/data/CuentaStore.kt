@@ -33,80 +33,78 @@ object CuentaStore {
     private val _sesionActual = MutableStateFlow<Cuenta?>(null)
     val sesionActual: StateFlow<Cuenta?> = _sesionActual
 
-    // id -> hash de contraseña (protección mínima de desarrollo local).
+    // id -> hash de contraseña (LEGADO: ya no se usa para Supabase Auth).
     private val _hashes = mutableMapOf<String, String>()
 
     private var localStore: CuentaLocalStore? = null
-    private var sesionSegura: SesionSeguraStore? = null
 
     /**
-     * Inicializa el store con el contexto de la app, carga las cuentas
-     * persistidas y restaura la última sesión activa si existía. Llamar varias
-     * veces es seguro (solo inicializa una vez).
+     * Inicializa el store con el contexto de la app y carga las cuentas
+     * persistidas.
      *
-     * La sesión activa se lee de [SesionSeguraStore] (almacenamiento cifrado).
-     * Si aún no existe ahí pero sí en el DataStore viejo, se migra una sola vez.
+     * DECISIÓN CAPA 7b-2: SesionSeguraStore ya no es la fuente de verdad para
+     * la sesión activa. Ahora se sincroniza con SupabaseAuthBridge.sesionActual,
+     * ya que el SDK de Supabase maneja su propia persistencia segura de tokens.
      */
     fun init(context: Context) {
         val appContext = context.applicationContext
         if (localStore == null) {
             val store = CuentaLocalStore(appContext)
             localStore = store
-            val segura = SesionSeguraStore(appContext)
-            sesionSegura = segura
             scope.launch {
                 val dtos = store.leerUnaVez()
                 _cuentas.value = dtos.map { it.aModelo() }
                 dtos.forEach { _hashes[it.id] = it.hashPassword }
 
-                var sesionId = segura.leerSesionActiva()
-                if (sesionId == null) {
-                    // Migración única: si había una sesión activa en el DataStore
-                    // viejo, muévela al almacenamiento cifrado y elimínala de ahí.
-                    val sesionVieja = store.leerSesionActivaViejaYLimpiar()
-                    if (sesionVieja != null) {
-                        segura.guardarSesionActiva(sesionVieja)
-                        sesionId = sesionVieja
+                // Sincronizamos la sesión actual con Supabase.
+                SupabaseAuthBridge.sesionActual.collect { userInfo ->
+                    if (userInfo == null) {
+                        _sesionActual.value = null
+                    } else {
+                        val uid = userInfo.id
+                        var cuenta = _cuentas.value.find { it.id == uid }
+                        
+                        // Si la sesión existe en Supabase pero no tenemos la Cuenta local,
+                        // la creamos bajo demanda (ej. login en nuevo dispositivo).
+                        if (cuenta == null) {
+                            cuenta = Cuenta(
+                                id = uid,
+                                username = userInfo.email ?: "Usuario anónimo",
+                                correoVerificado = userInfo.email,
+                                ultimoAcceso = System.currentTimeMillis(),
+                                fechaCreacion = System.currentTimeMillis()
+                            )
+                            crear(cuenta, "")
+                        }
+                        _sesionActual.value = cuenta
                     }
-                }
-                if (sesionId != null) {
-                    _sesionActual.value = _cuentas.value.find { it.id == sesionId }
                 }
             }
         }
     }
 
     /**
-     * Crea (agrega) una cuenta nueva y la persiste, junto con su hash de
-     * contraseña. No valida unicidad: eso lo hace AuthViewModel antes.
+     * Crea (agrega) una cuenta nueva y la persiste.
      */
-    fun crear(cuenta: Cuenta, hashPassword: String) {
+    fun crear(cuenta: Cuenta, hashPassword: String = "") {
+        if (_cuentas.value.any { it.id == cuenta.id }) return
         _cuentas.value = _cuentas.value + cuenta
         _hashes[cuenta.id] = hashPassword
         persistir()
     }
 
-    /** Busca una cuenta por su username (case-sensitive). Null si no existe. */
-    fun buscarPorUsername(username: String): Cuenta? =
-        _cuentas.value.find { it.username == username }
+    /** Busca una cuenta por su id. */
+    fun buscarPorId(id: String): Cuenta? =
+        _cuentas.value.find { it.id == id }
 
-    /** Hash de contraseña de una cuenta por su id. Null si no existe. */
-    fun hashDe(cuentaId: String): String? = _hashes[cuentaId]
-
-    /** Establece la sesión activa y la persiste (cifrada) como última sesión. */
+    /** Establece la sesión activa (usado para forzar actualización inmediata si es necesario). */
     fun iniciarSesion(cuenta: Cuenta) {
         _sesionActual.value = cuenta
-        sesionSegura?.let { segura ->
-            runCatching { segura.guardarSesionActiva(cuenta.id) }
-        }
     }
 
-    /** Limpia la sesión activa (y su registro persistido cifrado). */
+    /** Limpia la sesión activa. */
     fun cerrarSesion() {
         _sesionActual.value = null
-        sesionSegura?.let { segura ->
-            runCatching { segura.limpiarSesion() }
-        }
     }
 
     private fun persistir() {
