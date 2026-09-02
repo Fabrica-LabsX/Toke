@@ -97,7 +97,7 @@ object CuentaStore {
             // Sincronizamos ambos en paralelo (o secuencial, pero sin bloquear el uno al otro)
             launch {
                 relacionRepo.relacionesDe(cuentaId).onSuccess { relaciones ->
-                    RelacionCuentaNegocioStore.sincronizar(relaciones)
+                    RelacionCuentaNegocioStore.sincronizar(cuentaId, relaciones)
                 }.onFailure {
                     android.util.Log.e("CuentaStore", "Error sincronizando relaciones: ${it.message}")
                 }

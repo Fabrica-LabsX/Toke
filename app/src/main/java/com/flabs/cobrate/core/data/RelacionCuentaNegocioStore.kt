@@ -73,11 +73,13 @@ object RelacionCuentaNegocioStore {
         _relaciones.value.filter { it.cuentaId == cuentaId }
 
     /**
-     * Sincroniza (reemplaza) las relaciones locales con las del servidor.
+     * Sincroniza (reemplaza) las relaciones locales con las del servidor,
+     * pero solo para el alcance de la cuenta indicada, preservando las demás.
      * CAPA 7d-2.
      */
-    fun sincronizar(nuevasRelaciones: List<RelacionCuentaNegocio>) {
-        _relaciones.value = nuevasRelaciones
+    fun sincronizar(cuentaIdSincronizada: String, nuevasRelaciones: List<RelacionCuentaNegocio>) {
+        val relacionesDeOtrasCuentas = _relaciones.value.filter { it.cuentaId != cuentaIdSincronizada }
+        _relaciones.value = relacionesDeOtrasCuentas + nuevasRelaciones
         persistir()
     }
 
