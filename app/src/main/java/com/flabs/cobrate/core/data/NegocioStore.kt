@@ -70,6 +70,15 @@ object NegocioStore {
     fun buscarPorId(negocioId: String): Negocio? =
         _negocios.value.find { it.id == negocioId }
 
+    /**
+     * Sincroniza (reemplaza) los negocios locales con los del servidor.
+     * CAPA 7d-2.
+     */
+    fun sincronizar(nuevosNegocios: List<Negocio>) {
+        _negocios.value = nuevosNegocios
+        persistir()
+    }
+
     private fun persistir() {
         localStore?.let { store ->
             val snapshot = _negocios.value

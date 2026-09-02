@@ -113,6 +113,8 @@ fun ConfirmarInvitacionScreen(
                             )
                             if (resRel.isSuccess) {
                                 InvitacionStore.marcarAceptada(invitacion.codigo).onSuccess {
+                                    // Sincronizamos datos inmediatamente para el trabajador.
+                                    CuentaStore.sincronizarDatos(cuentaId)
                                     onAceptada()
                                 }
                             }

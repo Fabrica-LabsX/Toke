@@ -38,6 +38,9 @@ object CuentaStore {
 
     private var localStore: CuentaLocalStore? = null
 
+    private val relacionRepo = RelacionCuentaNegocioRepository()
+    private val negocioRepo = NegocioRepository()
+
     /**
      * Inicializa el store con el contexto de la app y carga las cuentas
      * persistidas.
@@ -77,7 +80,33 @@ object CuentaStore {
                             crear(cuenta, "")
                         }
                         _sesionActual.value = cuenta
+                        // Disparamos sincronización de datos al detectar sesión.
+                        sincronizarDatos(uid)
                     }
+                }
+            }
+        }
+    }
+
+    /**
+     * Sincroniza Relaciones y Negocios desde Supabase para la cuenta indicada.
+     * Si falla, se conserva el estado local previo. CAPA 7d-2.
+     */
+    fun sincronizarDatos(cuentaId: String) {
+        scope.launch {
+            // Sincronizamos ambos en paralelo (o secuencial, pero sin bloquear el uno al otro)
+            launch {
+                relacionRepo.relacionesDe(cuentaId).onSuccess { relaciones ->
+                    RelacionCuentaNegocioStore.sincronizar(relaciones)
+                }.onFailure {
+                    android.util.Log.e("CuentaStore", "Error sincronizando relaciones: ${it.message}")
+                }
+            }
+            launch {
+                negocioRepo.obtenerNegociosDeCuenta(cuentaId).onSuccess { negocios ->
+                    NegocioStore.sincronizar(negocios)
+                }.onFailure {
+                    android.util.Log.e("CuentaStore", "Error sincronizando negocios: ${it.message}")
                 }
             }
         }

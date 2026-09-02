@@ -72,6 +72,15 @@ object RelacionCuentaNegocioStore {
     fun relacionesDe(cuentaId: String): List<RelacionCuentaNegocio> =
         _relaciones.value.filter { it.cuentaId == cuentaId }
 
+    /**
+     * Sincroniza (reemplaza) las relaciones locales con las del servidor.
+     * CAPA 7d-2.
+     */
+    fun sincronizar(nuevasRelaciones: List<RelacionCuentaNegocio>) {
+        _relaciones.value = nuevasRelaciones
+        persistir()
+    }
+
     private fun persistir() {
         localStore?.let { store ->
             val snapshot = _relaciones.value
