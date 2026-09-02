@@ -1,88 +1,83 @@
 package com.flabs.cobrate.features.auth
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.flabs.cobrate.core.data.CuentaStore
-import com.flabs.cobrate.core.logic.AuthValidation
 import com.flabs.cobrate.core.model.Cuenta
+import com.flabs.cobrate.core.data.SupabaseAuthBridge
 import kotlinx.coroutines.flow.StateFlow
-import java.util.UUID
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
+import kotlin.Result
 
 /**
- * ViewModel de autenticación local (CAPA 2 de TOKE V1), sin backend.
- *
- * Expone la sesión actual ([sesionActual]) leyendo de [CuentaStore], y las
- * operaciones crearCuenta / iniciarSesion / cerrarSesion.
- *
- * No contiene lógica de backend: la validación la resuelve [AuthValidation]
- * (funciones puras) y la unicidad de username la garantiza [CuentaStore].
+ * ViewModel de autenticación (CAPA 7b-2).
+ * Implementa el login real con Supabase Auth (Dueño vía email+contraseña
+ * y Trabajador vía sesión anónima).
  */
 class AuthViewModel : ViewModel() {
 
     /** Cuenta actualmente logueada (null si no hay sesión activa). */
     val sesionActual: StateFlow<Cuenta?> = CuentaStore.sesionActual
 
-    /**
-     * Crea una cuenta nueva y queda logueado automáticamente.
-     *
-     * Valida username/contraseña, verifica que el username no exista, crea la
-     * [Cuenta], la persiste en [CuentaStore] y establece la sesión.
-     */
-    fun crearCuenta(username: String, password: String): Result<Unit> {
-        val usernameLimpio = username.trim()
-        if (!AuthValidation.usernameValido(usernameLimpio)) {
-            return Result.failure(
-                IllegalArgumentException(
-                    "El nombre de usuario debe tener al menos 3 caracteres y no contener espacios."
-                )
-            )
-        }
-        if (!AuthValidation.passwordValida(password)) {
-            return Result.failure(
-                IllegalArgumentException(
-                    "La contraseña debe tener al menos ${AuthValidation.MIN_LONGITUD_PASSWORD} caracteres."
-                )
-            )
-        }
-        if (CuentaStore.buscarPorUsername(usernameLimpio) != null) {
-            return Result.failure(
-                IllegalArgumentException("Ese nombre de usuario ya existe.")
-            )
-        }
-
+    /** Crea una cuenta Dueño en Supabase y la persiste localmente. */
+    suspend fun crearCuenta(email: String, password: String): Result<Unit> {
+        // 1. Llama a Supabase para crear la cuenta
+        val createRes = SupabaseAuthBridge.crearCuentaDueño(email, password)
+        if (createRes.isFailure) return createRes
+        // 2. Esperamos la sesión activa
+        val userInfo = SupabaseAuthBridge.sesionActual.first()
+        if (userInfo == null) return Result.failure(Exception("No active Supabase session después de crear cuenta"))
+        val uid = userInfo.id
+        val username = email
+        val correoVerificado = userInfo.email // email is present after signup
         val cuenta = Cuenta(
-            id = UUID.randomUUID().toString(),
-            username = usernameLimpio,
+            id = uid,
+            username = username,
+            correoVerificado = correoVerificado,
+            telefonoVerificado = null,
+            ultimoAcceso = System.currentTimeMillis(),
             fechaCreacion = System.currentTimeMillis()
         )
-        val hash = AuthValidation.hashPassword(password)
-
-        CuentaStore.crear(cuenta, hash)
+        val hashDummy = ""
+        CuentaStore.crear(cuenta, hashDummy)
         CuentaStore.iniciarSesion(cuenta)
         return Result.success(Unit)
     }
 
-    /**
-     * Inicia sesión con username/contraseña si coinciden con lo guardado.
-     */
-    fun iniciarSesion(username: String, password: String): Result<Unit> {
-        val usernameLimpio = username.trim()
-        val cuenta = CuentaStore.buscarPorUsername(usernameLimpio)
-        val hashGuardado = cuenta?.let { CuentaStore.hashDe(it.id) }
-
-        if (cuenta == null || hashGuardado == null ||
-            hashGuardado != AuthValidation.hashPassword(password)
-        ) {
-            return Result.failure(
-                IllegalArgumentException("Usuario o contraseña incorrectos.")
-            )
+    /** Inicia sesión de Dueño en Supabase y sincroniza la Cuenta local. */
+    suspend fun iniciarSesion(email: String, password: String): Result<Unit> {
+        val siginRes = SupabaseAuthBridge.iniciarSesionDueño(email, password)
+        if (siginRes.isFailure) return siginRes
+        val userInfo = SupabaseAuthBridge.sesionActual.first()
+        if (userInfo == null) return Result.failure(Exception("No active Supabase session después de iniciar sesión"))
+        val uid = userInfo.id
+        val correo = userInfo.email ?: email
+        val username = email
+        val existing = CuentaStore.cuentas.value.find { it.id == uid }
+        if (existing != null) {
+            CuentaStore.iniciarSesion(existing)
+            return Result.success(Unit)
         }
-
+        val cuenta = Cuenta(
+            id = uid,
+            username = username,
+            correoVerificado = correo,
+            telefonoVerificado = null,
+            ultimoAcceso = System.currentTimeMillis(),
+            fechaCreacion = System.currentTimeMillis()
+        )
+        val hashDummy = ""
+        CuentaStore.crear(cuenta, hashDummy)
         CuentaStore.iniciarSesion(cuenta)
         return Result.success(Unit)
     }
 
-    /** Cierra la sesión actual. */
+    /** Cierra la sesión local y en Supabase. */
     fun cerrarSesion() {
         CuentaStore.cerrarSesion()
+        viewModelScope.launch {
+            SupabaseAuthBridge.cerrarSesionSupabase()
+        }
     }
 }
