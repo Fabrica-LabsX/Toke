@@ -48,7 +48,7 @@ internal class OperacionRepository {
      * en el historial.
      */
     suspend fun actualizar(operacion: Operacion): Result<Operacion> = runCatching {
-        val dto = operacion.toDto()
+        val dto = operacion.toUpdateDto()
         
         postgrest.from("operaciones").update(dto) {
             filter { eq("id", operacion.id) }
@@ -131,6 +131,18 @@ internal class OperacionRepository {
         @SerialName("estado") val estado: EstadoOperacion,
         @SerialName("timestamp") val timestamp: Long
     )
+
+    @Serializable
+    internal data class OperacionUpdateDto(
+        @SerialName("negocio_id") val negocioId: String,
+        @SerialName("trabajador_asignado_id") val trabajadorAsignadoId: String?,
+        @SerialName("monto") val monto: Double,
+        @SerialName("estado") val estado: EstadoOperacion,
+        @SerialName("origen_tipo") val origenTipo: String,
+        @SerialName("origen_evento_id") val origenEventoId: String?,
+        @SerialName("origen_trabajador_id") val origenTrabajadorId: String?,
+        @SerialName("fecha_hora") val fechaHora: Long
+    )
 }
 
 // ---- Funciones de Mapeo (Domain <-> DTO) ----
@@ -151,6 +163,20 @@ private fun Operacion.toDto(fechaCreacion: Long? = null) = OperacionRepository.O
     origenTrabajadorId = null,
     fechaHora = fechaHora,
     fechaCreacion = fechaCreacion
+)
+
+private fun Operacion.toUpdateDto() = OperacionRepository.OperacionUpdateDto(
+    negocioId = negocioId,
+    trabajadorAsignadoId = trabajadorAsignadoId,
+    monto = monto,
+    estado = estado,
+    origenTipo = when (origen) {
+        is OrigenOperacion.Detectada -> "DETECTADA"
+        OrigenOperacion.VaAPagar -> "VA_A_PAGAR"
+    },
+    origenEventoId = (origen as? OrigenOperacion.Detectada)?.eventoId,
+    origenTrabajadorId = null,
+    fechaHora = fechaHora
 )
 
 private fun CambioDeEstado.toDto(operacionId: String) = OperacionRepository.CambioDeEstadoDto(
