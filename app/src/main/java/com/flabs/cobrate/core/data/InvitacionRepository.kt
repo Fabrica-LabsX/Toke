@@ -23,7 +23,7 @@ internal class InvitacionRepository {
             codigo = codigo,
             negocioId = negocioId,
             nombrePropuesto = nombrePropuesto,
-            metodo = "APP", // Valor por defecto
+            metodo = "CODIGO", // Valor correcto para la tabla
             estado = EstadoInvitacion.PENDIENTE,
             expiracion = expiracion,
             fechaCreacion = System.currentTimeMillis()

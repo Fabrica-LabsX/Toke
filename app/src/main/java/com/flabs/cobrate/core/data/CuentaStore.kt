@@ -40,6 +40,7 @@ object CuentaStore {
 
     private val relacionRepo = RelacionCuentaNegocioRepository()
     private val negocioRepo = NegocioRepository()
+    private val cuentaRepo = CuentaRepository()
 
     /**
      * Inicializa el store con el contexto de la app y carga las cuentas
@@ -80,8 +81,19 @@ object CuentaStore {
                             crear(cuenta, "")
                         }
                         _sesionActual.value = cuenta
-                        // Disparamos sincronización de datos al detectar sesión.
-                        sincronizarDatos(uid)
+
+                        // CAPA 7d-4: Sincronizamos la cuenta con la tabla public.cuentas
+                        // antes de disparar la sincronización de datos.
+                        scope.launch {
+                            cuentaRepo.upsert(cuenta)
+                                .onFailure {
+                                    android.util.Log.e("CuentaStore", "Error al sincronizar cuenta en Supabase: ${it.message}")
+                                }
+                                .onSuccess {
+                                    // Una vez asegurada la cuenta en Supabase, sincronizamos sus datos.
+                                    sincronizarDatos(uid)
+                                }
+                        }
                     }
                 }
             }
