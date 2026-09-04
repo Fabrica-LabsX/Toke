@@ -32,6 +32,10 @@ import com.flabs.cobrate.core.model.EstadoOperacion
 import com.flabs.cobrate.core.model.ModoVoz
 import com.flabs.cobrate.core.model.OrigenOperacion
 import com.flabs.cobrate.core.model.CambioDeEstado
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 
 /**
  * NotificationListenerService de TOKE (CAPA 6b).
@@ -45,6 +49,8 @@ import com.flabs.cobrate.core.model.CambioDeEstado
  * en capas posteriores (6c+).
  */
 class TokeNotificationListenerService : NotificationListenerService() {
+
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     // CAPA 14+: speaker de voz reutilizado entre notificaciones. Se crea de
     // forma perezosa con el context de la app y se conserva como propiedad del
@@ -234,8 +240,9 @@ class TokeNotificationListenerService : NotificationListenerService() {
                     nuevoEstado = EstadoOperacion.ASIGNADA,
                     timestamp = System.currentTimeMillis()
                 )
-                InMemoryOperationStore.actualizar { lista ->
-                    lista.map { if (it.id == coincidencia.id) operacionFinal else it }
+                scope.launch {
+                    InMemoryOperationStore.actualizar(operacionFinal)
+                        .onFailure { Log.e(TAG, "Error actualizando coincidencia: ${it.message}") }
                 }
             } else {
                 // SIN coincidencia: pago inesperado, flujo normal de CAPA 7/8.
@@ -264,7 +271,10 @@ class TokeNotificationListenerService : NotificationListenerService() {
                             it.estado == EstadoRelacion.ACTIVA
                     }
                 operacionFinal = AssignmentEngine.asignarSiCorresponde(operacion, trabajadoresActivos)
-                InMemoryOperationStore.agregar(operacionFinal)
+                scope.launch {
+                    InMemoryOperationStore.agregar(operacionFinal)
+                        .onFailure { Log.e(TAG, "Error creando operación detectada: ${it.message}") }
+                }
             }
 
             // CAPA 13: notificación interna local según el resultado (nueva o

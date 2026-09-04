@@ -1,6 +1,7 @@
 package com.flabs.cobrate.features.worker
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.flabs.cobrate.core.data.InMemoryOperationStore
 import com.flabs.cobrate.core.logic.PaymentConfirmation
 import com.flabs.cobrate.core.model.EstadoOperacion
@@ -8,6 +9,7 @@ import com.flabs.cobrate.core.model.Operacion
 import com.flabs.cobrate.core.model.OrigenOperacion
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 import java.util.UUID
 
 /**
@@ -27,6 +29,11 @@ class WorkerViewModel : ViewModel() {
 
     // Lee de la fuente compartida en memoria.
     val operaciones: StateFlow<List<Operacion>> = InMemoryOperationStore.operaciones
+
+    private val _error = MutableStateFlow<String?>(null)
+    val error: StateFlow<String?> = _error
+
+    fun limpiarError() { _error.value = null }
 
     // ---------------------------------------------------------------------
     // Identidad simulada de la sesión del trabajador.
@@ -65,7 +72,10 @@ class WorkerViewModel : ViewModel() {
             origen = OrigenOperacion.VaAPagar,
             fechaHora = System.currentTimeMillis()
         )
-        InMemoryOperationStore.agregar(nueva)
+        viewModelScope.launch {
+            InMemoryOperationStore.agregar(nueva)
+                .onFailure { _error.value = "Error al crear: ${it.message}" }
+        }
     }
 
     /**
@@ -79,8 +89,9 @@ class WorkerViewModel : ViewModel() {
             operacion = op,
             timestamp = System.currentTimeMillis()
         )
-        InMemoryOperationStore.actualizar { lista ->
-            lista.map { if (it.id == op.id) confirmado else it }
+        viewModelScope.launch {
+            InMemoryOperationStore.actualizar(confirmado)
+                .onFailure { _error.value = "Error al confirmar: ${it.message}" }
         }
     }
 }

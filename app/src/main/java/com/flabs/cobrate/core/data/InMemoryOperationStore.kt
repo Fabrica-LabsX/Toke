@@ -30,6 +30,8 @@ object InMemoryOperationStore {
     // Se inicializa con el contexto de la Application la primera vez que se llama a init().
     private var localStore: OperationLocalStore? = null
 
+    private val repository = OperacionRepository()
+
     /**
      * Inicializa el store con el contexto de la app y carga las operaciones
      * persistidas. Llamar varias veces es seguro (solo inicializa una vez).
@@ -48,19 +50,36 @@ object InMemoryOperationStore {
         }
     }
 
-    /** Agrega una operación al final de la lista y la persiste. */
-    fun agregar(operacion: Operacion) {
-        _operaciones.value = _operaciones.value + operacion
-        persistir()
+    /** 
+     * Agrega una operación en Supabase y, si tiene éxito, en la lista local.
+     * DECISIÓN CAPA 7e-2: Si falla en Supabase, la operación no se guarda localmente.
+     */
+    suspend fun agregar(operacion: Operacion): Result<Unit> {
+        val result = repository.crear(operacion)
+        if (result.isSuccess) {
+            val creada = result.getOrThrow()
+            _operaciones.value = _operaciones.value + creada
+            persistir()
+            return Result.success(Unit)
+        }
+        return Result.failure(result.exceptionOrNull() ?: Exception("Error al crear operación en Supabase"))
     }
 
     /**
-     * Aplica una transformación a la lista actual (p. ej. reemplazar una
-     * operación por su versión actualizada) y persiste el resultado.
+     * Actualiza una operación en Supabase y, si tiene éxito, en la lista local.
+     * DECISIÓN CAPA 7e-2: Todo o nada.
      */
-    fun actualizar(transform: (List<Operacion>) -> List<Operacion>) {
-        _operaciones.value = transform(_operaciones.value)
-        persistir()
+    suspend fun actualizar(operacion: Operacion): Result<Unit> {
+        val result = repository.actualizar(operacion)
+        if (result.isSuccess) {
+            val actualizada = result.getOrThrow()
+            _operaciones.value = _operaciones.value.map {
+                if (it.id == actualizada.id) actualizada else it
+            }
+            persistir()
+            return Result.success(Unit)
+        }
+        return Result.failure(result.exceptionOrNull() ?: Exception("Error al actualizar operación en Supabase"))
     }
 
     private fun persistir() {
