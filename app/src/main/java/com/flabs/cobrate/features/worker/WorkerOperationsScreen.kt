@@ -13,8 +13,11 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
@@ -32,13 +35,24 @@ fun WorkerOperationsScreen(
 ) {
     val operaciones by workerViewModel.operaciones.collectAsState()
     val identidad by workerViewModel.identidadTrabajador.collectAsState()
+    val error by workerViewModel.error.collectAsState()
+    val snackbarHostState = remember { SnackbarHostState() }
 
-    // Solo muestra las operaciones de la sesión actual (identidad simulada).
-    val operacionesDelTrabajador = remember(operaciones, identidad) {
-        operaciones.filter { it.trabajadorAsignadoId == identidad }
+    LaunchedEffect(error) {
+        error?.let {
+            snackbarHostState.showSnackbar(it)
+            workerViewModel.limpiarError()
+        }
     }
 
-    Scaffold { innerPadding ->
+    // Solo muestra las operaciones de la sesión actual O las que no tienen dueño (SIN_ASIGNAR).
+    val operacionesDelTrabajador = remember(operaciones, identidad) {
+        operaciones.filter { it.trabajadorAsignadoId == identidad || it.estado == EstadoOperacion.SIN_ASIGNAR }
+    }
+
+    Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) }
+    ) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -58,13 +72,16 @@ fun WorkerOperationsScreen(
                     items(operacionesDelTrabajador) { operacion ->
                         OperacionCard(
                             operacion = operacion,
-                            accion = if (operacion.estado == EstadoOperacion.ASIGNADA) {
-                                OperacionCardAccion(
+                            accion = when (operacion.estado) {
+                                EstadoOperacion.ASIGNADA -> OperacionCardAccion(
                                     etiqueta = "Marcar como pagado",
                                     onClick = { workerViewModel.confirmarPago(operacion.id) }
                                 )
-                            } else {
-                                null
+                                EstadoOperacion.SIN_ASIGNAR -> OperacionCardAccion(
+                                    etiqueta = "Asignarme",
+                                    onClick = { workerViewModel.reclamarOperacion(operacion.id) }
+                                )
+                                else -> null
                             }
                         )
                     }

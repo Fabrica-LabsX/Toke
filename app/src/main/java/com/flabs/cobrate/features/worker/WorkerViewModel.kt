@@ -3,6 +3,7 @@ package com.flabs.cobrate.features.worker
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.flabs.cobrate.core.data.InMemoryOperationStore
+import com.flabs.cobrate.core.data.OperacionRepository
 import com.flabs.cobrate.core.logic.PaymentConfirmation
 import com.flabs.cobrate.core.model.EstadoOperacion
 import com.flabs.cobrate.core.model.Operacion
@@ -92,6 +93,26 @@ class WorkerViewModel : ViewModel() {
         viewModelScope.launch {
             InMemoryOperationStore.actualizar(confirmado)
                 .onFailure { _error.value = "Error al confirmar: ${it.message}" }
+        }
+    }
+
+    /**
+     * Intenta reclamar una operación SIN_ASIGNAR para el trabajador actual.
+     * CAPA 9-2.
+     */
+    fun reclamarOperacion(operacionId: String) {
+        viewModelScope.launch {
+            OperacionRepository().reclamar(operacionId)
+                .onSuccess { resultado ->
+                    if (resultado.exito) {
+                        InMemoryOperationStore.refrescarUna(operacionId)
+                    } else {
+                        _error.value = resultado.mensaje
+                    }
+                }
+                .onFailure {
+                    _error.value = "Error de red al reclamar: ${it.message}"
+                }
         }
     }
 }

@@ -5,6 +5,7 @@ import com.flabs.cobrate.core.model.EstadoOperacion
 import com.flabs.cobrate.core.model.Operacion
 import com.flabs.cobrate.core.model.OrigenOperacion
 import io.github.jan.supabase.postgrest.postgrest
+import io.github.jan.supabase.postgrest.rpc
 import io.github.jan.supabase.postgrest.query.Order
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -109,6 +110,18 @@ internal class OperacionRepository {
         }
     }
 
+    /**
+     * Invoca la función RPC 'reclamar_operacion' para asignar una operación 
+     * SIN_ASIGNAR al trabajador actual de forma atómica.
+     * CAPA 9-2.
+     */
+    suspend fun reclamar(operacionId: String): Result<ResultadoReclamo> = runCatching {
+        postgrest.rpc(
+            function = "reclamar_operacion",
+            parameters = mapOf("operacion_id" to operacionId)
+        ).decodeSingle<ResultadoReclamo>()
+    }
+
     // ---- DTOs de Infraestructura (espejo de las tablas de Supabase) ----
 
     @Serializable
@@ -144,6 +157,13 @@ internal class OperacionRepository {
         @SerialName("fecha_hora") val fechaHora: Long
     )
 }
+
+/** Resultado de la operación atómica de reclamo en el servidor. */
+@Serializable
+internal data class ResultadoReclamo(
+    @SerialName("exito") val exito: Boolean,
+    @SerialName("mensaje") val mensaje: String
+)
 
 // ---- Funciones de Mapeo (Domain <-> DTO) ----
 

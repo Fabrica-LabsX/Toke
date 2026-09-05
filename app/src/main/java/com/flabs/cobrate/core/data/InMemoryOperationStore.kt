@@ -93,6 +93,22 @@ object InMemoryOperationStore {
         persistir()
     }
 
+    /**
+     * Refresca la información de UNA sola operación desde el servidor.
+     * Útil tras una operación atómica en el backend (ej. RPC reclamar).
+     * CAPA 9-2.
+     */
+    suspend fun refrescarUna(operacionId: String) {
+        repository.obtenerPorId(operacionId).onSuccess { actualizada ->
+            if (actualizada != null) {
+                _operaciones.value = _operaciones.value.map { 
+                    if (it.id == operacionId) actualizada else it 
+                }
+                persistir()
+            }
+        }
+    }
+
     private fun persistir() {
         localStore?.let { store ->
             val snapshot = _operaciones.value
