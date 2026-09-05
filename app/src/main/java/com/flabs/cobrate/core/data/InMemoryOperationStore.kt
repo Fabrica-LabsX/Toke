@@ -82,6 +82,17 @@ object InMemoryOperationStore {
         return Result.failure(result.exceptionOrNull() ?: Exception("Error al actualizar operación en Supabase"))
     }
 
+    /**
+     * Sincroniza (reemplaza) las operaciones locales con las del servidor,
+     * pero solo para el alcance del negocio indicado, preservando las demás.
+     * CAPA 7e-3.
+     */
+    fun sincronizar(negocioIdSincronizado: String, nuevasOperaciones: List<Operacion>) {
+        val operacionesDeOtrosNegocios = _operaciones.value.filter { it.negocioId != negocioIdSincronizado }
+        _operaciones.value = operacionesDeOtrosNegocios + nuevasOperaciones
+        persistir()
+    }
+
     private fun persistir() {
         localStore?.let { store ->
             val snapshot = _operaciones.value

@@ -41,6 +41,7 @@ object CuentaStore {
     private val relacionRepo = RelacionCuentaNegocioRepository()
     private val negocioRepo = NegocioRepository()
     private val cuentaRepo = CuentaRepository()
+    private val operacionRepo = OperacionRepository()
 
     /**
      * Inicializa el store con el contexto de la app y carga las cuentas
@@ -110,6 +111,18 @@ object CuentaStore {
             launch {
                 relacionRepo.relacionesDe(cuentaId).onSuccess { relaciones ->
                     RelacionCuentaNegocioStore.sincronizar(cuentaId, relaciones)
+
+                    // CAPA 7e-3: Sincronizar operaciones de cada negocio asociado
+                    val negocioIds = relaciones.map { it.negocioId }.distinct()
+                    negocioIds.forEach { negocioId ->
+                        launch {
+                            operacionRepo.obtenerDelNegocio(negocioId).onSuccess { operaciones ->
+                                InMemoryOperationStore.sincronizar(negocioId, operaciones)
+                            }.onFailure {
+                                android.util.Log.e("CuentaStore", "Error sincronizando operaciones del negocio $negocioId: ${it.message}")
+                            }
+                        }
+                    }
                 }.onFailure {
                     android.util.Log.e("CuentaStore", "Error sincronizando relaciones: ${it.message}")
                 }
