@@ -242,6 +242,7 @@ class TokeNotificationListenerService : NotificationListenerService() {
                 )
                 scope.launch {
                     InMemoryOperationStore.actualizar(operacionFinal)
+                        .onSuccess { notificarResultado(operacionFinal) }
                         .onFailure { Log.e(TAG, "Error actualizando coincidencia: ${it.message}") }
                 }
             } else {
@@ -273,60 +274,8 @@ class TokeNotificationListenerService : NotificationListenerService() {
                 operacionFinal = AssignmentEngine.asignarSiCorresponde(operacion, trabajadoresActivos)
                 scope.launch {
                     InMemoryOperationStore.agregar(operacionFinal)
+                        .onSuccess { notificarResultado(operacionFinal) }
                         .onFailure { Log.e(TAG, "Error creando operación detectada: ${it.message}") }
-                }
-            }
-
-            // CAPA 13: notificación interna local según el resultado (nueva o
-            // actualizada). El modo cauteloso solo se consulta cuando
-            // ConfiguracionDeVozStore es accesible de forma segura; de lo
-            // contrario se usa false (la integración con voz B2 resolverá esto
-            // sin forzar la consulta aquí). Lógica única, compartida por los dos
-            // caminos, sin duplicarse.
-            val modoCauteloso = consultarModoCauteloso()
-            when (operacionFinal.estado) {
-                EstadoOperacion.ASIGNADA -> {
-                    val contenido = NotificacionesInternas.notificacionPagoAsignado(monto, modoCauteloso)
-                    AndroidNotifier.mostrar(this, contenido.titulo, contenido.texto, NOTIF_PAGO_ASIGNADO)
-                    Log.d(TAG, "Notificación interna: pago asignado")
-                }
-                EstadoOperacion.SIN_ASIGNAR -> {
-                    val contenido = NotificacionesInternas.notificacionPagoSinAsignar(monto, modoCauteloso)
-                    AndroidNotifier.mostrar(this, contenido.titulo, contenido.texto, NOTIF_PAGO_SIN_ASIGNAR)
-                    Log.d(TAG, "Notificación interna: pago sin asignar")
-                }
-                else -> {
-                    // Único otro estado posible aquí (no se emite notificación).
-                    Log.d(TAG, "Operación creada sin notificación interna (estado ${operacionFinal.estado})")
-                }
-            }
-
-            // CAPA 14+: integración de voz y vibración en el flujo real de
-            // confirmación de pago. Se disparan SOLO para los estados que
-            // representan una confirmación de pago al estilo trabajador
-            // (ASIGNADA/SIN_ASIGNAR). La "alerta al Dueño por método no
-            // configurado" NO se anuncia ni vibra: es información sensible de
-            // negocio, no una confirmación de pago para el trabajador, y se
-            // trata de forma exclusivamente visual/notificación.
-            if (operacionFinal.estado == EstadoOperacion.ASIGNADA ||
-                operacionFinal.estado == EstadoOperacion.SIN_ASIGNAR
-            ) {
-                // Vibración: configuración INDEPENDIENTE de la voz; vibra si
-                // está activada, haya o no voz.
-                val config = ConfiguracionDeVozStore.configuracion.value
-                if (config.vibrarAlAnunciar) {
-                    vibrar(applicationContext)
-                    Log.d(TAG, "Vibración al anunciar pago")
-                }
-
-                // Voz: solo si la configuración está activada. TextToSpeech
-                // puede no estar disponible en el dispositivo; en ese caso
-                // TtsSpeaker.hablar() no hace nada (igual que en la pantalla
-                // de configuración), retomando en silencio.
-                if (config.activada) {
-                    val frase = VoicePhraseBuilder.construirFrase(config, monto)
-                    ttsSpeaker.hablar(frase, config.velocidad)
-                    Log.d(TAG, "Voz de confirmación de pago")
                 }
             }
         } else {
@@ -358,6 +307,49 @@ class TokeNotificationListenerService : NotificationListenerService() {
         // ConfiguracionDeVozStore.configuracion es una StateFlow pública; leer
         // .value es seguro incluso sin init previo (usa POR_DEFECTO).
         return ConfiguracionDeVozStore.configuracion.value.modo == ModoVoz.CAUTELOSO
+    }
+
+    /**
+     * CAPA 7e-2 fix: extrae la lógica de notificación (interna, voz, vibración)
+     * para dispararla solo después de confirmar que la operación se persistió
+     * con éxito en el servidor.
+     */
+    private fun notificarResultado(operacionFinal: Operacion) {
+        val monto = operacionFinal.monto
+        val modoCauteloso = consultarModoCauteloso()
+
+        // CAPA 13: notificación interna local.
+        when (operacionFinal.estado) {
+            EstadoOperacion.ASIGNADA -> {
+                val contenido = NotificacionesInternas.notificacionPagoAsignado(monto, modoCauteloso)
+                AndroidNotifier.mostrar(this, contenido.titulo, contenido.texto, NOTIF_PAGO_ASIGNADO)
+                Log.d(TAG, "Notificación interna: pago asignado")
+            }
+            EstadoOperacion.SIN_ASIGNAR -> {
+                val contenido = NotificacionesInternas.notificacionPagoSinAsignar(monto, modoCauteloso)
+                AndroidNotifier.mostrar(this, contenido.titulo, contenido.texto, NOTIF_PAGO_SIN_ASIGNAR)
+                Log.d(TAG, "Notificación interna: pago sin asignar")
+            }
+            else -> {
+                Log.d(TAG, "Operación persistida sin notificación interna (estado ${operacionFinal.estado})")
+            }
+        }
+
+        // CAPA 14+: voz y vibración.
+        if (operacionFinal.estado == EstadoOperacion.ASIGNADA ||
+            operacionFinal.estado == EstadoOperacion.SIN_ASIGNAR
+        ) {
+            val config = ConfiguracionDeVozStore.configuracion.value
+            if (config.vibrarAlAnunciar) {
+                vibrar(applicationContext)
+                Log.d(TAG, "Vibración al anunciar pago")
+            }
+            if (config.activada) {
+                val frase = VoicePhraseBuilder.construirFrase(config, monto)
+                ttsSpeaker.hablar(frase, config.velocidad)
+                Log.d(TAG, "Voz de confirmación de pago")
+            }
+        }
     }
 
     /**
