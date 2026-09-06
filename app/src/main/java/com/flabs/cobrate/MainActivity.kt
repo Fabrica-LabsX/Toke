@@ -63,6 +63,7 @@ import com.flabs.cobrate.features.business.PaymentMethodsScreen
 import com.flabs.cobrate.features.permisos.DiagnosticoPermisosScreen
 import com.flabs.cobrate.features.worker.PayScreen
 import com.flabs.cobrate.features.worker.WorkerOperationsScreen
+import com.flabs.cobrate.features.worker.EncuentraMiPedidoScreen
 import com.flabs.cobrate.features.worker.WorkerViewModel
 import com.flabs.cobrate.ui.theme.CobrateTheme
 
@@ -103,6 +104,7 @@ private object Routes {
     const val OPERACIONES_TRABAJADOR = "operaciones_trabajador"
     const val SELECCION_IDENTIDAD = "seleccion_identidad"
     const val PAGAR = "pagar"
+    const val ENCUENTRA_PEDIDO = "encuentra_pedido"
 
     // Flujo Dueño.
     const val PANEL_DUENO = "panel_dueno"
@@ -249,6 +251,9 @@ fun CobrateApp() {
                 onVaAPagar = {
                     navController.navigate(Routes.PAGAR)
                 },
+                onEncontrarPedido = {
+                    navController.navigate(Routes.ENCUENTRA_PEDIDO)
+                },
                 onCerrarSesion = { authViewModel.cerrarSesion() }
             )
         }
@@ -256,6 +261,15 @@ fun CobrateApp() {
         composable(Routes.PAGAR) {
             PayScreen(
                 workerViewModel = workerViewModel,
+                onBack = {
+                    navController.popBackStack()
+                }
+            )
+        }
+
+        composable(Routes.ENCUENTRA_PEDIDO) {
+            EncuentraMiPedidoScreen(
+                viewModel = workerViewModel,
                 onBack = {
                     navController.popBackStack()
                 }

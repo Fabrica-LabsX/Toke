@@ -31,6 +31,7 @@ import com.flabs.cobrate.core.model.EstadoOperacion
 fun WorkerOperationsScreen(
     workerViewModel: WorkerViewModel,
     onVaAPagar: () -> Unit,
+    onEncontrarPedido: () -> Unit,
     onCerrarSesion: () -> Unit
 ) {
     val operaciones by workerViewModel.operaciones.collectAsState()
@@ -94,6 +95,14 @@ fun WorkerOperationsScreen(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(text = "¡Voy a cobrar!")
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+            OutlinedButton(
+                onClick = onEncontrarPedido,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(text = "Encuentra mi pedido")
             }
 
             Spacer(modifier = Modifier.height(16.dp))

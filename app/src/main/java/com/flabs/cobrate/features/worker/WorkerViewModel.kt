@@ -115,4 +115,26 @@ class WorkerViewModel : ViewModel() {
                 }
         }
     }
+
+    /**
+     * Filtra las operaciones SIN_ASIGNAR que podrían corresponder a un monto
+     * ingresado por el trabajador.
+     *
+     * MARGEN DE TOLERANCIA (CAPA 12): se permite un margen de ±S/0.50 para
+     * cubrir posibles redondeos de comisiones (p. ej. en Plin/Yape de montos
+     * pequeños con céntimos) o errores de dedo mínimos al ingresar el monto.
+     * Si el monto es null, devuelve todas las candidatas sin filtrar.
+     */
+    fun buscarCandidatas(monto: Double?, operacionesSinAsignar: List<Operacion>): List<Operacion> {
+        if (monto == null) return operacionesSinAsignar
+
+        val margen = 0.50
+        return operacionesSinAsignar.filter { op ->
+            val diferencia = Math.abs(op.monto - monto)
+            diferencia <= margen
+        }.sortedBy { op ->
+            // Prioriza coincidencias exactas arriba.
+            Math.abs(op.monto - monto)
+        }
+    }
 }
