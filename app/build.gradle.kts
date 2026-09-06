@@ -65,12 +65,12 @@ dependencies {
     implementation(libs.lifecycleRuntimeCompose)
     implementation(libs.datastorePreferences)
     implementation(libs.androidx.security.crypto)
-    implementation(libs.kotlinxSerializationJson)
 
     // Supabase SDK (solo plomería, sin uso todavía)
     implementation(platform(libs.supabaseBom))
     implementation(libs.supabasePostgrest)
     implementation(libs.supabaseAuth)
+    implementation(libs.supabaseRealtime)
     implementation(libs.ktorClientAndroid)
     implementation(libs.kotlinxSerializationJson)
     testImplementation(libs.junit)

@@ -5,6 +5,7 @@ import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.createSupabaseClient
 import io.github.jan.supabase.auth.Auth
 import io.github.jan.supabase.postgrest.Postgrest
+import io.github.jan.supabase.realtime.Realtime
 
 /**
  * Proveedor central del cliente de Supabase.
@@ -25,6 +26,7 @@ object SupabaseClientProvider {
         ) {
             install(Postgrest)
             install(Auth)
+            install(Realtime)
         }
     }
 
