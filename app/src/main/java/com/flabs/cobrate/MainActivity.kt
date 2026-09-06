@@ -39,7 +39,6 @@ import com.flabs.cobrate.core.data.EstadoServiciosStore
 import com.flabs.cobrate.core.data.InvitacionStore
 import com.flabs.cobrate.core.data.NegocioStore
 import com.flabs.cobrate.core.data.RelacionCuentaNegocioStore
-import com.flabs.cobrate.core.data.TrabajadorStore
 import com.flabs.cobrate.core.logic.RolEfectivo
 import com.flabs.cobrate.core.model.EstadoTrabajador
 import com.flabs.cobrate.core.model.Negocio
@@ -102,7 +101,6 @@ private object Routes {
 
     // Flujo Trabajador.
     const val OPERACIONES_TRABAJADOR = "operaciones_trabajador"
-    const val SELECCION_IDENTIDAD = "seleccion_identidad"
     const val PAGAR = "pagar"
     const val ENCUENTRA_PEDIDO = "encuentra_pedido"
 
@@ -181,16 +179,7 @@ fun CobrateApp() {
                     navController.navigate(Routes.PANEL_DUENO)
                 },
                 onEntrarComoTrabajador = {
-                    val activos = TrabajadorStore.trabajadores.value
-                        .filter { it.estado == EstadoTrabajador.ACTIVO }
-                    when {
-                        activos.size == 1 -> {
-                            workerViewModel.seleccionarIdentidad(activos.first().id)
-                            navController.navigate(Routes.OPERACIONES_TRABAJADOR)
-                        }
-                        activos.size > 1 -> navController.navigate(Routes.SELECCION_IDENTIDAD)
-                        else -> navController.navigate(Routes.OPERACIONES_TRABAJADOR)
-                    }
+                    navController.navigate(Routes.OPERACIONES_TRABAJADOR)
                 },
                 onSoyTrabajador = {
                     navController.navigate(Routes.INGRESAR_CODIGO)
@@ -231,18 +220,6 @@ fun CobrateApp() {
                     onVolver = { navController.popBackStack() }
                 )
             }
-        }
-
-        // ---- Flujo Trabajador ----
-        composable(Routes.SELECCION_IDENTIDAD) {
-            SeleccionIdentidadScreen(
-                onSeleccionar = { id ->
-                    workerViewModel.seleccionarIdentidad(id)
-                    navController.navigate(Routes.OPERACIONES_TRABAJADOR) {
-                        popUpTo(Routes.SELECCION_IDENTIDAD) { inclusive = true }
-                    }
-                }
-            )
         }
 
         composable(Routes.OPERACIONES_TRABAJADOR) {
@@ -496,46 +473,6 @@ private fun SinNegociosScreen(
                 ) {
                     Text(text = "Herramientas (dev)")
                 }
-            }
-        }
-    }
-}
-
-/**
- * Pantalla de selección de identidad simulada del trabajador.
- *
- * Se muestra al entrar como Trabajador cuando hay más de un trabajador ACTIVO.
- * IMPORTANTE: es una simplificación temporal — el trabajador se elige a mano
- * para poder filtrar operaciones por trabajadorId. No es autenticación real;
- * el login llega en la CAPA 9.
- */
-@Composable
-private fun SeleccionIdentidadScreen(
-    onSeleccionar: (String) -> Unit
-) {
-    val trabajadores by TrabajadorStore.trabajadores.collectAsState()
-    val activos = trabajadores.filter { it.estado == EstadoTrabajador.ACTIVO }
-
-    Scaffold { innerPadding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .padding(24.dp)
-        ) {
-            Text(
-                text = "¿Cuál trabajador eres?",
-                style = MaterialTheme.typography.headlineMedium
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-            activos.forEach { trabajador ->
-                Button(
-                    onClick = { onSeleccionar(trabajador.id) },
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(trabajador.nombre)
-                }
-                Spacer(modifier = Modifier.height(8.dp))
             }
         }
     }
