@@ -3,7 +3,6 @@ package com.flabs.cobrate.core.data
 import android.content.Context
 import com.flabs.cobrate.core.model.Cuenta
 import com.flabs.cobrate.core.model.EstadoRelacion
-import com.flabs.cobrate.core.model.RolCuentaNegocio
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -116,14 +115,15 @@ object CuentaStore {
                 relacionRepo.relacionesDe(cuentaId).onSuccess { relaciones ->
                     RelacionCuentaNegocioStore.sincronizar(cuentaId, relaciones)
 
-                    // CAPA-REALTIME paso 2: Iniciar escucha para negocios donde es TRABAJADOR.
-                    val negociosTrabajador = relaciones.filter { 
-                        it.rol == RolCuentaNegocio.TRABAJADOR && it.estado == EstadoRelacion.ACTIVA 
-                    }.map { it.negocioId }
+                    // CAPA-REALTIME fix: Iniciar escucha para todos los negocios activos
+                    // (tanto para el rol Dueño/ADMINISTRADOR como para el Trabajador).
+                    val negociosParaEscuchar = relaciones.filter { 
+                        it.estado == EstadoRelacion.ACTIVA 
+                    }.map { it.negocioId }.distinct()
                     
-                    if (negociosTrabajador.isNotEmpty()) {
+                    if (negociosParaEscuchar.isNotEmpty()) {
                         appContext?.let { ctx ->
-                            RealtimeSyncManager.configurarEscucha(ctx, negociosTrabajador)
+                            RealtimeSyncManager.configurarEscucha(ctx, negociosParaEscuchar)
                         }
                     }
 
