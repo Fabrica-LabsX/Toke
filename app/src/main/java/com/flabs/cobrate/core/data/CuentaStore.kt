@@ -2,6 +2,8 @@ package com.flabs.cobrate.core.data
 
 import android.content.Context
 import com.flabs.cobrate.core.model.Cuenta
+import com.flabs.cobrate.core.model.EstadoRelacion
+import com.flabs.cobrate.core.model.RolCuentaNegocio
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -37,6 +39,7 @@ object CuentaStore {
     private val _hashes = mutableMapOf<String, String>()
 
     private var localStore: CuentaLocalStore? = null
+    private var appContext: Context? = null
 
     private val relacionRepo = RelacionCuentaNegocioRepository()
     private val negocioRepo = NegocioRepository()
@@ -53,6 +56,7 @@ object CuentaStore {
      */
     fun init(context: Context) {
         val appContext = context.applicationContext
+        this.appContext = appContext
         if (localStore == null) {
             val store = CuentaLocalStore(appContext)
             localStore = store
@@ -112,6 +116,17 @@ object CuentaStore {
                 relacionRepo.relacionesDe(cuentaId).onSuccess { relaciones ->
                     RelacionCuentaNegocioStore.sincronizar(cuentaId, relaciones)
 
+                    // CAPA-REALTIME paso 2: Iniciar escucha para negocios donde es TRABAJADOR.
+                    val negociosTrabajador = relaciones.filter { 
+                        it.rol == RolCuentaNegocio.TRABAJADOR && it.estado == EstadoRelacion.ACTIVA 
+                    }.map { it.negocioId }
+                    
+                    if (negociosTrabajador.isNotEmpty()) {
+                        appContext?.let { ctx ->
+                            RealtimeSyncManager.configurarEscucha(ctx, negociosTrabajador)
+                        }
+                    }
+
                     // CAPA 7e-3: Sincronizar operaciones de cada negocio asociado
                     val negocioIds = relaciones.map { it.negocioId }.distinct()
                     negocioIds.forEach { negocioId ->
@@ -159,6 +174,8 @@ object CuentaStore {
     /** Limpia la sesión activa. */
     fun cerrarSesion() {
         _sesionActual.value = null
+        // CAPA-REALTIME paso 2: Detener todas las escuchas al cerrar sesión.
+        RealtimeSyncManager.detenerTodo()
     }
 
     private fun persistir() {

@@ -21,15 +21,12 @@ import com.flabs.cobrate.core.logic.NivelConfianzaParseo
 import com.flabs.cobrate.core.logic.NotificationParser
 import com.flabs.cobrate.core.logic.NotificacionesInternas
 import com.flabs.cobrate.core.logic.OperationHistory
+import com.flabs.cobrate.core.logic.OperationNotifier
 import com.flabs.cobrate.core.logic.ResultadoParseo
-import com.flabs.cobrate.core.logic.TtsSpeaker
-import com.flabs.cobrate.core.logic.VoicePhraseBuilder
-import com.flabs.cobrate.core.logic.vibrar
 import com.flabs.cobrate.core.model.EstadoRelacion
 import com.flabs.cobrate.core.model.Operacion
 import com.flabs.cobrate.core.model.RolCuentaNegocio
 import com.flabs.cobrate.core.model.EstadoOperacion
-import com.flabs.cobrate.core.model.ModoVoz
 import com.flabs.cobrate.core.model.OrigenOperacion
 import com.flabs.cobrate.core.model.CambioDeEstado
 import kotlinx.coroutines.CoroutineScope
@@ -51,14 +48,6 @@ import kotlinx.coroutines.launch
 class TokeNotificationListenerService : NotificationListenerService() {
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
-
-    // CAPA 14+: speaker de voz reutilizado entre notificaciones. Se crea de
-    // forma perezosa con el context de la app y se conserva como propiedad del
-    // servicio, en lugar de crear un TextToSpeech nuevo por cada notificación
-    // (reinicializar el motor en cada pago sería costoso). El estado reactivo
-    // de disponibilidad vive en esta misma instancia.
-    private val ttsSpeaker: TtsSpeaker by lazy { TtsSpeaker(applicationContext) }
-    private var ttsSpeakerLiberado = false
 
     // DIAGNÓSTICO (temporal): logging instrumentado para investigar las
     // reconexiones del NotificationListenerService observadas en Logcat
@@ -90,11 +79,8 @@ class TokeNotificationListenerService : NotificationListenerService() {
 
     override fun onDestroy() {
         Log.d(TAG, "[DIAG] onDestroy() pid=${android.os.Process.myPid()} t=${marcaTiempo()}")
-        // Libera el TextToSpeech del speaker reutilizado (si llegó a crearse).
-        if (!ttsSpeakerLiberado) {
-            ttsSpeakerLiberado = true
-            ttsSpeaker.liberar()
-        }
+        // Libera los recursos de notificación.
+        OperationNotifier.liberar()
         super.onDestroy()
     }
 
@@ -242,7 +228,7 @@ class TokeNotificationListenerService : NotificationListenerService() {
                 )
                 scope.launch {
                     InMemoryOperationStore.actualizar(operacionFinal)
-                        .onSuccess { notificarResultado(operacionFinal) }
+                        .onSuccess { OperationNotifier.notificar(this@TokeNotificationListenerService, operacionFinal) }
                         .onFailure { Log.e(TAG, "Error actualizando coincidencia: ${it.message}") }
                 }
             } else {
@@ -274,7 +260,7 @@ class TokeNotificationListenerService : NotificationListenerService() {
                 operacionFinal = AssignmentEngine.asignarSiCorresponde(operacion, trabajadoresActivos)
                 scope.launch {
                     InMemoryOperationStore.agregar(operacionFinal)
-                        .onSuccess { notificarResultado(operacionFinal) }
+                        .onSuccess { OperationNotifier.notificar(this@TokeNotificationListenerService, operacionFinal) }
                         .onFailure { Log.e(TAG, "Error creando operación detectada: ${it.message}") }
                 }
             }
@@ -294,69 +280,6 @@ class TokeNotificationListenerService : NotificationListenerService() {
         }
     }
 
-    /**
-     * Consulta el modo cauteloso de configuración de voz, si es accesible.
-     *
-     * CAPA 13: el modo CAUTELOSO de ConfiguracionDeVozStore oculta el monto en
-     * las notificaciones internas. Esta consulta NO crea dependencias
-     * circulares (solo lee la StateFlow pública). Si el store aún no está
-     * inicializado, su valor es el POR_DEFECTO (no cauteloso) y se considera
-     * false. La integración de voz (B2) refinará este flujo más adelante.
-     */
-    private fun consultarModoCauteloso(): Boolean {
-        // ConfiguracionDeVozStore.configuracion es una StateFlow pública; leer
-        // .value es seguro incluso sin init previo (usa POR_DEFECTO).
-        return ConfiguracionDeVozStore.configuracion.value.modo == ModoVoz.CAUTELOSO
-    }
-
-    /**
-     * CAPA 7e-2 fix: extrae la lógica de notificación (interna, voz, vibración)
-     * para dispararla solo después de confirmar que la operación se persistió
-     * con éxito en el servidor.
-     */
-    private fun notificarResultado(operacionFinal: Operacion) {
-        val monto = operacionFinal.monto
-        val modoCauteloso = consultarModoCauteloso()
-
-        // CAPA 13: notificación interna local.
-        when (operacionFinal.estado) {
-            EstadoOperacion.ASIGNADA -> {
-                val contenido = NotificacionesInternas.notificacionPagoAsignado(monto, modoCauteloso)
-                AndroidNotifier.mostrar(this, contenido.titulo, contenido.texto, NOTIF_PAGO_ASIGNADO)
-                Log.d(TAG, "Notificación interna: pago asignado")
-            }
-            EstadoOperacion.SIN_ASIGNAR -> {
-                val contenido = NotificacionesInternas.notificacionPagoSinAsignar(monto, modoCauteloso)
-                AndroidNotifier.mostrar(this, contenido.titulo, contenido.texto, NOTIF_PAGO_SIN_ASIGNAR)
-                Log.d(TAG, "Notificación interna: pago sin asignar")
-            }
-            else -> {
-                Log.d(TAG, "Operación persistida sin notificación interna (estado ${operacionFinal.estado})")
-            }
-        }
-
-        // CAPA 14+: voz y vibración.
-        if (operacionFinal.estado == EstadoOperacion.ASIGNADA ||
-            operacionFinal.estado == EstadoOperacion.SIN_ASIGNAR
-        ) {
-            val config = ConfiguracionDeVozStore.configuracion.value
-            if (config.vibrarAlAnunciar) {
-                vibrar(applicationContext)
-                Log.d(TAG, "Vibración al anunciar pago")
-            }
-            if (config.activada) {
-                val frase = VoicePhraseBuilder.construirFrase(config, monto)
-                ttsSpeaker.hablar(frase, config.velocidad)
-                Log.d(TAG, "Voz de confirmación de pago")
-            }
-        }
-    }
-
-    /**
-     * Reúne el contenido adicional de la notificación (subtítulo, big text y
-     * líneas múltiples) y lo devuelve concatenado en un solo String, o null si
-     * no hay ninguno. CAPA 6c-2.
-     */
     private fun capturarExtras(sbn: StatusBarNotification): String? {
         val extras = sbn.notification.extras
         val partes = mutableListOf<String>()
@@ -397,8 +320,6 @@ class TokeNotificationListenerService : NotificationListenerService() {
         // Ids de notificaciones internas (CAPA 13). Constantes fijas para que
         // cada tipo reemplace la notificación previa del mismo tipo, evitando
         // acumular cientos en la bandeja.
-        private const val NOTIF_PAGO_ASIGNADO = 1001
-        private const val NOTIF_PAGO_SIN_ASIGNAR = 1002
         private const val NOTIF_ALERTA_DUENO = 1003
     }
 }
