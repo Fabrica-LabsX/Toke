@@ -21,6 +21,21 @@ internal class CuentaRepository {
         postgrest.from("cuentas").upsert(dto)
     }
 
+    /**
+     * Obtiene una cuenta por su id desde Supabase.
+     * CAPA 9.
+     */
+    suspend fun obtenerPorId(id: String): Result<Cuenta?> = runCatching {
+        postgrest.from("cuentas")
+            .select {
+                filter {
+                    eq("id", id)
+                }
+            }
+            .decodeSingleOrNull<CuentaDto>()
+            ?.toDomain()
+    }
+
     @Serializable
     internal data class CuentaDto(
         @SerialName("id") val id: String,
@@ -33,6 +48,15 @@ internal class CuentaRepository {
 }
 
 internal fun Cuenta.toDto() = CuentaRepository.CuentaDto(
+    id = id,
+    username = username,
+    correoVerificado = correoVerificado,
+    telefonoVerificado = telefonoVerificado,
+    fechaCreacion = fechaCreacion,
+    ultimoAcceso = ultimoAcceso
+)
+
+internal fun CuentaRepository.CuentaDto.toDomain() = Cuenta(
     id = id,
     username = username,
     correoVerificado = correoVerificado,

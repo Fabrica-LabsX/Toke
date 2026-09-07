@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.StateFlow
 /**
  * Fuente única de métodos de cobro compartida en memoria (singleton).
  *
- * Es el MISMO patrón que [TrabajadorStore] / [InMemoryOperationStore]: un
+ * Es el MISMO patrón que [InMemoryOperationStore]: un
  * puente entre el flujo del Dueño (que configura los métodos) y el del
  * Trabajador (que los consume), para que ambos lean/actualicen la MISMA lista.
  *

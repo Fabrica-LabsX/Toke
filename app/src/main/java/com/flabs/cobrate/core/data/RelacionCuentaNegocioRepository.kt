@@ -47,6 +47,26 @@ internal class RelacionCuentaNegocioRepository {
             .map { it.toDomain() }
     }
 
+    /**
+     * Actualiza el estado de una relación específica entre cuenta y negocio.
+     * CAPA 9.
+     */
+    suspend fun actualizarEstado(
+        cuentaId: String,
+        negocioId: String,
+        nuevoEstado: EstadoRelacion
+    ): Result<Unit> = runCatching {
+        postgrest.from("relacion_cuenta_negocio")
+            .update(
+                mapOf("estado" to nuevoEstado.name)
+            ) {
+                filter {
+                    eq("cuenta_id", cuentaId)
+                    eq("negocio_id", negocioId)
+                }
+            }
+    }
+
     @Serializable
     internal data class RelacionDto(
         @SerialName("cuenta_id") val cuentaId: String,

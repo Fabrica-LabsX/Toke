@@ -36,34 +36,21 @@ import com.flabs.cobrate.core.data.EstadoServiciosStore
 import com.flabs.cobrate.core.data.NegocioStore
 import com.flabs.cobrate.core.data.RelacionCuentaNegocioStore
 import com.flabs.cobrate.core.model.EstadoRelacion
-import com.flabs.cobrate.core.model.EstadoTrabajador
-import com.flabs.cobrate.core.model.ModoRegistro
 import com.flabs.cobrate.core.model.RolCuentaNegocio
-import com.flabs.cobrate.core.model.Trabajador
 
 /**
  * Pantalla de trabajadores del dueño.
- * El estado vive en BusinessViewModel (en memoria, sin ViewModel de terceros).
- *
- * CONFLICTO PENDIENTE DE UNIFICACIÓN (reportado, sin resolver): esta pantalla
- * convive temporalmente con dos conceptos de "trabajador":
- *  1. El [Trabajador] de [TrabajadorStore] (modelo viejo de CAPA 0, sin cuenta).
- *  2. La invitación por código de CAPA 4, que al aceptarse crea una
- *     [RelacionCuentaNegocio] con rol TRABAJADOR (modelo nuevo multi-negocio).
- * No se decidió cuál reemplaza a cuál; ambos conviven por ahora.
+ * CAPA 9: migración a trabajadores reales vinculados por invitación.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun OwnerWorkersScreen(
     businessViewModel: BusinessViewModel
 ) {
-    val trabajadores by businessViewModel.trabajadores.collectAsState()
-    var mostrandoFormulario by remember { mutableStateOf(false) }
+    val trabajadores by businessViewModel.trabajadoresReales.collectAsState()
     var mostrandoInvitar by remember { mutableStateOf(false) }
 
     // SERVICIOS (CAPA 5b): estado del control de EJECUCIÓN para el negocio actual.
-    // Se refleja aquí para que el trabajador entienda por qué no recibe eventos si
-    // está apagado. Solo lectura del estado; no altera datos históricos ni sesión.
     val sesion by CuentaStore.sesionActual.collectAsState()
     val relaciones by RelacionCuentaNegocioStore.relaciones.collectAsState()
     val negocios by NegocioStore.negocios.collectAsState()
@@ -102,9 +89,7 @@ fun OwnerWorkersScreen(
                 )
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // CAPA 4: invitación por código. Convive temporalmente con el listado
-                // de [TrabajadorStore] (modelo viejo de CAPA 0). Ver nota de conflicto
-                // al final de este archivo: no se decidió aún cuál reemplaza a cuál.
+                // Invitación por código. Los trabajadores se unen solo por esta vía.
                 Button(
                     onClick = { mostrandoInvitar = !mostrandoInvitar },
                     modifier = Modifier.fillMaxWidth()
@@ -119,23 +104,6 @@ fun OwnerWorkersScreen(
                     Spacer(modifier = Modifier.height(16.dp))
                 }
 
-                if (mostrandoFormulario) {
-                    FormularioAgregarTrabajador(
-                        onAgregar = { nombre, modo ->
-                            businessViewModel.agregarTrabajador(nombre, modo)
-                            mostrandoFormulario = false
-                        },
-                        onCancelar = { mostrandoFormulario = false }
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
-                }
-
-                Button(
-                    onClick = { mostrandoFormulario = true },
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(text = "Agregar trabajador")
-                }
                 Spacer(modifier = Modifier.height(16.dp))
             }
 
@@ -143,17 +111,17 @@ fun OwnerWorkersScreen(
                 modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                items(trabajadores, key = { it.id }) { trabajador ->
-                    TrabajadorCard(
-                        trabajador = trabajador,
+                items(trabajadores, key = { it.cuentaId }) { info ->
+                    TrabajadorRealCard(
+                        info = info,
                         servicioActivado = servicioActivado,
                         onAlternarEstado = {
-                            val nuevoEstado = if (trabajador.estado == EstadoTrabajador.ACTIVO) {
-                                EstadoTrabajador.PAUSADO
+                            val nuevoEstado = if (info.estado == EstadoRelacion.ACTIVA) {
+                                EstadoRelacion.EXPULSADA
                             } else {
-                                EstadoTrabajador.ACTIVO
+                                EstadoRelacion.ACTIVA
                             }
-                            businessViewModel.cambiarEstado(trabajador.id, nuevoEstado)
+                            businessViewModel.cambiarEstadoTrabajador(info.cuentaId, nuevoEstado)
                         }
                     )
                 }
@@ -163,86 +131,18 @@ fun OwnerWorkersScreen(
 }
 
 @Composable
-private fun FormularioAgregarTrabajador(
-    onAgregar: (String, ModoRegistro) -> Unit,
-    onCancelar: () -> Unit
-) {
-    var nombre by remember { mutableStateOf("") }
-    var modo by remember { mutableStateOf(ModoRegistro.APP) }
-    var menuAbierto by remember { mutableStateOf(false) }
-
-    Card(modifier = Modifier.fillMaxWidth()) {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            Text(
-                text = "Nuevo trabajador",
-                style = MaterialTheme.typography.titleMedium
-            )
-
-            OutlinedTextField(
-                value = nombre,
-                onValueChange = { nombre = it },
-                label = { Text("Nombre") },
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            Column {
-                OutlinedButton(onClick = { menuAbierto = true }) {
-                    Text(text = "Modo: ${modo.name}")
-                }
-                DropdownMenu(
-                    expanded = menuAbierto,
-                    onDismissRequest = { menuAbierto = false }
-                ) {
-                    ModoRegistro.entries.forEach { m ->
-                        DropdownMenuItem(
-                            text = { Text(m.name) },
-                            onClick = {
-                                modo = m
-                                menuAbierto = false
-                            }
-                        )
-                    }
-                }
-            }
-
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Button(
-                    onClick = {
-                        if (nombre.isNotBlank()) {
-                            onAgregar(nombre, modo)
-                        }
-                    },
-                    enabled = nombre.isNotBlank()
-                ) {
-                    Text(text = "Agregar")
-                }
-                OutlinedButton(onClick = onCancelar) {
-                    Text(text = "Cancelar")
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun TrabajadorCard(
-    trabajador: Trabajador,
-    // SERVICIOS (CAPA 5b): refleja el estado del control de ejecución del negocio.
+private fun TrabajadorRealCard(
+    info: TrabajadorRealInfo,
     servicioActivado: Boolean?,
     onAlternarEstado: () -> Unit
 ) {
     Card(modifier = Modifier.fillMaxWidth()) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(
-                text = trabajador.nombre,
+                text = info.username,
                 style = MaterialTheme.typography.titleMedium
             )
-            // Indicador SERVICIOS: le explica al trabajador por qué no recibe eventos
-            // remotos si el control está apagado (CAPA 5b, sin distribución real aún).
+            // Indicador SERVICIOS.
             servicioActivado?.let { activado ->
                 Text(
                     text = if (activado) "Servicio activado" else "Servicio desactivado",
@@ -255,18 +155,14 @@ private fun TrabajadorCard(
                 )
             }
             Text(
-                text = "Modo: ${trabajador.modo.name}",
-                style = MaterialTheme.typography.bodyMedium
-            )
-            Text(
-                text = "Estado: ${trabajador.estado.name}",
+                text = "Estado: ${info.estado.name}",
                 style = MaterialTheme.typography.bodyMedium
             )
             Spacer(modifier = Modifier.height(8.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {
                 OutlinedButton(onClick = onAlternarEstado) {
                     Text(
-                        text = if (trabajador.estado == EstadoTrabajador.ACTIVO) "Pausar" else "Reactivar"
+                        text = if (info.estado == EstadoRelacion.ACTIVA) "Expulsar" else "Reactivar"
                     )
                 }
             }
