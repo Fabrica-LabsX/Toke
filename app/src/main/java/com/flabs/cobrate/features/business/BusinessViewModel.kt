@@ -70,7 +70,7 @@ class BusinessViewModel : ViewModel() {
 
     /**
      * Lista de trabajadores reales del negocio actual (vinculados por invitación).
-     * CAPA 9: migración desde TrabajadorStore demo.
+     * CAPA 9: migración a RelacionCuentaNegocio real.
      */
     val trabajadoresReales: StateFlow<List<TrabajadorRealInfo>> = combine(
         negocioActualId,
