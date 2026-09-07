@@ -40,7 +40,6 @@ import com.flabs.cobrate.core.data.InvitacionStore
 import com.flabs.cobrate.core.data.NegocioStore
 import com.flabs.cobrate.core.data.RelacionCuentaNegocioStore
 import com.flabs.cobrate.core.logic.RolEfectivo
-import com.flabs.cobrate.core.model.EstadoTrabajador
 import com.flabs.cobrate.core.model.Negocio
 import com.flabs.cobrate.core.model.RolCuentaNegocio
 import com.flabs.cobrate.features.auth.AuthViewModel
