@@ -5,12 +5,16 @@ import androidx.lifecycle.viewModelScope
 import com.flabs.cobrate.core.data.CuentaStore
 import com.flabs.cobrate.core.data.InMemoryOperationStore
 import com.flabs.cobrate.core.data.OperacionRepository
+import com.flabs.cobrate.core.data.RelacionCuentaNegocioStore
 import com.flabs.cobrate.core.model.EstadoOperacion
+import com.flabs.cobrate.core.model.EstadoRelacion
 import com.flabs.cobrate.core.model.Operacion
 import com.flabs.cobrate.core.model.OrigenOperacion
+import com.flabs.cobrate.core.model.RolCuentaNegocio
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -23,16 +27,25 @@ import java.util.UUID
  */
 class WorkerViewModel : ViewModel() {
 
-    /**
-     * PLACEHOLDER CAPA 1: TOKE V1 es multi-negocio, pero aún no hay selección de
-     * negocio (ese flujo llega en una capa posterior). Por ahora toda operación
-     * creada se anota en un negocio por defecto claramente marcado.
-     * TODO(CAPA posterior): resolver el negocio activo desde la relación Cuenta↔Negocio.
-     */
-    private val negocioPlaceholder = "NEGOCIO_DEFAULT"
-
     // Lee de la fuente compartida en memoria.
     val operaciones: StateFlow<List<Operacion>> = InMemoryOperationStore.operaciones
+
+    /**
+     * Negocio actual gestionado por el trabajador (el primero donde es TRABAJADOR).
+     * Si en el futuro un trabajador pertenece a 2+ negocios simultáneamente,
+     * esta capa asume el primero.
+     */
+    val negocioActualId: StateFlow<String?> = combine(
+        CuentaStore.sesionActual,
+        RelacionCuentaNegocioStore.relaciones
+    ) { sesion, relaciones ->
+        val cuentaId = sesion?.id ?: return@combine null
+        relaciones.find {
+            it.cuentaId == cuentaId &&
+                it.rol == RolCuentaNegocio.TRABAJADOR &&
+                it.estado == EstadoRelacion.ACTIVA
+        }?.negocioId
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
     /** Id del trabajador autenticado (desde Supabase Auth). */
     val identidadTrabajador: StateFlow<String?> = CuentaStore.sesionActual
@@ -50,14 +63,21 @@ class WorkerViewModel : ViewModel() {
 
     /**
      * Crea una nueva operación manual "Va a pagar", asignada al trabajador de
-     * la sesión actual (estado ASIGNADA) y con el negocio placeholder.
+     * la sesión actual (estado ASIGNADA) y con el negocio real detectado.
      */
     fun crearOperacion(monto: Double) {
-        val trabajador = CuentaStore.sesionActual.value?.id
+        val cuentaId = CuentaStore.sesionActual.value?.id
+        val negocioId = negocioActualId.value
+
+        if (negocioId == null) {
+            _error.value = "No perteneces a ningún negocio todavía"
+            return
+        }
+
         val nueva = Operacion(
             id = UUID.randomUUID().toString(),
-            negocioId = negocioPlaceholder,
-            trabajadorAsignadoId = trabajador,
+            negocioId = negocioId,
+            trabajadorAsignadoId = cuentaId,
             monto = monto,
             estado = EstadoOperacion.ASIGNADA,
             origen = OrigenOperacion.VaAPagar,
