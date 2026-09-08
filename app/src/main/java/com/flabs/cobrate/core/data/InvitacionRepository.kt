@@ -59,6 +59,19 @@ internal class InvitacionRepository {
     }
 
     /**
+     * Acepta una invitación de trabajador de forma segura vía RPC.
+     * La función en Supabase valida la invitación y crea la relación atómicamente.
+     */
+    suspend fun aceptarInvitacion(codigo: String): Result<Unit> = runCatching {
+        postgrest.rpc(
+            function = "aceptar_invitacion",
+            parameters = buildJsonObject {
+                put("codigo_invitacion", codigo)
+            }
+        )
+    }
+
+    /**
      * Obtiene una vista previa segura (nombre negocio y dueño) de una invitación
      * vía RPC, sin requerir permisos de lectura sobre las tablas.
      * CAPA 7d-3.

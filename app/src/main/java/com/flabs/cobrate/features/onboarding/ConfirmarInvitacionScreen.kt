@@ -29,11 +29,8 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import com.flabs.cobrate.core.data.CuentaStore
 import com.flabs.cobrate.core.data.InvitacionRepository
-import com.flabs.cobrate.core.data.InvitacionStore
-import com.flabs.cobrate.core.data.RelacionCuentaNegocioStore
 import com.flabs.cobrate.core.model.InvitacionTrabajador
 import com.flabs.cobrate.core.model.PreviewInvitacion
-import com.flabs.cobrate.core.model.RolCuentaNegocio
 
 /**
  * Pantalla de confirmación de la invitación (CAPA 7d-3).
@@ -144,18 +141,11 @@ fun ConfirmarInvitacionScreen(
                     val cuentaId = CuentaStore.sesionActual.value?.id
                     if (cuentaId != null) {
                         scope.launch {
-                            // Crea la relación TRABAJADOR/ACTIVA y marca la invitación como aceptada.
-                            val resRel = RelacionCuentaNegocioStore.crear(
-                                cuentaId = cuentaId,
-                                negocioId = invitacion.negocioId,
-                                rol = RolCuentaNegocio.TRABAJADOR
-                            )
-                            if (resRel.isSuccess) {
-                                InvitacionStore.marcarAceptada(invitacion.codigo).onSuccess {
-                                    // Sincronizamos datos inmediatamente para el trabajador.
-                                    CuentaStore.sincronizarDatos(cuentaId)
-                                    onAceptada()
-                                }
+                            // Acepta la invitación vía RPC (valida y crea la relación en el servidor).
+                            repository.aceptarInvitacion(invitacion.codigo).onSuccess {
+                                // Sincronizamos datos inmediatamente para el trabajador.
+                                CuentaStore.sincronizarDatos(cuentaId)
+                                onAceptada()
                             }
                         }
                     }
