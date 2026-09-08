@@ -6,6 +6,10 @@ import com.flabs.cobrate.core.model.Operacion
 /**
  * Regla de confirmación MANUAL de pago.
  *
+ * MIGRACIÓN: La lógica de confirmación se ha migrado a la función 'confirmar_pago'
+ * de Supabase para validación centralizada de seguridad. Esta clase queda pendiente
+ * de limpieza en una tarea posterior.
+ *
  * Estado de transición (CAPA 1): la versión previa de esta regla avanzaba la
  * operación por una plantilla de flujo (usando pasoActual/plantillaId), que
  * ya NO viven en [Operacion]. Mientras se rediseña el flujo de confirmación,

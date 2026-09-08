@@ -5,7 +5,6 @@ import androidx.lifecycle.viewModelScope
 import com.flabs.cobrate.core.data.CuentaStore
 import com.flabs.cobrate.core.data.InMemoryOperationStore
 import com.flabs.cobrate.core.data.OperacionRepository
-import com.flabs.cobrate.core.logic.PaymentConfirmation
 import com.flabs.cobrate.core.model.EstadoOperacion
 import com.flabs.cobrate.core.model.Operacion
 import com.flabs.cobrate.core.model.OrigenOperacion
@@ -71,19 +70,22 @@ class WorkerViewModel : ViewModel() {
     }
 
     /**
-     * Confirma la operación indicada por su id.  Delegado a
-     * PaymentConfirmation.confirmarPagoManualmente.
+     * Confirma la operación indicada por su id. Delegado a la RPC 'confirmar_pago'
+     * en Supabase para validación de seguridad (CAPA 13).
      */
     fun confirmarPago(operacionId: String) {
-        val op = InMemoryOperationStore.operaciones.value.find { it.id == operacionId } ?: return
-
-        val confirmado = PaymentConfirmation.confirmarPagoManualmente(
-            operacion = op,
-            timestamp = System.currentTimeMillis()
-        )
         viewModelScope.launch {
-            InMemoryOperationStore.actualizar(confirmado)
-                .onFailure { _error.value = "Error al confirmar: ${it.message}" }
+            OperacionRepository().confirmarPago(operacionId)
+                .onSuccess { resultado ->
+                    if (resultado.exito) {
+                        InMemoryOperationStore.refrescarUna(operacionId)
+                    } else {
+                        _error.value = resultado.mensaje
+                    }
+                }
+                .onFailure {
+                    _error.value = "Error de red al confirmar: ${it.message}"
+                }
         }
     }
 

@@ -122,6 +122,17 @@ internal class OperacionRepository {
         ).decodeSingle<ResultadoReclamo>()
     }
 
+    /**
+     * Invoca la función RPC 'confirmar_pago' para mover la operación a CONFIRMADA.
+     * El servidor valida que el trabajador sea el asignado.
+     */
+    suspend fun confirmarPago(operacionId: String): Result<ResultadoConfirmarPago> = runCatching {
+        postgrest.rpc(
+            function = "confirmar_pago",
+            parameters = mapOf("operacion_id" to operacionId)
+        ).decodeSingle<ResultadoConfirmarPago>()
+    }
+
     // ---- DTOs de Infraestructura (espejo de las tablas de Supabase) ----
 
     @Serializable
@@ -161,6 +172,13 @@ internal class OperacionRepository {
 /** Resultado de la operación atómica de reclamo en el servidor. */
 @Serializable
 internal data class ResultadoReclamo(
+    @SerialName("exito") val exito: Boolean,
+    @SerialName("mensaje") val mensaje: String
+)
+
+/** Resultado de la confirmación de pago en el servidor. */
+@Serializable
+internal data class ResultadoConfirmarPago(
     @SerialName("exito") val exito: Boolean,
     @SerialName("mensaje") val mensaje: String
 )
