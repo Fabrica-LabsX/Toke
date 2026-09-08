@@ -51,6 +51,7 @@ fun ConfirmarInvitacionScreen(
     var preview by remember { mutableStateOf<PreviewInvitacion?>(null) }
     var loading by remember { mutableStateOf(true) }
     var errorPreview by remember { mutableStateOf<String?>(null) }
+    var errorAceptar by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(invitacion.codigo) {
         loading = true
@@ -104,7 +105,23 @@ fun ConfirmarInvitacionScreen(
                         style = MaterialTheme.typography.bodyMedium
                     )
                 }
-            } else {
+            }
+
+            if (errorAceptar != null) {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer)
+                ) {
+                    Text(
+                        text = errorAceptar!!,
+                        modifier = Modifier.padding(16.dp),
+                        color = MaterialTheme.colorScheme.onErrorContainer,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+            }
+
+            if (!loading && errorPreview == null) {
                 Card(modifier = Modifier.fillMaxWidth()) {
                     Column(
                         modifier = Modifier.padding(16.dp),
@@ -141,12 +158,21 @@ fun ConfirmarInvitacionScreen(
                     val cuentaId = CuentaStore.sesionActual.value?.id
                     if (cuentaId != null) {
                         scope.launch {
+                            errorAceptar = null
                             // Acepta la invitación vía RPC (valida y crea la relación en el servidor).
-                            repository.aceptarInvitacion(invitacion.codigo).onSuccess {
-                                // Sincronizamos datos inmediatamente para el trabajador.
-                                CuentaStore.sincronizarDatos(cuentaId)
-                                onAceptada()
-                            }
+                            repository.aceptarInvitacion(invitacion.codigo)
+                                .onSuccess { resultado ->
+                                    if (resultado.exito) {
+                                        // Sincronizamos datos inmediatamente para el trabajador.
+                                        CuentaStore.sincronizarDatos(cuentaId)
+                                        onAceptada()
+                                    } else {
+                                        errorAceptar = resultado.mensaje
+                                    }
+                                }
+                                .onFailure {
+                                    errorAceptar = "Error de conexión al aceptar invitación"
+                                }
                         }
                     }
                 },

@@ -62,13 +62,13 @@ internal class InvitacionRepository {
      * Acepta una invitación de trabajador de forma segura vía RPC.
      * La función en Supabase valida la invitación y crea la relación atómicamente.
      */
-    suspend fun aceptarInvitacion(codigo: String): Result<Unit> = runCatching {
+    suspend fun aceptarInvitacion(codigo: String): Result<ResultadoAceptarInvitacion> = runCatching {
         postgrest.rpc(
             function = "aceptar_invitacion",
             parameters = buildJsonObject {
                 put("codigo_invitacion", codigo)
             }
-        )
+        ).decodeSingle<ResultadoAceptarInvitacion>()
     }
 
     /**
@@ -84,6 +84,12 @@ internal class InvitacionRepository {
             }
         ).decodeSingleOrNull<PreviewInvitacion>()
     }
+
+    @Serializable
+    internal data class ResultadoAceptarInvitacion(
+        @SerialName("exito") val exito: Boolean,
+        @SerialName("mensaje") val mensaje: String
+    )
 
     @Serializable
     internal data class InvitacionDto(
