@@ -6,6 +6,7 @@ import android.service.notification.StatusBarNotification
 import android.util.Log
 import com.flabs.cobrate.core.data.AlertaStore
 import com.flabs.cobrate.core.data.ConfiguracionDeVozStore
+import com.flabs.cobrate.core.data.CuentaStore
 import com.flabs.cobrate.core.data.EventoDeNotificacionStore
 import com.flabs.cobrate.core.data.MetodoDeCobroStore
 import com.flabs.cobrate.core.model.EventoDeNotificacion
@@ -139,12 +140,15 @@ class TokeNotificationListenerService : NotificationListenerService() {
         // Yape). Se guarda en [EventoDeNotificacion.datosAdicionales].
         val datosAdicionales = capturarExtras(sbn)
 
-        // PLACEHOLDER CAPA 1: mismo negocio por defecto que WorkerViewModel.
-        // TODO(CAPA posterior): resolver el negocio activo cuando exista
-        // selección real de negocio en segundo plano.
+        val negocioId = resolverNegocioActual()
+        if (negocioId == null) {
+            Log.d(TAG, "Notificación de pago ignorada: no hay negocio activo resuelto en este dispositivo")
+            return
+        }
+
         val evento = EventoDeNotificacion(
             id = UUID.randomUUID().toString(),
-            negocioId = NEGOCIO_PLACEHOLDER,
+            negocioId = negocioId,
             paqueteOrigen = paquete,
             titulo = titulo,
             texto = texto,
@@ -309,13 +313,22 @@ class TokeNotificationListenerService : NotificationListenerService() {
         Log.d(TAG, "Notificación eliminada de: ${sbn.packageName}")
     }
 
+    /**
+     * Resuelve el negocioId real desde la sesión del Dueño en este dispositivo.
+     * La detección automática de pagos (CAPA 6b+) solo es válida si hay un
+     * administrador con sesión activa.
+     */
+    private fun resolverNegocioActual(): String? {
+        val cuentaId = CuentaStore.sesionActual.value?.id ?: return null
+        return RelacionCuentaNegocioStore.relaciones.value.find {
+            it.cuentaId == cuentaId &&
+                it.rol == RolCuentaNegocio.ADMINISTRADOR &&
+                it.estado == EstadoRelacion.ACTIVA
+        }?.negocioId
+    }
+
     companion object {
         private const val TAG = "TokeListener"
-
-        // Mismo placeholder de negocio único que WorkerViewModel
-        // ("NEGOCIO_DEFAULT"), pendiente de resolverse cuando exista selección
-        // real de negocio activo en segundo plano.
-        private const val NEGOCIO_PLACEHOLDER = "NEGOCIO_DEFAULT"
 
         // Ids de notificaciones internas (CAPA 13). Constantes fijas para que
         // cada tipo reemplace la notificación previa del mismo tipo, evitando
