@@ -36,6 +36,21 @@ internal class NegocioRepository {
         dto?.toDomain()
     }
 
+    /**
+     * Obtiene una lista de negocios por sus IDs en una sola petición.
+     */
+    suspend fun obtenerVariosPorId(ids: List<String>): Result<List<Negocio>> = runCatching {
+        if (ids.isEmpty()) return@runCatching emptyList()
+        postgrest.from("negocios")
+            .select {
+                filter {
+                    isIn("id", ids)
+                }
+            }
+            .decodeList<NegocioDto>()
+            .map { it.toDomain() }
+    }
+
     suspend fun obtenerNegociosDeCuenta(cuentaId: String): Result<List<Negocio>> = runCatching {
         // Negocios donde es dueño O donde existe una relación activa.
         // En Supabase, esto se puede hacer con un select con join o via RPC si es complejo.

@@ -71,7 +71,7 @@ dependencies {
     implementation(libs.supabasePostgrest)
     implementation(libs.supabaseAuth)
     implementation(libs.supabaseRealtime)
-    implementation(libs.ktorClientAndroid)
+    implementation(libs.ktorClientOkhttp)
     implementation(libs.kotlinxSerializationJson)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.espresso.core)

@@ -9,6 +9,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
@@ -35,16 +37,19 @@ object SupabaseAuthBridge {
 
     /**
      * Usuario autenticado actual en Supabase, o null si no hay sesión.
-     * Observa `supabase.auth.sessionStatus` en tiempo real.
+     * Estabilizado: Filtra estados transitorios (como Initializing) para evitar
+     * que la UI reaccione a falsos cierres de sesión al volver de background.
      */
     val sesionActual: StateFlow<UserInfo?> =
         SupabaseClientProvider.supabase.auth.sessionStatus
+            .filter { it !is SessionStatus.Initializing }
             .map { status ->
                 when (status) {
                     is SessionStatus.Authenticated -> status.session.user
                     else -> null
                 }
             }
+            .distinctUntilChanged()
             .stateIn(scope, SharingStarted.Eagerly, null)
 
     /** Crea una cuenta de Dueño con email + contraseña reales en Supabase Auth. */

@@ -42,6 +42,7 @@ supabasePostgrest = { group = "io.github.jan-tennert.supabase", name = "postgres
 supabaseAuth = { group = "io.github.jan-tennert.supabase", name = "auth-kt" }
 supabaseRealtime = { group = "io.github.jan-tennert.supabase", name = "realtime-kt" }
 ktorClientAndroid = { group = "io.ktor", name = "ktor-client-android", version.ref = "ktorClientAndroid" }
+ktorClientOkhttp = { group = "io.ktor", name = "ktor-client-okhttp", version.ref = "ktorClientAndroid" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

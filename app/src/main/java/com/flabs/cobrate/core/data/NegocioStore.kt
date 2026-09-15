@@ -79,6 +79,14 @@ object NegocioStore {
         persistir()
     }
 
+    /**
+     * Limpia la memoria local y el disco (usado en Logout para evitar fuga de datos entre cuentas).
+     */
+    fun limpiar() {
+        _negocios.value = emptyList()
+        persistir()
+    }
+
     private fun persistir() {
         localStore?.let { store ->
             val snapshot = _negocios.value

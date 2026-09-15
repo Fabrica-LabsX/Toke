@@ -65,6 +65,14 @@ object AlertaStore {
         return alerta
     }
 
+    /**
+     * Limpia la memoria local y el disco (usado en Logout para evitar fuga de datos entre cuentas).
+     */
+    fun limpiar() {
+        _alertas.value = emptyList()
+        persistir()
+    }
+
     private fun persistir() {
         localStore?.let { store ->
             val snapshot = _alertas.value

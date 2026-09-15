@@ -39,6 +39,8 @@ import com.flabs.cobrate.core.data.EstadoServiciosStore
 import com.flabs.cobrate.core.data.InvitacionStore
 import com.flabs.cobrate.core.data.NegocioStore
 import com.flabs.cobrate.core.data.RelacionCuentaNegocioStore
+import com.flabs.cobrate.core.data.OperacionPendienteStore
+import com.flabs.cobrate.core.logic.NetworkMonitor
 import com.flabs.cobrate.core.logic.RolEfectivo
 import com.flabs.cobrate.core.model.Negocio
 import com.flabs.cobrate.core.model.RolCuentaNegocio
@@ -68,6 +70,11 @@ import com.flabs.cobrate.ui.theme.CobrateTheme
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // Inicialización del monitor de red (CAPA TAREA E-1)
+        NetworkMonitor.init(this)
+        // Inicialización de la cola offline (CAPA TAREA E-2)
+        OperacionPendienteStore.init(this)
+        
         // Carga las operaciones persistidas al iniciar la app.
         InMemoryOperationStore.init(applicationContext)
         // Carga las cuentas persistidas y restaura la última sesión activa.
@@ -131,18 +138,21 @@ fun CobrateApp() {
     // Observa la sesión: arranca en LOGIN, salta a INICIO en cuanto hay una
     // sesión activa (tras autenticarse o al restaurarse al abrir la app), y
     // vuelve a LOGIN cuando la sesión se cierra (cerrarSesion).
+    // Estabilizado: Solo navega si el usuario está actualmente en la pantalla de LOGIN.
     val sesionActual by authViewModel.sesionActual.collectAsState()
     LaunchedEffect(sesionActual) {
+        val currentRoute = navController.currentBackStackEntry?.destination?.route
         when {
             sesionActual != null -> {
-                navController.navigate(Routes.INICIO) {
-                    popUpTo(Routes.LOGIN) { inclusive = true }
+                if (currentRoute == Routes.LOGIN || currentRoute == null) {
+                    navController.navigate(Routes.INICIO) {
+                        popUpTo(Routes.LOGIN) { inclusive = true }
+                    }
                 }
             }
             // Al cerrar sesión (null tras haber estado logueado) volvemos a
-            // LOGIN limpiando todo el backstack. Evitamos el arranque en frío
-            // (ya estamos en LOGIN y no ha habido sesión).
-            navController.currentDestination?.route != Routes.LOGIN -> {
+            // LOGIN limpiando todo el backstack.
+            currentRoute != Routes.LOGIN && currentRoute != null -> {
                 navController.navigate(Routes.LOGIN) {
                     popUpTo(0) { inclusive = true }
                 }

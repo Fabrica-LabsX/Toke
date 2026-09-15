@@ -33,11 +33,14 @@ internal class OperacionRepository {
         val ahora = System.currentTimeMillis()
         val dto = operacion.toDto(fechaCreacion = ahora)
         
-        postgrest.from("operaciones").insert(dto)
+        // Usar upsert para garantizar idempotencia. Si la request se repite
+        // por un reintento de red, Supabase no devolverá error de duplicado.
+        postgrest.from("operaciones").upsert(dto)
 
         if (operacion.historial.isNotEmpty()) {
             val historialDtos = operacion.historial.map { it.toDto(operacion.id) }
-            postgrest.from("cambios_de_estado").insert(historialDtos)
+            // El historial también es idempotente por timestamp+operacion_id
+            postgrest.from("cambios_de_estado").upsert(historialDtos)
         }
 
         // Recuperamos la versión final con historial reconstruido
@@ -91,6 +94,35 @@ internal class OperacionRepository {
         val operacionesDtos = postgrest.from("operaciones")
             .select {
                 filter { eq("negocio_id", negocioId) }
+                order("fecha_hora", Order.DESCENDING)
+            }
+            .decodeList<OperacionDto>()
+
+        if (operacionesDtos.isEmpty()) return@runCatching emptyList()
+
+        val ids = operacionesDtos.map { it.id }
+        val historialesPorOperacion = postgrest.from("cambios_de_estado")
+            .select {
+                filter { isIn("operacion_id", ids) }
+            }
+            .decodeList<CambioDeEstadoDto>()
+            .groupBy { it.operacionId }
+
+        operacionesDtos.map { dto ->
+            dto.toDomain(historialesPorOperacion[dto.id] ?: emptyList())
+        }
+    }
+
+    /**
+     * Obtiene todas las operaciones de varios negocios con sus respectivos historiales
+     * en un número mínimo de peticiones.
+     */
+    suspend fun obtenerDeVariosNegocios(negocioIds: List<String>): Result<List<Operacion>> = runCatching {
+        if (negocioIds.isEmpty()) return@runCatching emptyList()
+
+        val operacionesDtos = postgrest.from("operaciones")
+            .select {
+                filter { isIn("negocio_id", negocioIds) }
                 order("fecha_hora", Order.DESCENDING)
             }
             .decodeList<OperacionDto>()

@@ -92,6 +92,14 @@ object InvitacionStore {
         return Result.failure(result.exceptionOrNull() ?: Exception("Error en Supabase"))
     }
 
+    /**
+     * Limpia la memoria local y el disco (usado en Logout para evitar fuga de datos entre cuentas).
+     */
+    fun limpiar() {
+        _invitaciones.value = emptyList()
+        persistir()
+    }
+
     private fun generarCodigo(): String {
         val sb = StringBuilder(LARGO_CODIGO)
         repeat(LARGO_CODIGO) {

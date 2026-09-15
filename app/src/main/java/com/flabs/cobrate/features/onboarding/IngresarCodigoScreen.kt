@@ -19,6 +19,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardCapitalization
@@ -43,7 +44,7 @@ fun IngresarCodigoScreen(
     onCodigoValido: (InvitacionTrabajador) -> Unit,
     onVolver: () -> Unit
 ) {
-    var codigo by remember { mutableStateOf("") }
+    var codigo by rememberSaveable { mutableStateOf("") }
     var error by remember { mutableStateOf<String?>(null) }
     val scope = rememberCoroutineScope()
     Scaffold { innerPadding ->

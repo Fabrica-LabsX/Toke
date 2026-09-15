@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -17,12 +18,15 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.flabs.cobrate.core.data.MetodoDeCobroStore
 
@@ -36,13 +40,22 @@ fun PayScreen(
     workerViewModel: WorkerViewModel,
     onBack: () -> Unit
 ) {
-    var montoText by remember { mutableStateOf("") }
+    var montoText by rememberSaveable { mutableStateOf("") }
     var menuAbierto by remember { mutableStateOf(false) }
 
     // Lee los métodos ACTIVOS de la fuente única compartida con el Dueño.
     val metodosActivos by MetodoDeCobroStore.metodos.collectAsState()
-    val nombresMetodos = metodosActivos.filter { it.activo }.map { it.tipo.name }
+    val nombresMetodos = remember(metodosActivos) {
+        metodosActivos.filter { it.activo }.map { it.tipo.name }
+    }
     var metodoSeleccionado by remember { mutableStateOf(nombresMetodos.firstOrNull() ?: "") }
+
+    // Corregir Bug: actualizar el método seleccionado si la lista cambia y el actual no es válido (CAPA TAREA C-4)
+    LaunchedEffect(nombresMetodos) {
+        if (!nombresMetodos.contains(metodoSeleccionado)) {
+            metodoSeleccionado = nombresMetodos.firstOrNull() ?: ""
+        }
+    }
 
     Scaffold { innerPadding ->
         Column(
@@ -59,9 +72,15 @@ fun PayScreen(
 
             OutlinedTextField(
                 value = montoText,
-                onValueChange = { montoText = it },
+                onValueChange = { 
+                    // Validación básica: solo números y punto decimal
+                    if (it.isEmpty() || it.toDoubleOrNull() != null || it.endsWith(".")) {
+                        montoText = it 
+                    }
+                },
                 label = { Text("Monto") },
                 singleLine = true,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -90,7 +109,7 @@ fun PayScreen(
             Button(
                 onClick = {
                     val monto = montoText.toDoubleOrNull()
-                    if (montoText.isNotBlank() && monto != null) {
+                    if (monto != null && monto > 0 && metodoSeleccionado.isNotBlank()) {
                         // NOTA CAPA 1: el método seleccionado ya no se persiste en
                         // [Operacion] (ver WorkerViewModel.crearOperacion); el selector
                         // queda por ahora sin efecto sobre el modelo.
@@ -99,6 +118,7 @@ fun PayScreen(
                         onBack()
                     }
                 },
+                enabled = montoText.toDoubleOrNull()?.let { it > 0 } == true && metodoSeleccionado.isNotBlank(),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(text = "Confirmar")

@@ -1,6 +1,7 @@
 package com.flabs.cobrate.core.data
 
 import android.content.Context
+import android.util.Log
 import com.flabs.cobrate.core.model.Cuenta
 import com.flabs.cobrate.core.model.EstadoRelacion
 import kotlinx.coroutines.CoroutineScope
@@ -33,6 +34,11 @@ object CuentaStore {
 
     private val _sesionActual = MutableStateFlow<Cuenta?>(null)
     val sesionActual: StateFlow<Cuenta?> = _sesionActual
+
+    // UID de la cuenta que ya ha completado su sincronización inicial.
+    // Evita la "tormenta de peticiones" (~60 requests) al volver de background
+    // o durante un refresco de token técnico.
+    private var ultimoUidSincronizado: String? = null
 
     // id -> hash de contraseña (LEGADO: ya no se usa para Supabase Auth).
     private val _hashes = mutableMapOf<String, String>()
@@ -68,6 +74,7 @@ object CuentaStore {
                 SupabaseAuthBridge.sesionActual.collect { userInfo ->
                     if (userInfo == null) {
                         _sesionActual.value = null
+                        ultimoUidSincronizado = null
                     } else {
                         val uid = userInfo.id
                         var cuenta = _cuentas.value.find { it.id == uid }
@@ -86,16 +93,27 @@ object CuentaStore {
                         }
                         _sesionActual.value = cuenta
 
+                        // GUARDA DE IDEMPOTENCIA: Evita re-sincronizar todo si el UID no ha cambiado.
+                        // Esto detiene las ~60 requests al volver de background o en token refresh.
+                        if (uid == ultimoUidSincronizado) {
+                            Log.d("CuentaStore", "[SYNC] SYNC SKIPPED (UID $uid ya sincronizado)")
+                            return@collect
+                        }
+
+                        Log.d("CuentaStore", "[SYNC] SYNC START (UID $uid)")
+                        ultimoUidSincronizado = uid
+
                         // CAPA 7d-4: Sincronizamos la cuenta con la tabla public.cuentas
                         // antes de disparar la sincronización de datos.
                         scope.launch {
                             cuentaRepo.upsert(cuenta)
                                 .onFailure {
-                                    android.util.Log.e("CuentaStore", "Error al sincronizar cuenta en Supabase: ${it.message}")
+                                    Log.e("CuentaStore", "Error al sincronizar cuenta en Supabase: ${it.message}")
                                 }
                                 .onSuccess {
                                     // Una vez asegurada la cuenta en Supabase, sincronizamos sus datos.
                                     sincronizarDatos(uid)
+                                    Log.d("CuentaStore", "[SYNC] SYNC END (UID $uid)")
                                 }
                         }
                     }
@@ -115,8 +133,9 @@ object CuentaStore {
                 relacionRepo.relacionesDe(cuentaId).onSuccess { relaciones ->
                     RelacionCuentaNegocioStore.sincronizar(cuentaId, relaciones)
 
+                    val negocioIds = relaciones.map { it.negocioId }.distinct()
+
                     // CAPA-REALTIME fix: Iniciar escucha para todos los negocios activos
-                    // (tanto para el rol Dueño/ADMINISTRADOR como para el Trabajador).
                     val negociosParaEscuchar = relaciones.filter { 
                         it.estado == EstadoRelacion.ACTIVA 
                     }.map { it.negocioId }.distinct()
@@ -127,26 +146,30 @@ object CuentaStore {
                         }
                     }
 
-                    // CAPA 7e-3: Sincronizar operaciones de cada negocio asociado
-                    val negocioIds = relaciones.map { it.negocioId }.distinct()
-                    negocioIds.forEach { negocioId ->
+                    if (negocioIds.isNotEmpty()) {
                         launch {
-                            operacionRepo.obtenerDelNegocio(negocioId).onSuccess { operaciones ->
-                                InMemoryOperationStore.sincronizar(negocioId, operaciones)
+                            // Sincronizar todos los negocios en una sola petición (OPTIMIZACIÓN)
+                            negocioRepo.obtenerVariosPorId(negocioIds).onSuccess { negocios ->
+                                NegocioStore.sincronizar(negocios)
                             }.onFailure {
-                                android.util.Log.e("CuentaStore", "Error sincronizando operaciones del negocio $negocioId: ${it.message}")
+                                Log.e("CuentaStore", "Error sincronizando bloque de negocios: ${it.message}")
+                            }
+                        }
+
+                        launch {
+                            // Sincronizar todas las operaciones en un solo bloque (OPTIMIZACIÓN)
+                            operacionRepo.obtenerDeVariosNegocios(negocioIds).onSuccess { todasLasOps ->
+                                negocioIds.forEach { negocioId ->
+                                    val opsDelNegocio = todasLasOps.filter { it.negocioId == negocioId }
+                                    InMemoryOperationStore.sincronizar(negocioId, opsDelNegocio)
+                                }
+                            }.onFailure {
+                                Log.e("CuentaStore", "Error sincronizando bloque de operaciones: ${it.message}")
                             }
                         }
                     }
                 }.onFailure {
-                    android.util.Log.e("CuentaStore", "Error sincronizando relaciones: ${it.message}")
-                }
-            }
-            launch {
-                negocioRepo.obtenerNegociosDeCuenta(cuentaId).onSuccess { negocios ->
-                    NegocioStore.sincronizar(negocios)
-                }.onFailure {
-                    android.util.Log.e("CuentaStore", "Error sincronizando negocios: ${it.message}")
+                    Log.e("CuentaStore", "Error sincronizando relaciones: ${it.message}")
                 }
             }
         }
@@ -171,10 +194,21 @@ object CuentaStore {
         _sesionActual.value = cuenta
     }
 
-    /** Limpia la sesión activa. */
+    /** Limpia la sesión activa y purga todos los datos en memoria de la cuenta anterior. */
     fun cerrarSesion() {
         _sesionActual.value = null
-        // CAPA-REALTIME paso 2: Detener todas las escuchas al cerrar sesión.
+        ultimoUidSincronizado = null
+        _cuentas.value = emptyList()
+
+        // Purgado atómico de todos los Stores con estado en memoria (CAPA 7-FIX)
+        InMemoryOperationStore.limpiar()
+        NegocioStore.limpiar()
+        RelacionCuentaNegocioStore.limpiar()
+        EventoDeNotificacionStore.limpiar()
+        AlertaStore.limpiar()
+        InvitacionStore.limpiar()
+
+        // Detener escuchas activas
         RealtimeSyncManager.detenerTodo()
     }
 

@@ -20,6 +20,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -38,8 +39,8 @@ fun CrearNegocioScreen(
     negocioViewModel: NegocioViewModel,
     onCreado: () -> Unit
 ) {
-    var nombre by remember { mutableStateOf("") }
-    var tipo by remember { mutableStateOf<TipoNegocio?>(null) }
+    var nombre by rememberSaveable { mutableStateOf("") }
+    var tipo by rememberSaveable { mutableStateOf<TipoNegocio?>(null) }
     var menuAbierto by remember { mutableStateOf(false) }
 
     Scaffold { innerPadding ->

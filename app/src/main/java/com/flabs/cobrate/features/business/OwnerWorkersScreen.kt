@@ -12,6 +12,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -46,6 +47,9 @@ fun OwnerWorkersScreen(
 ) {
     val trabajadores by businessViewModel.trabajadoresReales.collectAsState()
     var mostrandoInvitar by remember { mutableStateOf(false) }
+
+    // Estado para el diálogo de confirmación de expulsión (CAPA TAREA C-1)
+    var trabajadorConfirmacion by remember { mutableStateOf<TrabajadorRealInfo?>(null) }
 
     // SERVICIOS (CAPA 5b): estado del control de EJECUCIÓN para el negocio actual.
     val sesion by CuentaStore.sesionActual.collectAsState()
@@ -119,11 +123,48 @@ fun OwnerWorkersScreen(
                                 EstadoRelacion.ACTIVA
                             }
                             businessViewModel.cambiarEstadoTrabajador(info.cuentaId, nuevoEstado)
+                        },
+                        onMostrarConfirmacion = { trabajador ->
+                            trabajadorConfirmacion = trabajador
                         }
                     )
                 }
             }
         }
+    }
+
+    // Diálogo de confirmación (CAPA TAREA C-1)
+    trabajadorConfirmacion?.let { trabajador ->
+        AlertDialog(
+            onDismissRequest = { trabajadorConfirmacion = null },
+            title = { Text("¿Eliminar a ${trabajador.username}?") },
+            text = {
+                Text(
+                    "Esto eliminará a ${trabajador.username} de este negocio. " +
+                            "Su cuenta TOKE no se eliminará."
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        val nuevoEstado = if (trabajador.estado == EstadoRelacion.ACTIVA) {
+                            EstadoRelacion.EXPULSADA
+                        } else {
+                            EstadoRelacion.ACTIVA
+                        }
+                        businessViewModel.cambiarEstadoTrabajador(trabajador.cuentaId, nuevoEstado)
+                        trabajadorConfirmacion = null
+                    }
+                ) {
+                    Text("Expulsar")
+                }
+            },
+            dismissButton = {
+                OutlinedButton(onClick = { trabajadorConfirmacion = null }) {
+                    Text("Cancelar")
+                }
+            }
+        )
     }
 }
 
@@ -131,7 +172,8 @@ fun OwnerWorkersScreen(
 private fun TrabajadorRealCard(
     info: TrabajadorRealInfo,
     servicioActivado: Boolean?,
-    onAlternarEstado: () -> Unit
+    onAlternarEstado: () -> Unit,
+    onMostrarConfirmacion: (TrabajadorRealInfo) -> Unit
 ) {
     Card(modifier = Modifier.fillMaxWidth()) {
         Column(modifier = Modifier.padding(16.dp)) {
@@ -157,7 +199,15 @@ private fun TrabajadorRealCard(
             )
             Spacer(modifier = Modifier.height(8.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {
-                OutlinedButton(onClick = onAlternarEstado) {
+                OutlinedButton(
+                    onClick = {
+                        if (info.estado == EstadoRelacion.ACTIVA) {
+                            onMostrarConfirmacion(info)
+                        } else {
+                            onAlternarEstado()
+                        }
+                    }
+                ) {
                     Text(
                         text = if (info.estado == EstadoRelacion.ACTIVA) "Expulsar" else "Reactivar"
                     )
