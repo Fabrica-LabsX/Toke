@@ -19,6 +19,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import java.util.Collections
 
 /**
  * Estado de la aplicación para el lado del Dueño.
@@ -27,6 +28,9 @@ class BusinessViewModel : ViewModel() {
 
     private val relacionRepo = RelacionCuentaNegocioRepository()
     private val cuentaRepo = CuentaRepository()
+
+    // IDs de cuentas que están siendo descargadas actualmente para evitar peticiones duplicadas.
+    private val idsEnVuelo = Collections.synchronizedSet(mutableSetOf<String>())
 
     // Operaciones reales compartidas (mismo flujo que usa WorkerViewModel).
     val operaciones: StateFlow<List<Operacion>> = InMemoryOperationStore.operaciones
@@ -83,28 +87,41 @@ class BusinessViewModel : ViewModel() {
             it.negocioId == negocioId && it.rol == RolCuentaNegocio.TRABAJADOR
         }
 
+        // Identificar qué cuentas no están en el caché local
+        val idsFaltantes = relacionesTrabajador
+            .map { it.cuentaId }
+            .filter { id -> cuentasCheadas.none { it.id == id } }
+
+        if (idsFaltantes.isNotEmpty()) {
+            cargarCuentasAgrupadas(idsFaltantes)
+        }
+
         relacionesTrabajador.map { rel ->
             val cuenta = cuentasCheadas.find { it.id == rel.cuentaId }
-            if (cuenta == null) {
-                // Si no está en caché, disparamos carga asíncrona.
-                cargarCuenta(rel.cuentaId)
-            }
             TrabajadorRealInfo(
                 cuentaId = rel.cuentaId,
-                username = cuenta?.username ?: "Cuenta sin nombre",
+                username = cuenta?.username ?: "Cargando...",
                 estado = rel.estado
             )
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
-    private fun cargarCuenta(id: String) {
+    private fun cargarCuentasAgrupadas(ids: List<String>) {
+        val realmenteFaltantes = ids.filter { it !in idsEnVuelo }
+        if (realmenteFaltantes.isEmpty()) return
+
+        idsEnVuelo.addAll(realmenteFaltantes)
         viewModelScope.launch {
-            cuentaRepo.obtenerPorId(id).onSuccess { cuenta ->
-                if (cuenta != null) {
-                    // Cacheamos en CuentaStore para que el StateFlow reaccione.
-                    CuentaStore.crear(cuenta)
+            cuentaRepo.obtenerVariosPorId(realmenteFaltantes)
+                .onSuccess { cuentas ->
+                    cuentas.forEach { CuentaStore.crear(it) }
+                    // No removemos de idsEnVuelo tras éxito porque CuentaStore.cuentas
+                    // ya las tendrá y el filtro inicial las descartará.
                 }
-            }
+                .onFailure {
+                    // Si falla, permitimos reintento liberando los IDs
+                    idsEnVuelo.removeAll(realmenteFaltantes.toSet())
+                }
         }
     }
 

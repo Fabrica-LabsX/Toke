@@ -8,6 +8,7 @@ import io.github.jan.supabase.realtime.postgresChangeFlow
 import io.github.jan.supabase.realtime.realtime
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -23,7 +24,8 @@ import kotlinx.coroutines.launch
  */
 internal object OperacionesRealtimeListener {
 
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private var job = SupervisorJob()
+    private var scope = CoroutineScope(job + Dispatchers.IO)
     private val channels = mutableMapOf<String, RealtimeChannel>()
 
     private val _eventos = MutableSharedFlow<PostgresAction>(extraBufferCapacity = 64)
@@ -58,10 +60,20 @@ internal object OperacionesRealtimeListener {
 
     /**
      * Cancela todas las suscripciones y libera los canales.
+     * Cancela el Job de las corrutinas activas para evitar fugas y callbacks zombies.
      */
     fun detenerTodo() {
+        // Cancelamos el job actual para detener todos los collectors de postgresChangeFlow
+        job.cancel()
+        
+        // Creamos un nuevo Job y Scope para futuras conexiones (si las hubiera)
+        job = SupervisorJob()
+        scope = CoroutineScope(job + Dispatchers.IO)
+
         scope.launch {
-            channels.values.forEach { it.unsubscribe() }
+            channels.values.forEach { 
+                runCatching { it.unsubscribe() }
+            }
             channels.clear()
         }
     }

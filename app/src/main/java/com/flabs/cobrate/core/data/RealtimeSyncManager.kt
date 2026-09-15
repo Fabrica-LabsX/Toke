@@ -7,6 +7,7 @@ import com.flabs.cobrate.core.model.EstadoOperacion
 import io.github.jan.supabase.realtime.PostgresAction
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
@@ -24,7 +25,8 @@ import kotlinx.serialization.json.jsonPrimitive
  */
 internal object RealtimeSyncManager {
     private const val TAG = "RealtimeSyncManager"
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private var job = SupervisorJob()
+    private var scope = CoroutineScope(job + Dispatchers.IO)
     private var initialized = false
 
     /**
@@ -47,9 +49,16 @@ internal object RealtimeSyncManager {
     }
 
     /**
-     * Detiene todas las suscripciones de Realtime.
+     * Detiene todas las suscripciones de Realtime y cancela los procesos de escucha.
      */
     fun detenerTodo() {
+        initialized = false
+        job.cancel()
+        
+        // Reset de job/scope para re-inicialización posterior
+        job = SupervisorJob()
+        scope = CoroutineScope(job + Dispatchers.IO)
+        
         OperacionesRealtimeListener.detenerTodo()
     }
 

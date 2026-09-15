@@ -36,6 +36,21 @@ internal class CuentaRepository {
             ?.toDomain()
     }
 
+    /**
+     * Obtiene varias cuentas por sus IDs en una sola petición.
+     */
+    suspend fun obtenerVariosPorId(ids: List<String>): Result<List<Cuenta>> = runCatching {
+        if (ids.isEmpty()) return@runCatching emptyList()
+        postgrest.from("cuentas")
+            .select {
+                filter {
+                    isIn("id", ids)
+                }
+            }
+            .decodeList<CuentaDto>()
+            .map { it.toDomain() }
+    }
+
     @Serializable
     internal data class CuentaDto(
         @SerialName("id") val id: String,

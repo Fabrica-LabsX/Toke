@@ -36,8 +36,10 @@ class AuthViewModel : ViewModel() {
     /** Cierra la sesión local y en Supabase. */
     fun cerrarSesion() {
         viewModelScope.launch {
-            SupabaseAuthBridge.cerrarSesionSupabase()
+            // Invertimos el orden: Primero cerramos Realtime y limpiamos Stores
+            // mientras el token de sesión sigue siendo válido en el cliente HTTP.
             CuentaStore.cerrarSesion()
+            SupabaseAuthBridge.cerrarSesionSupabase()
         }
     }
 }
