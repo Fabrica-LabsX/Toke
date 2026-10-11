@@ -6,7 +6,10 @@ import io.github.jan.supabase.createSupabaseClient
 import io.github.jan.supabase.auth.Auth
 import io.github.jan.supabase.postgrest.Postgrest
 import io.github.jan.supabase.realtime.Realtime
+import io.github.jan.supabase.storage.Storage
 import io.ktor.client.engine.okhttp.OkHttp
+import java.util.concurrent.TimeUnit
+import kotlin.time.Duration.Companion.seconds
 
 /**
  * Proveedor central del cliente de Supabase.
@@ -25,10 +28,22 @@ object SupabaseClientProvider {
             supabaseUrl = BuildConfig.SUPABASE_URL,
             supabaseKey = BuildConfig.SUPABASE_ANON_KEY,
         ) {
-            httpEngine = OkHttp.create()
+            httpEngine = OkHttp.create {
+                config {
+                    connectTimeout(20, TimeUnit.SECONDS)
+                    readTimeout(20, TimeUnit.SECONDS)
+                    writeTimeout(20, TimeUnit.SECONDS)
+                    pingInterval(20, TimeUnit.SECONDS)
+                    retryOnConnectionFailure(true)
+                }
+            }
             install(Postgrest)
             install(Auth)
-            install(Realtime)
+            install(Realtime) {
+                heartbeatInterval = 15.seconds
+                reconnectDelay = 7.seconds
+            }
+            install(Storage)
         }
     }
 

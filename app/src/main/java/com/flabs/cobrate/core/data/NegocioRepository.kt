@@ -1,11 +1,32 @@
 package com.flabs.cobrate.core.data
 
 import com.flabs.cobrate.core.model.Negocio
+import com.flabs.cobrate.core.model.ResultadoRpc
 import com.flabs.cobrate.core.model.TipoNegocio
 import io.github.jan.supabase.postgrest.postgrest
 import io.github.jan.supabase.postgrest.query.Columns
+import io.github.jan.supabase.storage.storage
+import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.descriptors.PrimitiveKind
+import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
+import kotlinx.serialization.descriptors.SerialDescriptor
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
+
+@OptIn(ExperimentalSerializationApi::class)
+object SafeTipoNegocioSerializer : KSerializer<TipoNegocio> {
+    override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("TipoNegocio", PrimitiveKind.STRING)
+    override fun serialize(encoder: Encoder, value: TipoNegocio) = encoder.encodeString(value.name)
+    override fun deserialize(decoder: Decoder): TipoNegocio {
+        val raw = decoder.decodeString().uppercase()
+        return runCatching { TipoNegocio.valueOf(raw) }.getOrDefault(TipoNegocio.OTRO)
+    }
+}
 
 /**
  * Repositorio de Negocios conectado a Supabase (Postgrest).
@@ -51,6 +72,30 @@ internal class NegocioRepository {
             .map { it.toDomain() }
     }
 
+    /**
+     * Limpia los archivos QR del bucket 'metodos-qr' y ejecuta la RPC eliminar_negocio (CAPA 39).
+     */
+    suspend fun eliminarNegocio(negocioId: String): Result<ResultadoRpc> = runCatching {
+        val storage = SupabaseClientProvider.supabase.storage.from("metodos-qr")
+        val archivos = runCatching { storage.list(prefix = "$negocioId/") }.getOrNull()
+        if (!archivos.isNullOrEmpty()) {
+            val rutas = archivos.map { "$negocioId/${it.name}" }
+            storage.delete(rutas)
+        }
+
+        val respuesta = postgrest.rpc(
+            function = "eliminar_negocio",
+            parameters = buildJsonObject {
+                put("p_negocio_id", negocioId)
+            }
+        ).decodeAs<ResultadoRpc>()
+
+        if (!respuesta.exito) {
+            throw Exception(respuesta.mensaje)
+        }
+        respuesta
+    }
+
     suspend fun obtenerNegociosDeCuenta(cuentaId: String): Result<List<Negocio>> = runCatching {
         // Negocios donde es dueño O donde existe una relación activa.
         // En Supabase, esto se puede hacer con un select con join o via RPC si es complejo.
@@ -64,12 +109,12 @@ internal class NegocioRepository {
             }
             .decodeList<NegocioDto>()
 
-        // 2. Negocios donde existe una relacion activa en relacion_cuenta_negocio.
+        // 2. Negocios donde existe una relación visible en relacion_cuenta_negocio.
         val relacionesActivas = postgrest.from("relacion_cuenta_negocio")
             .select {
                 filter {
                     eq("cuenta_id", cuentaId)
-                    eq("estado", "ACTIVA")
+                    isIn("estado", listOf("ACTIVA", "PAUSADA", "SOLICITADA", "RECHAZADA"))
                 }
             }
             .decodeList<NegocioRelacionDto>()
@@ -95,8 +140,10 @@ internal class NegocioRepository {
     internal data class NegocioDto(
         @SerialName("id") val id: String,
         @SerialName("nombre") val nombre: String,
+        @Serializable(with = SafeTipoNegocioSerializer::class)
         @SerialName("tipo") val tipo: TipoNegocio,
-        @SerialName("dueno_cuenta_id") val duenoCuentaId: String
+        @SerialName("dueno_cuenta_id") val duenoCuentaId: String,
+        @SerialName("color_marca") val colorMarca: String? = null
     )
 
     @Serializable
@@ -109,12 +156,14 @@ internal fun Negocio.toDto() = NegocioRepository.NegocioDto(
     id = id,
     nombre = nombre,
     tipo = tipo,
-    duenoCuentaId = dueñoCuentaId
+    duenoCuentaId = dueñoCuentaId,
+    colorMarca = colorMarca
 )
 
 internal fun NegocioRepository.NegocioDto.toDomain() = Negocio(
     id = id,
     nombre = nombre,
     tipo = tipo,
-    dueñoCuentaId = duenoCuentaId
+    dueñoCuentaId = duenoCuentaId,
+    colorMarca = colorMarca
 )

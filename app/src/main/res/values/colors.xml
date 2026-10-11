@@ -7,4 +7,12 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
+    <color name="toke_green">#FF00A651</color>
+    <color name="toke_green_deep">#FF0B4E30</color>
+    <color name="toke_background">#FFF4F5F7</color>
+
+    <!-- Splash Colors -->
+    <color name="splash_background_light">#FFFFFFFF</color>
+    <color name="splash_background_dark">#FF000000</color>
 </resources>

@@ -2,14 +2,26 @@ package com.flabs.cobrate.core.data
 
 import android.content.Context
 import android.util.Log
+import com.flabs.cobrate.core.logic.LogSeguro
 import com.flabs.cobrate.core.model.Cuenta
 import com.flabs.cobrate.core.model.EstadoRelacion
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
+
+/**
+ * Estados del flujo de sincronización remota de datos del usuario.
+ */
+enum class EstadoSincronizacionRemota {
+    IDLE,
+    SINCRONIZANDO,
+    EXITO,
+    ERROR
+}
 
 /**
  * Fuente de cuentas compartida en memoria (singleton) con persistencia local.
@@ -35,10 +47,14 @@ object CuentaStore {
     private val _sesionActual = MutableStateFlow<Cuenta?>(null)
     val sesionActual: StateFlow<Cuenta?> = _sesionActual
 
-    // UID de la cuenta que ya ha completado su sincronización inicial.
-    // Evita la "tormenta de peticiones" (~60 requests) al volver de background
-    // o durante un refresco de token técnico.
+    // UID de la cuenta que ya ha completado su sincronización inicial exitosamente.
     private var ultimoUidSincronizado: String? = null
+
+    // Control anticarreras de sincronización
+    private var currentSyncGeneration = 0L
+
+    private val _estadoSincronizacion = MutableStateFlow<EstadoSincronizacionRemota>(EstadoSincronizacionRemota.IDLE)
+    val estadoSincronizacion: StateFlow<EstadoSincronizacionRemota> = _estadoSincronizacion.asStateFlow()
 
     // id -> hash de contraseña (LEGADO: ya no se usa para Supabase Auth).
     private val _hashes = mutableMapOf<String, String>()
@@ -46,10 +62,10 @@ object CuentaStore {
     private var localStore: CuentaLocalStore? = null
     private var appContext: Context? = null
 
-    private val relacionRepo = RelacionCuentaNegocioRepository()
-    private val negocioRepo = NegocioRepository()
-    private val cuentaRepo = CuentaRepository()
-    private val operacionRepo = OperacionRepository()
+    private val relacionRepo by lazy { RelacionCuentaNegocioRepository() }
+    private val negocioRepo by lazy { NegocioRepository() }
+    private val cuentaRepo by lazy { CuentaRepository() }
+    private val operacionRepo by lazy { OperacionRepository() }
 
     /**
      * Inicializa el store con el contexto de la app y carga las cuentas
@@ -70,51 +86,87 @@ object CuentaStore {
                 _cuentas.value = dtos.map { it.aModelo() }
                 dtos.forEach { _hashes[it.id] = it.hashPassword }
 
-                // Sincronizamos la sesión actual con Supabase.
-                SupabaseAuthBridge.sesionActual.collect { userInfo ->
-                    if (userInfo == null) {
-                        _sesionActual.value = null
-                        ultimoUidSincronizado = null
-                    } else {
-                        val uid = userInfo.id
-                        var cuenta = _cuentas.value.find { it.id == uid }
-                        
-                        // Si la sesión existe en Supabase pero no tenemos la Cuenta local,
-                        // la creamos bajo demanda (ej. login en nuevo dispositivo).
-                        if (cuenta == null) {
-                            cuenta = Cuenta(
-                                id = uid,
-                                username = userInfo.email ?: "Usuario anónimo",
-                                correoVerificado = userInfo.email,
-                                ultimoAcceso = System.currentTimeMillis(),
-                                fechaCreacion = System.currentTimeMillis()
-                            )
-                            crear(cuenta, "")
+                val sesionSeguraStore = SesionSeguraStore(appContext)
+
+                // Sincronizamos la sesión actual con Supabase Auth (CAPA 20).
+                SupabaseAuthBridge.estadoSesion.collect { estado ->
+                    Log.d("TokeSesion", "EstadoSesion recibido: ${estado::class.simpleName}")
+                    when (estado) {
+                        EstadoSesion.Inicializando -> {
+                            Log.d("TokeSesion", "Inicializando sesión Supabase Auth...")
                         }
-                        _sesionActual.value = cuenta
+                        is EstadoSesion.Activa -> {
+                            val userInfo = estado.usuario
+                            val uid = userInfo.id
+                            var cuenta = _cuentas.value.find { it.id == uid }
 
-                        // GUARDA DE IDEMPOTENCIA: Evita re-sincronizar todo si el UID no ha cambiado.
-                        // Esto detiene las ~60 requests al volver de background o en token refresh.
-                        if (uid == ultimoUidSincronizado) {
-                            Log.d("CuentaStore", "[SYNC] SYNC SKIPPED (UID $uid ya sincronizado)")
-                            return@collect
+                            if (cuenta == null) {
+                                cuenta = Cuenta(
+                                    id = uid,
+                                    username = userInfo.email ?: "Usuario anónimo",
+                                    correoVerificado = userInfo.email,
+                                    ultimoAcceso = System.currentTimeMillis(),
+                                    fechaCreacion = System.currentTimeMillis()
+                                )
+                                crear(cuenta, "")
+                            }
+                            _sesionActual.value = cuenta
+                            sesionSeguraStore.guardarSesionActiva(uid)
+                            Log.d("TokeSesion", "Sesión Activa confirmada para UID ${uid.take(6)}. Guardado en SesionSeguraStore.")
+
+                            if (uid == ultimoUidSincronizado && _estadoSincronizacion.value == EstadoSincronizacionRemota.EXITO) {
+                                Log.d("CuentaStore", "[SYNC] SYNC SKIPPED (UID ${uid.take(6)} ya sincronizado con éxito)")
+                                return@collect
+                            }
+
+                            Log.d("CuentaStore", "[SYNC] SYNC START (UID ${uid.take(6)})")
+
+                            scope.launch {
+                                cuentaRepo.upsert(cuenta)
+                                    .onFailure {
+                                        LogSeguro.e("CuentaStore", "Error al sincronizar cuenta en Supabase", it)
+                                    }
+
+                                sincronizarDatos(uid).onSuccess {
+                                    ultimoUidSincronizado = uid
+                                    Log.d("CuentaStore", "[SYNC] SYNC END EXITO (UID ${uid.take(6)})")
+                                }.onFailure { err ->
+                                    LogSeguro.w("CuentaStore", "[SYNC] SYNC END CON ERROR (UID ${uid.take(6)}). No se marcará como completado.", err)
+                                }
+                            }
                         }
-
-                        Log.d("CuentaStore", "[SYNC] SYNC START (UID $uid)")
-                        ultimoUidSincronizado = uid
-
-                        // CAPA 7d-4: Sincronizamos la cuenta con la tabla public.cuentas
-                        // antes de disparar la sincronización de datos.
-                        scope.launch {
-                            cuentaRepo.upsert(cuenta)
-                                .onFailure {
-                                    Log.e("CuentaStore", "Error al sincronizar cuenta en Supabase: ${it.message}")
+                        EstadoSesion.CerradaPorUsuario, EstadoSesion.SinSesion -> {
+                            Log.d("TokeSesion", "Sesión cerrada o sin sesión. Limpiando sesión local.")
+                            _sesionActual.value = null
+                            ultimoUidSincronizado = null
+                            _estadoSincronizacion.value = EstadoSincronizacionRemota.IDLE
+                            sesionSeguraStore.limpiarSesion()
+                        }
+                        is EstadoSesion.FalloDeRefresco -> {
+                            if (estado.porRed) {
+                                val uidGuardado = sesionSeguraStore.leerSesionActiva()
+                                val cuentaLocal = if (uidGuardado != null) _cuentas.value.find { it.id == uidGuardado } else null
+                                if (uidGuardado != null && cuentaLocal != null) {
+                                    Log.d("TokeSesion", "Fallo de refresco por red. Estableciendo Sesión Provisional para UID ${uidGuardado.take(6)} sin sync.")
+                                    _sesionActual.value = cuentaLocal
+                                    ultimoUidSincronizado = null
+                                } else {
+                                    Log.d("TokeSesion", "Fallo de refresco por red sin cuenta local. Limpiando sesión.")
+                                    _sesionActual.value = null
+                                    ultimoUidSincronizado = null
+                                    _estadoSincronizacion.value = EstadoSincronizacionRemota.IDLE
+                                    sesionSeguraStore.limpiarSesion()
                                 }
-                                .onSuccess {
-                                    // Una vez asegurada la cuenta en Supabase, sincronizamos sus datos.
-                                    sincronizarDatos(uid)
-                                    Log.d("CuentaStore", "[SYNC] SYNC END (UID $uid)")
+                            } else {
+                                Log.d("TokeSesion", "Fallo de refresco técnico (no por red). Cerrando sesión.")
+                                _sesionActual.value = null
+                                ultimoUidSincronizado = null
+                                _estadoSincronizacion.value = EstadoSincronizacionRemota.IDLE
+                                sesionSeguraStore.limpiarSesion()
+                                scope.launch {
+                                    SupabaseAuthBridge.limpiarSesionLocal()
                                 }
+                            }
                         }
                     }
                 }
@@ -123,55 +175,99 @@ object CuentaStore {
     }
 
     /**
-     * Sincroniza Relaciones y Negocios desde Supabase para la cuenta indicada.
-     * Si falla, se conserva el estado local previo. CAPA 7d-2.
+     * Sincroniza Relaciones y Negocios desde Supabase para la cuenta indicada de forma coordinada.
+     * Devuelve Result.success(Unit) solo si todas las peticiones remotas necesarias completaron exitosamente.
+     * Si falla, se conserva el estado local previo en caché.
      */
-    fun sincronizarDatos(cuentaId: String) {
-        scope.launch {
-            // Sincronizamos ambos en paralelo (o secuencial, pero sin bloquear el uno al otro)
-            launch {
-                relacionRepo.relacionesDe(cuentaId).onSuccess { relaciones ->
-                    RelacionCuentaNegocioStore.sincronizar(cuentaId, relaciones)
+    suspend fun sincronizarDatos(cuentaId: String): Result<Unit> {
+        val generation = synchronized(this) {
+            ++currentSyncGeneration
+        }
+        _estadoSincronizacion.value = EstadoSincronizacionRemota.SINCRONIZANDO
 
-                    val negocioIds = relaciones.map { it.negocioId }.distinct()
+        LogSeguro.d("CuentaStore", "[SYNC-START] Generación $generation para UID ${cuentaId.take(6)}")
 
-                    // CAPA-REALTIME fix: Iniciar escucha para todos los negocios activos
-                    val negociosParaEscuchar = relaciones.filter { 
-                        it.estado == EstadoRelacion.ACTIVA 
-                    }.map { it.negocioId }.distinct()
-                    
-                    if (negociosParaEscuchar.isNotEmpty()) {
-                        appContext?.let { ctx ->
-                            RealtimeSyncManager.configurarEscucha(ctx, negociosParaEscuchar)
-                        }
-                    }
+        return try {
+            // 1. Obtener relaciones de la cuenta
+            val relacionesResult = relacionRepo.relacionesDe(cuentaId)
+            if (relacionesResult.isFailure) {
+                val err = relacionesResult.exceptionOrNull()
+                LogSeguro.w("CuentaStore", "[SYNC-FAIL] Error consultando relaciones de ${cuentaId.take(6)}: ${err?.message}")
+                if (generation == currentSyncGeneration) {
+                    _estadoSincronizacion.value = EstadoSincronizacionRemota.ERROR
+                }
+                return Result.failure(err ?: Exception("Error consultando relaciones"))
+            }
 
-                    if (negocioIds.isNotEmpty()) {
-                        launch {
-                            // Sincronizar todos los negocios en una sola petición (OPTIMIZACIÓN)
-                            negocioRepo.obtenerVariosPorId(negocioIds).onSuccess { negocios ->
-                                NegocioStore.sincronizar(negocios)
-                            }.onFailure {
-                                Log.e("CuentaStore", "Error sincronizando bloque de negocios: ${it.message}")
-                            }
-                        }
+            val relaciones = relacionesResult.getOrThrow()
 
-                        launch {
-                            // Sincronizar todas las operaciones en un solo bloque (OPTIMIZACIÓN)
-                            operacionRepo.obtenerDeVariosNegocios(negocioIds).onSuccess { todasLasOps ->
-                                negocioIds.forEach { negocioId ->
-                                    val opsDelNegocio = todasLasOps.filter { it.negocioId == negocioId }
-                                    InMemoryOperationStore.sincronizar(negocioId, opsDelNegocio)
-                                }
-                            }.onFailure {
-                                Log.e("CuentaStore", "Error sincronizando bloque de operaciones: ${it.message}")
-                            }
-                        }
-                    }
-                }.onFailure {
-                    Log.e("CuentaStore", "Error sincronizando relaciones: ${it.message}")
+            // Validar si esta generación sigue siendo válida frente al UID activo
+            if (cuentaId != _sesionActual.value?.id || generation != currentSyncGeneration) {
+                LogSeguro.d("CuentaStore", "[SYNC-STALE] Generación $generation o UID obsoletos tras relaciones. Descartando respuesta.")
+                return Result.failure(Exception("Sincronización obsoleta"))
+            }
+
+            // Sincronizar relaciones obtenidas con el store (preservando de otros UIDs)
+            RelacionCuentaNegocioStore.sincronizar(cuentaId, relaciones)
+
+            // 2. Obtener negocios propios y relacionados vía NegocioRepository
+            val negociosResult = negocioRepo.obtenerNegociosDeCuenta(cuentaId)
+            if (negociosResult.isFailure) {
+                val err = negociosResult.exceptionOrNull()
+                LogSeguro.w("CuentaStore", "[SYNC-FAIL] Error consultando negocios de ${cuentaId.take(6)}: ${err?.message}")
+                if (generation == currentSyncGeneration) {
+                    _estadoSincronizacion.value = EstadoSincronizacionRemota.ERROR
+                }
+                return Result.failure(err ?: Exception("Error consultando negocios"))
+            }
+
+            val negocios = negociosResult.getOrThrow()
+
+            // Re-validar vigencia de generación
+            if (cuentaId != _sesionActual.value?.id || generation != currentSyncGeneration) {
+                LogSeguro.d("CuentaStore", "[SYNC-STALE] Generación $generation o UID obsoletos tras negocios. Descartando.")
+                return Result.failure(Exception("Sincronización obsoleta"))
+            }
+
+            NegocioStore.sincronizar(negocios)
+
+            // 3. Configurar escuchas de Realtime para negocios donde es dueño o tiene relación activa
+            val negocioIdsOwned = negocios.filter { it.dueñoCuentaId == cuentaId }.map { it.id }
+            val negocioIdsActiveRel = relaciones.filter { it.estado == EstadoRelacion.ACTIVA }.map { it.negocioId }
+            val negociosParaEscuchar = (negocioIdsOwned + negocioIdsActiveRel).distinct()
+
+            if (negociosParaEscuchar.isNotEmpty()) {
+                appContext?.let { ctx ->
+                    RealtimeSyncManager.configurarEscucha(ctx, negociosParaEscuchar)
                 }
             }
+
+            // 4. Sincronizar operaciones en bloque si existen negocios
+            val todosNegocioIds = (negocios.map { it.id } + relaciones.map { it.negocioId }).distinct()
+            if (todosNegocioIds.isNotEmpty()) {
+                operacionRepo.obtenerDeVariosNegocios(todosNegocioIds).onSuccess { todasLasOps ->
+                    if (cuentaId == _sesionActual.value?.id && generation == currentSyncGeneration) {
+                        todosNegocioIds.forEach { negocioId ->
+                            val opsDelNegocio = todasLasOps.filter { it.negocioId == negocioId }
+                            InMemoryOperationStore.sincronizar(negocioId, opsDelNegocio)
+                        }
+                    }
+                }.onFailure { err ->
+                    LogSeguro.w("CuentaStore", "[SYNC-WARN] Fallo menor sincronizando operaciones", err)
+                }
+            }
+
+            if (generation == currentSyncGeneration && cuentaId == _sesionActual.value?.id) {
+                _estadoSincronizacion.value = EstadoSincronizacionRemota.EXITO
+            }
+            LogSeguro.d("CuentaStore", "[SYNC-SUCCESS] Generación $generation completada para ${cuentaId.take(6)}. Negocios: ${negocios.size}, Relaciones: ${relaciones.size}")
+            Result.success(Unit)
+        } catch (e: Exception) {
+            LogSeguro.e("CuentaStore", "[SYNC-ERROR] Excepción durante sincronización de ${cuentaId.take(6)}", e)
+            if (generation == currentSyncGeneration) {
+                _estadoSincronizacion.value = EstadoSincronizacionRemota.ERROR
+            }
+            Result.failure(e)
         }
     }
 
@@ -200,6 +296,10 @@ object CuentaStore {
         ultimoUidSincronizado = null
         _cuentas.value = emptyList()
 
+        appContext?.let { ctx ->
+            SesionSeguraStore(ctx).limpiarSesion()
+        }
+
         // Purgado atómico de todos los Stores con estado en memoria (CAPA 7-FIX)
         InMemoryOperationStore.limpiar()
         NegocioStore.limpiar()
@@ -207,9 +307,13 @@ object CuentaStore {
         EventoDeNotificacionStore.limpiar()
         AlertaStore.limpiar()
         InvitacionStore.limpiar()
+        MetodoDeCobroStore.limpiar()
+        OperacionPendienteStore.limpiarMemoria()
 
         // Detener escuchas activas
-        RealtimeSyncManager.detenerTodo()
+        scope.launch {
+            RealtimeSyncManager.detenerTodo()
+        }
     }
 
     private fun persistir() {

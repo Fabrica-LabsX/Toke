@@ -15,7 +15,9 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.flabs.cobrate.R
 
 /**
  * Plan y facturación. Los planes son contenido estático de solo lectura;
@@ -31,7 +33,7 @@ fun BillingPlanScreen() {
                 .padding(16.dp)
         ) {
             Text(
-                text = "Plan y facturación",
+                text = stringResource(R.string.nombre_mi_plan),
                 style = MaterialTheme.typography.headlineMedium
             )
             Spacer(modifier = Modifier.height(16.dp))

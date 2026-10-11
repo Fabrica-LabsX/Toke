@@ -21,7 +21,8 @@ data class InvitacionTrabajador(
     val estado: EstadoInvitacion,
     val fechaCreacion: Long = 0L,
     // Momento en que la invitación deja de ser válida.
-    val expiracion: Long = 0L
+    val expiracion: Long = 0L,
+    val nombrePropuesto: String? = null
 )
 
 /** Estados posibles de una invitación de trabajador. */
@@ -29,5 +30,6 @@ enum class EstadoInvitacion {
     PENDIENTE,
     ACEPTADA,
     RECHAZADA,
-    EXPIRADA
+    EXPIRADA,
+    REVOCADA
 }

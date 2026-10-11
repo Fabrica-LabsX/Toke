@@ -43,7 +43,9 @@ import com.flabs.cobrate.core.model.RolCuentaNegocio
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun OwnerWorkersScreen(
-    businessViewModel: BusinessViewModel
+    businessViewModel: BusinessViewModel,
+    soloLectura: Boolean = false,
+    onRefrescarTab: (() -> Unit)? = null
 ) {
     val trabajadores by businessViewModel.trabajadoresReales.collectAsState()
     var mostrandoInvitar by remember { mutableStateOf(false) }
@@ -100,6 +102,7 @@ fun OwnerWorkersScreen(
                 if (mostrandoInvitar) {
                     Spacer(modifier = Modifier.height(16.dp))
                     InvitarTrabajadorScreen(
+                        businessViewModel = businessViewModel,
                         onCerrar = { mostrandoInvitar = false }
                     )
                     Spacer(modifier = Modifier.height(16.dp))

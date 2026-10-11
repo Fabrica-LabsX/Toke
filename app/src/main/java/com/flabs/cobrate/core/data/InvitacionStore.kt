@@ -3,6 +3,7 @@ package com.flabs.cobrate.core.data
 import android.content.Context
 import com.flabs.cobrate.core.model.EstadoInvitacion
 import com.flabs.cobrate.core.model.InvitacionTrabajador
+import com.flabs.cobrate.core.model.toInvitacion
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -22,7 +23,7 @@ object InvitacionStore {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     private const val LARGO_CODIGO = 6
-    private const val HORAS_VALIDEZ = 24L
+    private const val MINUTOS_VALIDEZ = 20L
 
     // Caracteres legibles (sin 0/O, 1/I, etc.) para evitar confusiones al leerlos.
     private val CARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789".toCharArray()
@@ -32,7 +33,7 @@ object InvitacionStore {
 
     private var localStore: InvitacionLocalStore? = null
 
-    private val repository = InvitacionRepository()
+    private val repository by lazy { InvitacionRepository() }
 
     /**
      * Inicializa el store con el contexto de la app y carga las invitaciones
@@ -57,7 +58,7 @@ object InvitacionStore {
     suspend fun crear(negocioId: String): Result<InvitacionTrabajador> {
         val ahora = System.currentTimeMillis()
         val codigo = generarCodigo()
-        val expiracion = ahora + HORAS_VALIDEZ * 60 * 60 * 1000
+        val expiracion = ahora + MINUTOS_VALIDEZ * 60 * 1000
         
         val result = repository.crear(negocioId, null, codigo, expiracion)
         if (result.isSuccess) {
@@ -73,6 +74,42 @@ object InvitacionStore {
     fun buscarPorCodigo(codigo: String): InvitacionTrabajador? {
         val normalizado = codigo.trim().uppercase()
         return _invitaciones.value.find { it.codigo == normalizado }
+    }
+
+    /** Agrega una invitación manualmente a la caché (C8). */
+    fun agregarManual(invitacion: InvitacionTrabajador) {
+        val actual = _invitaciones.value.toMutableList()
+        val index = actual.indexOfFirst { it.codigo == invitacion.codigo }
+        if (index != -1) {
+            actual[index] = invitacion
+        } else {
+            actual.add(invitacion)
+        }
+        _invitaciones.value = actual
+        persistir()
+    }
+
+    /**
+     * Busca una invitación remotamente por su código.
+     * CAPA 4-FIX: Usa la RPC obtenerPreview en lugar de SELECT directo para 
+     * permitir el acceso a trabajadores (sesión anónima) restringido por RLS.
+     */
+    suspend fun obtenerRemoto(codigo: String): Result<InvitacionTrabajador?> {
+        val normalizado = codigo.trim().uppercase()
+        return repository.obtenerPreview(normalizado).onSuccess { preview ->
+            if (preview != null) {
+                val invitacion = preview.toInvitacion()
+                val actual = _invitaciones.value.toMutableList()
+                val index = actual.indexOfFirst { it.codigo == normalizado }
+                if (index != -1) {
+                    actual[index] = invitacion
+                } else {
+                    actual.add(invitacion)
+                }
+                _invitaciones.value = actual
+                persistir()
+            }
+        }.map { it?.toInvitacion() }
     }
 
     /** 

@@ -14,7 +14,9 @@ data class Negocio(
     val nombre: String,
     val tipo: TipoNegocio,
     // Cuenta que creó/administra el negocio.
-    val dueñoCuentaId: String
+    val dueñoCuentaId: String,
+    // Color de marca de la empresa (formato Hex #RRGGBB).
+    val colorMarca: String? = null
 )
 
 /** Rubro/tipo del negocio. */

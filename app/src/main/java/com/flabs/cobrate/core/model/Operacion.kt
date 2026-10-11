@@ -6,14 +6,17 @@ package com.flabs.cobrate.core.model
  *
  * Modelo TOKE V1: la operación pertenece a un [negocioId] y puede estar
  * asignada a un trabajador ([trabajadorAsignadoId]) o no (null si SIN_ASIGNAR).
- * El origen ([origen]) indica cómo se creó: pago detectado automáticamente o
- * cobro manual "Va a pagar".
+ * El origen ([origen]) indica cómo se creó: pago detectado automáticamente.
  */
 data class Operacion(
     val id: String,
     val negocioId: String,
     // Trabajador al que está asignada la operación (null si no asignada).
     val trabajadorAsignadoId: String? = null,
+    // Método de pago asociado (Yape, Plin, etc.). Nuevo en Bloqueador 3.
+    val metodoPago: TipoMetodoCobro? = null,
+    // ID del método de cobro específico (referencia a metodos_de_cobro.id) (C11).
+    val metodoCobroId: String? = null,
     val monto: Double,
     val estado: EstadoOperacion,
     val origen: OrigenOperacion,
@@ -35,11 +38,8 @@ enum class EstadoOperacion {
 
 /** Origen/forma en que se creó la operación. */
 sealed class OrigenOperacion {
-    /** Pago detectado automáticamente (vía notificación). "Próximamente". */
+    /** Pago detectado automáticamente (vía notificación). */
     data class Detectada(val eventoId: String = "") : OrigenOperacion()
-
-    /** Operación creada manualmente con "Va a pagar". */
-    data object VaAPagar : OrigenOperacion()
 }
 
 /** Un cambio de estado en el historial de una operación. */

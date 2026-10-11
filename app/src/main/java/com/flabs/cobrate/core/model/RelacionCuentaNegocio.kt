@@ -13,10 +13,12 @@ data class RelacionCuentaNegocio(
     val cuentaId: String,
     val negocioId: String,
     val rol: RolCuentaNegocio,
-    // Estado actual de la relación (activa o expulsada).
+    // Estado actual de la relación.
     val estado: EstadoRelacion = EstadoRelacion.ACTIVA,
     // Momento en que se vinculó la cuenta al negocio.
-    val fechaVinculacion: Long = 0L
+    val fechaVinculacion: Long = 0L,
+    // Código con el que se solicitó ingresar al negocio (CAPA 42).
+    val codigoUsado: String? = null
 )
 
 /** Rol de una cuenta dentro de un negocio. */
@@ -31,6 +33,12 @@ enum class RolCuentaNegocio {
 enum class EstadoRelacion {
     // Relación vigente.
     ACTIVA,
+    // Relación vigente pero silenciada.
+    PAUSADA,
     // La cuenta fue expulsada del negocio.
-    EXPULSADA
+    EXPULSADA,
+    // La cuenta solicitó unirse pero requiere aprobación del dueño (CAPA 42).
+    SOLICITADA,
+    // La solicitud de ingreso fue rechazada por el dueño (CAPA 42).
+    RECHAZADA
 }

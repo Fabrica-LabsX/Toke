@@ -18,7 +18,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.flabs.cobrate.R
 import com.flabs.cobrate.components.ProximamenteCard
 import java.util.Locale
 
@@ -44,7 +46,7 @@ fun BusinessStatsScreen(businessViewModel: BusinessViewModel) {
                 .padding(16.dp)
         ) {
             Text(
-                text = "Estadísticas",
+                text = stringResource(R.string.nombre_reportes),
                 style = MaterialTheme.typography.headlineMedium
             )
             Spacer(modifier = Modifier.height(16.dp))
@@ -72,7 +74,7 @@ fun BusinessStatsScreen(businessViewModel: BusinessViewModel) {
             )
             Spacer(modifier = Modifier.height(8.dp))
             ProximamenteCard(
-                titulo = "Estadísticas del mes",
+                titulo = stringResource(com.flabs.cobrate.R.string.nombre_este_mes),
                 descripcion = "Disponible próximamente"
             )
             Spacer(modifier = Modifier.height(16.dp))
@@ -82,7 +84,7 @@ fun BusinessStatsScreen(businessViewModel: BusinessViewModel) {
             )
             Spacer(modifier = Modifier.height(8.dp))
             ProximamenteCard(
-                titulo = "Estadísticas del año",
+                titulo = stringResource(R.string.nombre_este_anio),
                 descripcion = "Disponible próximamente"
             )
         }

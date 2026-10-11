@@ -42,8 +42,11 @@ import com.flabs.cobrate.core.logic.PermisosChecker
  * o el botón "Permitir" de batería), la pantalla se revalida automáticamente
  * vía el observer de lifecycle al volver a RESUMED.
  */
+import com.flabs.cobrate.core.logic.Requisito
+
 @Composable
 fun DiagnosticoPermisosScreen(
+    requisitos: Set<Requisito> = emptySet(),
     onVolver: () -> Unit
 ) {
     val context = LocalContext.current

@@ -1,17 +1,19 @@
 package com.flabs.cobrate.core.model
 
 /**
- * Representa un método de cobro configurado por el dueño.
- * Sin lógica de negocio, solo el modelo de datos.
- *
- * Nota: no incluye un campo `id` propio ni asociación a negocio; eso se añadirá
- * cuando se persista (CAPA posterior) y se relacione con Negocio. Por ahora no
- * se agrega para no adelantarse a capas futuras.
+ * Representa un método de cobro del negocio con QR y visibilidad.
+ * Ahora completo con persistencia y Storage.
  */
 data class MetodoDeCobro(
+    val id: String = "",
+    val negocioId: String = "",
     val tipo: TipoMetodoCobro,
-    val datoDeCobro: String,
-    val activo: Boolean
+    val datoDeCobro: String = "",
+    val nombreDestinatario: String? = null,
+    val qrUrl: String? = null,
+    val activo: Boolean = true,
+    val oculto: Boolean = false,
+    val creadoEn: Long = 0
 )
 
 /** Tipos de método de cobro soportados. */
@@ -22,7 +24,6 @@ enum class TipoMetodoCobro {
     BCP,
     INTERBANK,
     BIM,
-    // Valores añadidos en CAPA 6c-2 (extensión aditiva del enum).
     AGORA_TUNKI,
     BBVA,
     BANBIF,

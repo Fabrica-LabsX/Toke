@@ -23,8 +23,10 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.flabs.cobrate.R
 import com.flabs.cobrate.core.data.ConfiguracionDeVozStore
 import com.flabs.cobrate.core.logic.AndroidTtsVoiceEngine
 import com.flabs.cobrate.core.model.ConfiguracionDeVoz
@@ -59,7 +61,7 @@ fun VoiceSettingsScreen(
                 .padding(16.dp)
         ) {
             Text(
-                text = "Configuración de voz",
+                text = stringResource(R.string.nombre_aviso_voz),
                 style = MaterialTheme.typography.headlineMedium
             )
             Spacer(modifier = Modifier.height(16.dp))

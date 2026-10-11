@@ -10,6 +10,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 /**
  * Fuente de relaciones Cuenta↔Negocio compartida en memoria (singleton) con
@@ -25,9 +26,13 @@ object RelacionCuentaNegocioStore {
     private val _relaciones = MutableStateFlow<List<RelacionCuentaNegocio>>(emptyList())
     val relaciones: StateFlow<List<RelacionCuentaNegocio>> = _relaciones
 
+    // ---- SEÑAL DATOS LISTOS (CAPA 55) ----
+    private val _listo = MutableStateFlow<Boolean>(false)
+    val listo: StateFlow<Boolean> = _listo.asStateFlow()
+
     private var localStore: RelacionCuentaNegocioLocalStore? = null
 
-    private val repository = RelacionCuentaNegocioRepository()
+    private val repository by lazy { RelacionCuentaNegocioRepository() }
 
     /**
      * Inicializa el store con el contexto de la app y carga las relaciones
@@ -39,7 +44,11 @@ object RelacionCuentaNegocioStore {
             val store = RelacionCuentaNegocioLocalStore(appContext)
             localStore = store
             scope.launch {
-                _relaciones.value = store.leerUnaVez().map { it.aModelo() }
+                try {
+                    _relaciones.value = store.leerUnaVez().map { it.aModelo() }
+                } finally {
+                    _listo.value = true
+                }
             }
         }
     }
@@ -84,10 +93,34 @@ object RelacionCuentaNegocioStore {
     }
 
     /**
+     * Sincroniza (reemplaza) las relaciones locales con las del servidor
+     * para un negocio específico, preservando las de otros negocios.
+     * CAPA 23.
+     */
+    fun sincronizarNegocio(negocioIdSincronizado: String, nuevasRelaciones: List<RelacionCuentaNegocio>) {
+        val relacionesDeOtrosNegocios = _relaciones.value.filter { it.negocioId != negocioIdSincronizado }
+        _relaciones.value = relacionesDeOtrosNegocios + nuevasRelaciones
+        persistir()
+    }
+
+    /** Quita una relación localmente (CAPA 40). */
+    fun quitarRelacion(negocioId: String, cuentaId: String) {
+        _relaciones.value = _relaciones.value.filterNot { it.negocioId == negocioId && it.cuentaId == cuentaId }
+        persistir()
+    }
+
+    /** Quita todas las relaciones de un negocio localmente (CAPA 41). */
+    fun quitarPorNegocio(negocioId: String) {
+        _relaciones.value = _relaciones.value.filterNot { it.negocioId == negocioId }
+        persistir()
+    }
+
+    /**
      * Limpia la memoria local y el disco (usado en Logout para evitar fuga de datos entre cuentas).
      */
     fun limpiar() {
         _relaciones.value = emptyList()
+        _listo.value = true
         persistir()
     }
 

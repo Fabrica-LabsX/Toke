@@ -3,7 +3,11 @@ package com.flabs.cobrate.core.logic
 import android.content.Context
 import android.util.Log
 import com.flabs.cobrate.core.data.ConfiguracionDeVozStore
+import com.flabs.cobrate.core.data.CuentaStore
+import com.flabs.cobrate.core.data.EstadoOperativoStore
+import com.flabs.cobrate.core.data.RelacionCuentaNegocioStore
 import com.flabs.cobrate.core.model.EstadoOperacion
+import com.flabs.cobrate.core.model.EstadoRelacion
 import com.flabs.cobrate.core.model.ModoVoz
 import com.flabs.cobrate.core.model.Operacion
 
@@ -28,6 +32,23 @@ object OperationNotifier {
      * Evita duplicar lógica entre el detector local y el listener remoto.
      */
     fun notificar(context: Context, operacion: Operacion) {
+        if (!EstadoOperativoStore.encendido.value) {
+            Log.d(TAG, "Notificación omitida porque TOKE está apagado a nivel global")
+            return
+        }
+
+        // C10: Solo notificamos si la relación del usuario con este negocio es ACTIVA.
+        // Si está PAUSADA o EXPULSADA, el evento se procesa en el Store pero no se alerta al usuario.
+        val cuentaId = CuentaStore.sesionActual.value?.id ?: return
+        val relacion = RelacionCuentaNegocioStore.relaciones.value.find { 
+            it.cuentaId == cuentaId && it.negocioId == operacion.negocioId 
+        }
+        
+        if (relacion?.estado != EstadoRelacion.ACTIVA) {
+            Log.d(TAG, "Notificación omitida por estado de relación: ${relacion?.estado}")
+            return
+        }
+
         val monto = operacion.monto
         val modoCauteloso = ConfiguracionDeVozStore.configuracion.value.modo == ModoVoz.CAUTELOSO
 

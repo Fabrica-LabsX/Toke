@@ -21,6 +21,10 @@ object DailySummary {
     fun operacionesPendientes(operaciones: List<Operacion>): Int =
         operaciones.count { it.estado == EstadoOperacion.SIN_ASIGNAR }
 
+    /** Pagos recibidos: operaciones ya asignadas o cerradas (todo lo que no está SIN_ASIGNAR). */
+    fun pagosRecibidos(operaciones: List<Operacion>): Int =
+        operaciones.count { it.estado != EstadoOperacion.SIN_ASIGNAR }
+
     /**
      * Promedio del día: total de montos entre el número de operaciones.
      * Protege ante división por cero (devuelve 0.0 si no hay operaciones).

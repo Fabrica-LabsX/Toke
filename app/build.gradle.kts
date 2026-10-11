@@ -1,12 +1,14 @@
+import com.android.build.api.dsl.ApplicationExtension
 import java.util.Properties
 
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.kotlin.serialization)
+    id("com.google.gms.google-services")
 }
 
-android {
+extensions.configure<ApplicationExtension> {
     buildFeatures {
         compose = true
         buildConfig = true
@@ -45,20 +47,31 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 }
+
+kotlin {
+    jvmToolchain(17)
+    compilerOptions {
+        freeCompilerArgs.add("-opt-in=androidx.compose.material3.ExperimentalMaterial3Api")
+    }
+}
+
 
 dependencies {
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.core.splashscreen)
     implementation(libs.material)
     implementation(platform(libs.composerbom))
     implementation(libs.composeUi)
     implementation(libs.composeGraphics)
     implementation(libs.composeToolingPreview)
     implementation(libs.composeMaterial3)
+    implementation(libs.composeMaterialIconsCore)
+    implementation(libs.composeMaterialIconsExtended)
     implementation(libs.activityCompose)
     implementation(libs.navigationCompose)
     implementation(libs.lifecycleViewmodelCompose)
@@ -71,9 +84,17 @@ dependencies {
     implementation(libs.supabasePostgrest)
     implementation(libs.supabaseAuth)
     implementation(libs.supabaseRealtime)
+    implementation(libs.supabaseStorage)
+    implementation(libs.coil)
     implementation(libs.ktorClientOkhttp)
     implementation(libs.kotlinxSerializationJson)
     testImplementation(libs.junit)
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.androidx.junit)
+    implementation(libs.google.mlkit.barcode.scanning)
+
+    // Firebase
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.messaging)
 }

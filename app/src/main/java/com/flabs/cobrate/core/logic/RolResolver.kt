@@ -48,6 +48,8 @@ object RolResolver {
 
 /** Rol efectivo resuelto de una cuenta en el sistema. */
 enum class RolEfectivo {
+    // Estado inicial mientras se cargan las relaciones.
+    CARGANDO,
     // Administrador en al menos un negocio activo.
     ADMINISTRADOR,
     // Trabajador en al menos un negocio activo (pero no administrador en ninguno).

@@ -24,28 +24,36 @@ internal class NegocioLocalStore(private val context: Context) {
 
     private val Context.dataStore by preferencesDataStore(name = "negocios")
 
-    private val negociosKey = stringPreferencesKey("lista_negocios")
+    /**
+     * CAPA 8-SANEAMIENTO: La clave ahora incluye el UID para aislamiento físico.
+     */
+    private fun keyParaUsuario(uid: String) = stringPreferencesKey("negocios_$uid")
 
     private val json = Json {
         ignoreUnknownKeys = true
     }
 
-    /** Lee los negocios persistidos una sola vez (DTOs). */
-    suspend fun leerUnaVez(): List<NegocioDto> =
+    /** Lee los negocios persistidos una sola vez para un usuario específico. */
+    suspend fun leerUnaVez(uid: String): List<NegocioDto> =
         context.dataStore.data.map { prefs ->
-            prefs[negociosKey]?.let { raw ->
+            prefs[keyParaUsuario(uid)]?.let { raw ->
                 runCatching {
                     json.decodeFromString<List<NegocioDto>>(raw)
                 }.getOrElse { emptyList() }
             } ?: emptyList()
         }.first()
 
-    /** Guarda la lista completa de negocios (sobrescribe lo anterior). */
-    suspend fun guardar(negocios: List<Negocio>) {
+    /** Guarda la lista completa de negocios para un usuario (espera finalización). */
+    suspend fun guardar(uid: String, negocios: List<Negocio>) {
         val raw = json.encodeToString(negocios.map { it.aDto() })
         context.dataStore.edit { prefs ->
-            prefs[negociosKey] = raw
+            prefs[keyParaUsuario(uid)] = raw
         }
+    }
+
+    /** Borra los datos de un usuario específico. */
+    suspend fun borrarParaUsuario(uid: String) {
+        context.dataStore.edit { it.remove(keyParaUsuario(uid)) }
     }
 
     // ---- DTO serializable (espejo del dominio) ----
@@ -55,7 +63,8 @@ internal class NegocioLocalStore(private val context: Context) {
         val id: String,
         val nombre: String,
         val tipo: TipoNegocio,
-        val dueñoCuentaId: String
+        val dueñoCuentaId: String,
+        val colorMarca: String? = null
     )
 }
 
@@ -66,7 +75,8 @@ private fun Negocio.aDto(): NegocioLocalStore.NegocioDto =
         id = id,
         nombre = nombre,
         tipo = tipo,
-        dueñoCuentaId = dueñoCuentaId
+        dueñoCuentaId = dueñoCuentaId,
+        colorMarca = colorMarca
     )
 
 internal fun NegocioLocalStore.NegocioDto.aModelo(): Negocio =
@@ -74,5 +84,6 @@ internal fun NegocioLocalStore.NegocioDto.aModelo(): Negocio =
         id = id,
         nombre = nombre,
         tipo = tipo,
-        dueñoCuentaId = dueñoCuentaId
+        dueñoCuentaId = dueñoCuentaId,
+        colorMarca = colorMarca
     )

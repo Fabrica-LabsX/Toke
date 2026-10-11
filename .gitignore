@@ -11,6 +11,10 @@ local.properties
 # Capturas de depuración (logcat exportado, no es código)
 *.logcat
 
+# Sensitive credentials and config
+google-services.json
+app/google-services.json
+
 # IDE - Android Studio (ignorar .idea salvo lo esencial)
 .idea/
 !.idea/.gitignore

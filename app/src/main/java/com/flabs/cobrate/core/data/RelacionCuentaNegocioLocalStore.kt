@@ -54,7 +54,8 @@ internal class RelacionCuentaNegocioLocalStore(private val context: Context) {
         val negocioId: String,
         val rol: RolCuentaNegocio,
         val estado: EstadoRelacion,
-        val fechaVinculacion: Long
+        val fechaVinculacion: Long,
+        val codigoUsado: String? = null
     )
 }
 
@@ -66,7 +67,8 @@ private fun RelacionCuentaNegocio.aDto(): RelacionCuentaNegocioLocalStore.Relaci
         negocioId = negocioId,
         rol = rol,
         estado = estado,
-        fechaVinculacion = fechaVinculacion
+        fechaVinculacion = fechaVinculacion,
+        codigoUsado = codigoUsado
     )
 
 internal fun RelacionCuentaNegocioLocalStore.RelacionDto.aModelo(): RelacionCuentaNegocio =
@@ -75,5 +77,6 @@ internal fun RelacionCuentaNegocioLocalStore.RelacionDto.aModelo(): RelacionCuen
         negocioId = negocioId,
         rol = rol,
         estado = estado,
-        fechaVinculacion = fechaVinculacion
+        fechaVinculacion = fechaVinculacion,
+        codigoUsado = codigoUsado
     )

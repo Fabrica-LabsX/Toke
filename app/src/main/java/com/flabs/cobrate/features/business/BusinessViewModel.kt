@@ -1,20 +1,37 @@
 package com.flabs.cobrate.features.business
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.flabs.cobrate.core.data.NegocioStore
 import com.flabs.cobrate.core.data.CuentaRepository
 import com.flabs.cobrate.core.data.CuentaStore
 import com.flabs.cobrate.core.data.InMemoryOperationStore
+import com.flabs.cobrate.core.data.InvitacionRepository
+import com.flabs.cobrate.core.data.InvitacionStore
+import com.flabs.cobrate.core.data.OperacionRepository
 import com.flabs.cobrate.core.data.RelacionCuentaNegocioRepository
 import com.flabs.cobrate.core.data.RelacionCuentaNegocioStore
+import com.flabs.cobrate.core.data.MetodoDeCobroStore
 import com.flabs.cobrate.core.logic.DailySummary
+import com.flabs.cobrate.core.logic.FeedbackManager
+import com.flabs.cobrate.core.logic.LogSeguro
+import com.flabs.cobrate.core.logic.SolicitudesIngreso
+import com.flabs.cobrate.core.logic.conReintentoPorReloj
+import com.flabs.cobrate.core.model.EstadoInvitacion
 import com.flabs.cobrate.core.model.EstadoRelacion
+import com.flabs.cobrate.core.model.InvitacionTrabajador
+import com.flabs.cobrate.core.model.MetodoDeCobro
+import com.flabs.cobrate.core.model.MiembroEquipo
+import com.flabs.cobrate.core.model.Negocio
 import com.flabs.cobrate.core.model.Operacion
 import com.flabs.cobrate.core.model.RelacionCuentaNegocio
 import com.flabs.cobrate.core.model.RolCuentaNegocio
+import com.flabs.cobrate.core.model.TipoMetodoCobro
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -28,37 +45,115 @@ class BusinessViewModel : ViewModel() {
 
     private val relacionRepo = RelacionCuentaNegocioRepository()
     private val cuentaRepo = CuentaRepository()
+    private val invitacionRepo = InvitacionRepository()
+
+    // ---- Códigos de invitación activos y Solicitudes (CAPA 45) ----
+    private val _codigosActivos = MutableStateFlow<List<InvitacionTrabajador>>(emptyList())
+    val codigosActivos: StateFlow<List<InvitacionTrabajador>> = _codigosActivos.asStateFlow()
+
+    private val mapaCodigosNombres = Collections.synchronizedMap(mutableMapOf<String, String>())
+
+    // ---- Estados de Métodos de Cobro (C8) ----
+    
+    // Estado de progreso de subida de QR para la UI
+    private val _uploadStage = MutableStateFlow<String?>(null)
+    val uploadStage: StateFlow<String?> = _uploadStage.asStateFlow()
+
+    // Caché de QRs descargados (puente al Store)
+    val qrCache = MetodoDeCobroStore.qrCache
 
     // IDs de cuentas que están siendo descargadas actualmente para evitar peticiones duplicadas.
     private val idsEnVuelo = Collections.synchronizedSet(mutableSetOf<String>())
 
-    // Operaciones reales compartidas (mismo flujo que usa WorkerViewModel).
-    val operaciones: StateFlow<List<Operacion>> = InMemoryOperationStore.operaciones
+    // ID del negocio que este ViewModel debe mostrar.
+    // Única fuente de verdad desde el contexto central (C9).
+    val negocioActualId: StateFlow<String?> = NegocioStore.negocioActivoId
 
-    /** 
-     * Negocio actual gestionado por el dueño (el primero donde es ADMINISTRADOR). 
-     * Mismo criterio que en el resto de la app.
-     */
-    val negocioActualId: StateFlow<String?> = combine(
-        CuentaStore.sesionActual,
-        RelacionCuentaNegocioStore.relaciones
-    ) { sesion, relaciones ->
-        val cuentaId = sesion?.id ?: return@combine null
-        relaciones.find {
-            it.cuentaId == cuentaId &&
-                it.rol == RolCuentaNegocio.ADMINISTRADOR &&
-                it.estado == EstadoRelacion.ACTIVA
-        }?.negocioId
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
+    private val _equipoVisible = MutableStateFlow<List<MiembroEquipo>>(emptyList())
+    val equipoVisible: StateFlow<List<MiembroEquipo>> = _equipoVisible.asStateFlow()
 
-    // Resumen del día calculado a partir de las operaciones reales.
-    val resumenDelDia: StateFlow<ResumenDelDia> = InMemoryOperationStore.operaciones
+    init {
+        viewModelScope.launch {
+            negocioActualId.collect { negId ->
+                if (negId != null) {
+                    cargarEquipoDelNegocio()
+                    cargarEquipoVisible()
+                    cargarCodigosActivos()
+                }
+            }
+        }
+    }
+
+    /** Solicitudes de ingreso pendientes (CAPA 45) */
+    val solicitudes: StateFlow<List<SolicitudUi>> = combine(
+        negocioActualId,
+        RelacionCuentaNegocioStore.relaciones,
+        CuentaStore.cuentas
+    ) { negocioId, todasLasRelaciones, cuentasCheadas ->
+        if (negocioId == null) return@combine emptyList()
+
+        val pendientes = SolicitudesIngreso.pendientes(todasLasRelaciones, negocioId)
+
+        val idsFaltantes = pendientes.map { it.cuentaId }.filter { id -> cuentasCheadas.none { it.id == id } }
+        if (idsFaltantes.isNotEmpty()) {
+            cargarCuentasAgrupadas(idsFaltantes)
+        }
+
+        pendientes.map { rel ->
+            val codigo = rel.codigoUsado
+            if (codigo != null && !mapaCodigosNombres.containsKey(codigo)) {
+                cargarNombrePropuestoAsync(codigo)
+            }
+
+            val nombrePropuesto = codigo?.let { mapaCodigosNombres[it] }
+            val cuenta = cuentasCheadas.find { it.id == rel.cuentaId }
+            val nombreFinal = when {
+                !nombrePropuesto.isNullOrBlank() -> nombrePropuesto
+                !cuenta?.username.isNullOrBlank() -> cuenta!!.username
+                else -> "Trabajador nuevo"
+            }
+
+            SolicitudUi(
+                cuentaId = rel.cuentaId,
+                nombre = nombreFinal,
+                codigoUsado = rel.codigoUsado,
+                fechaMs = rel.fechaVinculacion
+            )
+        }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    val cantidadSolicitudes: StateFlow<Int> = solicitudes
+        .map { it.size }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), 0)
+
+    private fun cargarNombrePropuestoAsync(codigo: String) {
+        viewModelScope.launch {
+            invitacionRepo.buscarPorCodigo(codigo).onSuccess { inv ->
+                val nombre = inv?.nombrePropuesto
+                if (!nombre.isNullOrBlank()) {
+                    mapaCodigosNombres[codigo] = nombre
+                }
+            }
+        }
+    }
+
+    // Operaciones del negocio activo (C9 - Aislamiento).
+    val operaciones: StateFlow<List<Operacion>> = combine(
+        InMemoryOperationStore.operaciones,
+        negocioActualId
+    ) { allOps, negId ->
+        if (negId == null) emptyList() else allOps.filter { it.negocioId == negId }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    // Resumen del día calculado a partir de las operaciones del negocio activo (C9).
+    val resumenDelDia: StateFlow<ResumenDelDia> = operaciones
         .map { ops ->
             ResumenDelDia(
                 totalDelDia = DailySummary.totalDelDia(ops),
                 numeroDeOperaciones = DailySummary.numeroDeOperaciones(ops),
                 operacionesPendientes = DailySummary.operacionesPendientes(ops),
-                promedioDelDia = DailySummary.promedioDelDia(ops)
+                promedioDelDia = DailySummary.promedioDelDia(ops),
+                pagosRecibidos = DailySummary.pagosRecibidos(ops)
             )
         }
         .stateIn(
@@ -68,7 +163,8 @@ class BusinessViewModel : ViewModel() {
                 totalDelDia = 0.0,
                 numeroDeOperaciones = 0,
                 operacionesPendientes = 0,
-                promedioDelDia = 0.0
+                promedioDelDia = 0.0,
+                pagosRecibidos = 0
             )
         )
 
@@ -84,7 +180,10 @@ class BusinessViewModel : ViewModel() {
         if (negocioId == null) return@combine emptyList()
 
         val relacionesTrabajador = todasLasRelaciones.filter {
-            it.negocioId == negocioId && it.rol == RolCuentaNegocio.TRABAJADOR
+            it.negocioId == negocioId &&
+            it.rol == RolCuentaNegocio.TRABAJADOR &&
+            it.estado != EstadoRelacion.SOLICITADA &&
+            it.estado != EstadoRelacion.RECHAZADA
         }
 
         // Identificar qué cuentas no están en el caché local
@@ -105,6 +204,52 @@ class BusinessViewModel : ViewModel() {
             )
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    /**
+     * Carga las relaciones completas de todo el negocio (solo para Dueño/Admin).
+     * CAPA 23.
+     */
+    fun cargarEquipoDelNegocio() {
+        val negocioId = negocioActualId.value ?: return
+        val cuentaId = CuentaStore.sesionActual.value?.id ?: return
+
+        val negocio = NegocioStore.negocios.value.find { it.id == negocioId }
+        val relaciones = RelacionCuentaNegocioStore.relaciones.value
+        val esDueno = negocio?.dueñoCuentaId == cuentaId
+        val esAdminActivo = relaciones.any {
+            it.cuentaId == cuentaId && it.negocioId == negocioId &&
+                    it.rol == RolCuentaNegocio.ADMINISTRADOR && it.estado == EstadoRelacion.ACTIVA
+        }
+
+        if (!esDueno && !esAdminActivo) return
+
+        viewModelScope.launch {
+            conReintentoPorReloj {
+                relacionRepo.relacionesDelNegocio(negocioId)
+            }.onSuccess { resultado ->
+                RelacionCuentaNegocioStore.sincronizarNegocio(negocioId, resultado)
+            }.onFailure { err ->
+                LogSeguro.w("TokeEquipo", "Error al cargar relaciones del negocio", err)
+            }
+        }
+    }
+
+    /**
+     * Carga el equipo del negocio llamando a la RPC equipo_de_negocio (para Trabajador).
+     * CAPA 24.
+     */
+    fun cargarEquipoVisible() {
+        val negocioId = negocioActualId.value ?: return
+        viewModelScope.launch {
+            conReintentoPorReloj {
+                relacionRepo.equipoDeNegocio(negocioId)
+            }.onSuccess { miembros ->
+                _equipoVisible.value = miembros
+            }.onFailure { err ->
+                LogSeguro.w("TokeEquipo", "Error al cargar equipo visible", err)
+            }
+        }
+    }
 
     private fun cargarCuentasAgrupadas(ids: List<String>) {
         val realmenteFaltantes = ids.filter { it !in idsEnVuelo }
@@ -129,6 +274,7 @@ class BusinessViewModel : ViewModel() {
     fun cambiarEstadoTrabajador(cuentaId: String, nuevoEstado: EstadoRelacion) {
         val negocioId = negocioActualId.value ?: return
         viewModelScope.launch {
+            FeedbackManager.setLoading(true, "Actualizando trabajador...")
             relacionRepo.actualizarEstado(cuentaId, negocioId, nuevoEstado).onSuccess {
                 // Actualizamos el Store local (todo o nada).
                 val relacionesActuales = RelacionCuentaNegocioStore.relaciones.value
@@ -138,10 +284,216 @@ class BusinessViewModel : ViewModel() {
                     } else it
                 }
                 RelacionCuentaNegocioStore.sincronizar(cuentaId, nuevasRelaciones)
+                cargarEquipoDelNegocio()
+                FeedbackManager.setLoading(false)
+                FeedbackManager.showSuccess("Trabajador actualizado correctamente.")
+            }.onFailure {
+                FeedbackManager.setLoading(false)
+                FeedbackManager.showError(it)
             }
         }
     }
+
+    // ---- Operaciones de Métodos de Cobro (C8) ----
+
+    fun cargarMetodos() {
+        val id = negocioActualId.value ?: return
+        viewModelScope.launch {
+            MetodoDeCobroStore.cargarPorNegocio(id)
+        }
+    }
+
+    private fun estaMetodoActivoEnOtroNegocio(tipo: TipoMetodoCobro, negocioIdActual: String): Boolean {
+        val uid = CuentaStore.sesionActual.value?.id ?: return false
+        val misNegocios = NegocioStore.negocios.value.filter { it.dueñoCuentaId == uid && it.id != negocioIdActual }
+        val metodosMap = MetodoDeCobroStore.metodosPorNegocio.value
+        return misNegocios.any { negocio ->
+            val listaMetodos = metodosMap[negocio.id] ?: emptyList()
+            listaMetodos.any { it.tipo == tipo && it.activo }
+        }
+    }
+
+    fun crearMetodo(tipo: TipoMetodoCobro, dato: String, nombre: String) {
+        val id = negocioActualId.value ?: return
+        if (estaMetodoActivoEnOtroNegocio(tipo, id)) {
+            FeedbackManager.showErrorMessage("Esta billetera ya está activa en otro negocio tuyo")
+            return
+        }
+        viewModelScope.launch {
+            FeedbackManager.setLoading(true, "Creando método...")
+            MetodoDeCobroStore.crear(id, tipo, dato, nombre).onSuccess {
+                FeedbackManager.setLoading(false)
+                FeedbackManager.showSuccess("Método creado.")
+            }.onFailure {
+                FeedbackManager.setLoading(false)
+                FeedbackManager.showError(it)
+            }
+        }
+    }
+
+    fun actualizarMetodo(id: String, dato: String? = null, nombre: String? = null, activo: Boolean? = null, oculto: Boolean? = null) {
+        val negId = negocioActualId.value ?: return
+        val listaMetodos = MetodoDeCobroStore.obtenerPorNegocio(negId)
+        val metodoExistente = listaMetodos.find { it.id == id }
+        if (activo == true && metodoExistente != null) {
+            if (estaMetodoActivoEnOtroNegocio(metodoExistente.tipo, negId)) {
+                FeedbackManager.showErrorMessage("Esta billetera ya está activa en otro negocio tuyo")
+                return
+            }
+        }
+        viewModelScope.launch {
+            MetodoDeCobroStore.actualizar(id, negId, dato, nombre, null, activo, oculto)
+        }
+    }
+
+    fun eliminarMetodo(id: String) {
+        val negId = negocioActualId.value ?: return
+        viewModelScope.launch {
+            FeedbackManager.setLoading(true, "Eliminando...")
+            MetodoDeCobroStore.eliminar(id, negId).onSuccess {
+                FeedbackManager.setLoading(false)
+            }.onFailure {
+                FeedbackManager.setLoading(false)
+                FeedbackManager.showError(it)
+            }
+        }
+    }
+
+    fun subirQr(metodoId: String, imageData: ByteArray) {
+        val negId = negocioActualId.value ?: return
+        viewModelScope.launch {
+            _uploadStage.value = "PREPARANDO"
+            val result = MetodoDeCobroStore.actualizarConQr(metodoId, negId, imageData) { stage ->
+                _uploadStage.value = stage
+            }
+            
+            result.onSuccess {
+                FeedbackManager.showSuccess("QR actualizado correctamente")
+            }.onFailure {
+                FeedbackManager.showError(it)
+            }
+            
+            _uploadStage.value = null
+        }
+    }
+
+    fun obtenerImagenQr(path: String) {
+        viewModelScope.launch {
+            MetodoDeCobroStore.obtenerImagenQr(path)
+        }
+    }
+
+    // ---- Métodos para Códigos y Solicitudes (CAPA 45) ----
+
+    fun cargarCodigosActivos() {
+        val negocioId = negocioActualId.value ?: return
+        viewModelScope.launch {
+            conReintentoPorReloj {
+                invitacionRepo.codigosActivos(negocioId)
+            }.onSuccess { lista ->
+                val vigentes = SolicitudesIngreso.codigosVigentes(lista, System.currentTimeMillis())
+                _codigosActivos.value = vigentes
+            }.onFailure { err ->
+                LogSeguro.w("TokeEquipo", "Error al cargar códigos activos", err)
+            }
+        }
+    }
+
+    fun responderSolicitud(cuentaId: String, aceptar: Boolean) {
+        val negocioId = negocioActualId.value ?: return
+        viewModelScope.launch {
+            FeedbackManager.setLoading(true, if (aceptar) "Aceptando..." else "Rechazando...")
+            relacionRepo.responderSolicitud(negocioId, cuentaId, aceptar).onSuccess { res ->
+                cargarEquipoDelNegocio()
+                cargarCodigosActivos()
+                FeedbackManager.setLoading(false)
+                FeedbackManager.showSuccess(res.mensaje)
+            }.onFailure { err ->
+                FeedbackManager.setLoading(false)
+                FeedbackManager.showErrorMessage(err.message ?: "Error al procesar la solicitud")
+            }
+        }
+    }
+
+    fun revocarCodigo(codigo: String) {
+        viewModelScope.launch {
+            FeedbackManager.setLoading(true, "Revocando...")
+            invitacionRepo.revocar(codigo).onSuccess { res ->
+                cargarEquipoDelNegocio()
+                cargarCodigosActivos()
+                FeedbackManager.setLoading(false)
+                FeedbackManager.showSuccess(res.mensaje)
+            }.onFailure { err ->
+                FeedbackManager.setLoading(false)
+                FeedbackManager.showErrorMessage(err.message ?: "Error al revocar el código")
+            }
+        }
+    }
+
+    /**
+     * Crea un código de invitación para el negocio indicado, actualizando inmediatamente
+     * la lista de códigos activos y conciliando en segundo plano.
+     */
+    suspend fun crearInvitacion(negocioId: String): Result<InvitacionTrabajador> {
+        val result = InvitacionStore.crear(negocioId)
+        if (result.isSuccess) {
+            val creada = result.getOrThrow()
+            val actual = _codigosActivos.value.toMutableList()
+            if (actual.none { it.codigo == creada.codigo }) {
+                actual.add(creada)
+            }
+            _codigosActivos.value = SolicitudesIngreso.codigosVigentes(actual, System.currentTimeMillis())
+                .sortedBy { it.expiracion }
+            cargarCodigosActivos()
+            return Result.success(creada)
+        }
+        return result
+    }
+
+    /** Refresco coordinado de la pestaña Equipo (Miembros, Relaciones, Códigos, Solicitudes). */
+    suspend fun refrescarEquipo(): Result<Unit> {
+        val negocioId = negocioActualId.value ?: return Result.success(Unit)
+
+        val resRelaciones = runCatching { relacionRepo.relacionesDelNegocio(negocioId) }.getOrNull()
+        resRelaciones?.onSuccess { RelacionCuentaNegocioStore.sincronizarNegocio(negocioId, it) }
+
+        val resCodigos = runCatching { invitacionRepo.codigosActivos(negocioId) }.getOrNull()
+        resCodigos?.onSuccess { lista ->
+            val combinada = (_codigosActivos.value + lista)
+                .filter { it.negocioId == negocioId && it.estado == EstadoInvitacion.PENDIENTE }
+            val vigentes = SolicitudesIngreso.codigosVigentes(combinada, System.currentTimeMillis())
+                .distinctBy { it.codigo }
+                .sortedBy { it.expiracion }
+            _codigosActivos.value = vigentes
+        }
+
+        val resMiembros = runCatching { relacionRepo.equipoDeNegocio(negocioId) }.getOrNull()
+        resMiembros?.onSuccess { _equipoVisible.value = it }
+
+        return Result.success(Unit)
+    }
+
+    /** Refresco coordinado de la pestaña Mis Cobros. */
+    suspend fun refrescarMisCobros(): Result<Unit> {
+        val negocioId = negocioActualId.value ?: return Result.success(Unit)
+        val operacionRepo = OperacionRepository()
+        val resOps = operacionRepo.obtenerDeVariosNegocios(listOf(negocioId))
+        if (resOps.isSuccess) {
+            val ops = resOps.getOrThrow()
+            InMemoryOperationStore.sincronizar(negocioId, ops)
+            return Result.success(Unit)
+        }
+        return Result.failure(resOps.exceptionOrNull() ?: Exception("Error al refrescar cobros"))
+    }
 }
+
+/** Información de una solicitud de ingreso (CAPA 45). */
+data class SolicitudUi(
+    val cuentaId: String,
+    val nombre: String,
+    val codigoUsado: String?,
+    val fechaMs: Long
+)
 
 /** Información de un trabajador real vinculada a una cuenta. */
 data class TrabajadorRealInfo(
@@ -155,5 +507,6 @@ data class ResumenDelDia(
     val totalDelDia: Double,
     val numeroDeOperaciones: Int,
     val operacionesPendientes: Int,
-    val promedioDelDia: Double
+    val promedioDelDia: Double,
+    val pagosRecibidos: Int = 0
 )
