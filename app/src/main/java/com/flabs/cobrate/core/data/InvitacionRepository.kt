@@ -41,7 +41,13 @@ internal class InvitacionRepository {
 
     private val postgrest = SupabaseClientProvider.supabase.postgrest
 
-    suspend fun crear(negocioId: String, nombrePropuesto: String?, codigo: String, expiracion: Long): Result<InvitacionTrabajador> = runCatching {
+    suspend fun crear(
+        negocioId: String,
+        nombrePropuesto: String?,
+        codigo: String,
+        expiracion: Long,
+        requiereAprobacion: Boolean = true
+    ): Result<InvitacionTrabajador> = runCatching {
         val dto = InvitacionDto(
             codigo = codigo,
             negocioId = negocioId,
@@ -49,7 +55,8 @@ internal class InvitacionRepository {
             metodo = "CODIGO", // Valor correcto para la tabla
             estado = EstadoInvitacion.PENDIENTE,
             expiracion = expiracion,
-            fechaCreacion = System.currentTimeMillis()
+            fechaCreacion = System.currentTimeMillis(),
+            requiereAprobacion = requiereAprobacion
         )
         val createdDto = postgrest.from("invitaciones_trabajador")
             .insert(dto) {
@@ -175,12 +182,13 @@ internal class InvitacionRepository {
     internal data class InvitacionDto(
         @SerialName("codigo") val codigo: String,
         @SerialName("negocio_id") val negocioId: String,
-        @SerialName("nombre_propuesto") val nombrePropuesto: String?,
+        @SerialName("nombre_propuesto") val nombrePropuesto: String? = null,
         @SerialName("metodo") val metodo: String,
         @Serializable(with = SafeEstadoInvitacionSerializer::class)
         @SerialName("estado") val estado: EstadoInvitacion? = null,
         @SerialName("expiracion") val expiracion: Long,
-        @SerialName("fecha_creacion") val fechaCreacion: Long
+        @SerialName("fecha_creacion") val fechaCreacion: Long,
+        @SerialName("requiere_aprobacion") val requiereAprobacion: Boolean = true
     )
 }
 
@@ -193,7 +201,8 @@ internal fun InvitacionRepository.InvitacionDto.toDomainOrNull(): InvitacionTrab
         estado = e,
         fechaCreacion = fechaCreacion,
         expiracion = expiracion,
-        nombrePropuesto = nombrePropuesto
+        nombrePropuesto = nombrePropuesto,
+        requiereAprobacion = requiereAprobacion
     )
 }
 
@@ -205,5 +214,6 @@ internal fun InvitacionRepository.InvitacionDto.toDomain() =
         estado = EstadoInvitacion.EXPIRADA,
         fechaCreacion = fechaCreacion,
         expiracion = expiracion,
-        nombrePropuesto = nombrePropuesto
+        nombrePropuesto = nombrePropuesto,
+        requiereAprobacion = requiereAprobacion
     )

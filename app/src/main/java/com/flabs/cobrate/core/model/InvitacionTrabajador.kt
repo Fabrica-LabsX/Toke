@@ -22,7 +22,8 @@ data class InvitacionTrabajador(
     val fechaCreacion: Long = 0L,
     // Momento en que la invitación deja de ser válida.
     val expiracion: Long = 0L,
-    val nombrePropuesto: String? = null
+    val nombrePropuesto: String? = null,
+    val requiereAprobacion: Boolean = true
 )
 
 /** Estados posibles de una invitación de trabajador. */

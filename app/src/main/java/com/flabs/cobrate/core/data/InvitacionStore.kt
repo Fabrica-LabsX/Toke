@@ -55,12 +55,12 @@ object InvitacionStore {
      * Si falla en Supabase, la operación falla completa.
      * DECISIÓN CAPA 7d-1: El servidor es la fuente de verdad.
      */
-    suspend fun crear(negocioId: String): Result<InvitacionTrabajador> {
+    suspend fun crear(negocioId: String, requiereAprobacion: Boolean = true): Result<InvitacionTrabajador> {
         val ahora = System.currentTimeMillis()
         val codigo = generarCodigo()
         val expiracion = ahora + MINUTOS_VALIDEZ * 60 * 1000
         
-        val result = repository.crear(negocioId, null, codigo, expiracion)
+        val result = repository.crear(negocioId, null, codigo, expiracion, requiereAprobacion)
         if (result.isSuccess) {
             val creada = result.getOrThrow()
             _invitaciones.value = _invitaciones.value + creada

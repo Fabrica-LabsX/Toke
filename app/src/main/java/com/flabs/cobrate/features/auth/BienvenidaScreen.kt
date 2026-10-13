@@ -38,11 +38,10 @@ import com.flabs.cobrate.core.data.PreferenciasAppStore
 import com.flabs.cobrate.ui.theme.ThemeMode
 
 /**
- * Pantalla de Bienvenida / Entrada de TOKE!
+ * Pantalla de Bienvenida / Entrada de TOKE! (Oficial del ZIP).
  *
  * Se muestra cuando la app arranca sin sesión o cuando se cierra la sesión.
- * Nunca debe renderizar ArranqueScreen(). Ofrece accesos a Iniciar Sesión,
- * Crear Cuenta o Ingresar Código de Trabajador.
+ * Ofrece accesos a Iniciar Sesión, Crear Cuenta o Ingresar Código de Trabajador.
  */
 @Composable
 fun BienvenidaScreen(

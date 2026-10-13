@@ -111,14 +111,45 @@ fun InvitarTrabajadorScreen(
                     style = MaterialTheme.typography.bodyMedium
                 )
 
+                // Casilla con aprobación previa
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { requiereAprobacion = !requiereAprobacion }
+                        .padding(vertical = 2.dp)
+                ) {
+                    Checkbox(
+                        checked = requiereAprobacion,
+                        onCheckedChange = { requiereAprobacion = it }
+                    )
+                    Column(modifier = Modifier.padding(start = 8.dp)) {
+                        Text(
+                            text = "Con aprobación previa",
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.Bold
+                        )
+                        if (requiereAprobacion) {
+                            Text(
+                                text = "Tendrás que aprobar a quien use este código.",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                }
+
                 Button(
                     onClick = {
                         if (creandoInvitacion) return@Button
                         creandoInvitacion = true
                         scope.launch {
                             try {
-                                businessViewModel.crearInvitacion(negocio.id).onSuccess {
+                                businessViewModel.crearInvitacion(negocio.id, requiereAprobacion).onSuccess {
                                     invitacionActiva = it
+                                    if (requiereAprobacion) {
+                                        FeedbackManager.showSuccess("Código creado. Quien lo use deberá esperar tu aprobación.")
+                                    }
                                 }.onFailure { err ->
                                     FeedbackManager.showErrorMessage(err.message ?: "Error al crear invitación")
                                 }

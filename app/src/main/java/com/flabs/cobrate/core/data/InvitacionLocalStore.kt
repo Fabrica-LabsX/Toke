@@ -54,7 +54,8 @@ internal class InvitacionLocalStore(private val context: Context) {
         val codigo: String,
         val estado: EstadoInvitacion,
         val fechaCreacion: Long = 0L,
-        val expiracion: Long = 0L
+        val expiracion: Long = 0L,
+        val requiereAprobacion: Boolean = true
     )
 }
 
@@ -67,7 +68,8 @@ private fun InvitacionTrabajador.aDto(): InvitacionLocalStore.InvitacionDto =
         codigo = codigo,
         estado = estado,
         fechaCreacion = fechaCreacion,
-        expiracion = expiracion
+        expiracion = expiracion,
+        requiereAprobacion = requiereAprobacion
     )
 
 internal fun InvitacionLocalStore.InvitacionDto.aModelo(): InvitacionTrabajador =
@@ -77,5 +79,6 @@ internal fun InvitacionLocalStore.InvitacionDto.aModelo(): InvitacionTrabajador 
         codigo = codigo,
         estado = estado,
         fechaCreacion = fechaCreacion,
-        expiracion = expiracion
+        expiracion = expiracion,
+        requiereAprobacion = requiereAprobacion
     )

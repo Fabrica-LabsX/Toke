@@ -3,47 +3,79 @@ package com.flabs.cobrate.features.permisos
 import android.content.Context
 import android.content.Intent
 import android.provider.Settings
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.BatterySaver
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.NotificationsActive
+import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import com.flabs.cobrate.core.logic.PermisosChecker
+import com.flabs.cobrate.core.logic.Requisito
+import com.flabs.cobrate.ui.theme.TokeBorder
+import com.flabs.cobrate.ui.theme.TokeGreen
+import com.flabs.cobrate.ui.theme.TokeGreenSoft
 
 /**
- * Diagnóstico de permisos (CAPA 5).
+ * Diagnóstico y Configuración de Permisos (Nodo Figma 1:2 - TOKE! - Permisos).
  *
- * Diagnostica si el permiso de acceso a notificaciones está concedido (este
- * sigue siendo el único chequeo BLOQUEANTE) y muestra información sobre el
- * estado de batería como RECOMENDACIÓN NO BLOQUEANTE.
- *
- * Al regresar de Ajustes (ya sea desde el botón "Solucionar" de notificaciones
- * o el botón "Permitir" de batería), la pantalla se revalida automáticamente
- * vía el observer de lifecycle al volver a RESUMED.
+ * Requisitos:
+ * - Acceso a notificaciones (REQUISITO BLOQUEANTE)
+ * - Exención de optimización de batería (RECOMENDACIÓN NO BLOQUEANTE)
  */
-import com.flabs.cobrate.core.logic.Requisito
-
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DiagnosticoPermisosScreen(
     requisitos: Set<Requisito> = emptySet(),
@@ -59,16 +91,12 @@ fun DiagnosticoPermisosScreen(
         mutableStateOf(PermisosChecker.segundoPlanoSinRestricciones(context))
     }
 
-    // Revalida el estado real cada vez que la pantalla vuelve a primer plano
-    // (por ejemplo, al regresar desde los Ajustes de notificaciones o de
-    // batería). Mismo patrón que el chequeo de notificaciones.
+    // Revalida el estado real automáticamente al regresar de Ajustes
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
-                accesoNotificaciones =
-                    PermisosChecker.accesoNotificacionesConcedido(context)
-                sinRestriccionesBateria =
-                    PermisosChecker.segundoPlanoSinRestricciones(context)
+                accesoNotificaciones = PermisosChecker.accesoNotificacionesConcedido(context)
+                sinRestriccionesBateria = PermisosChecker.segundoPlanoSinRestricciones(context)
             }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
@@ -77,182 +105,329 @@ fun DiagnosticoPermisosScreen(
         }
     }
 
-    Scaffold { innerPadding ->
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { },
+                navigationIcon = {
+                    IconButton(onClick = onVolver) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Volver"
+                        )
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background
+                )
+            )
+        },
+        bottomBar = {
+            // Barra Inferior Fija con Botón Principal "Listo, todo configurado" (Nodo 1:77)
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .navigationBarsPadding(),
+                color = MaterialTheme.colorScheme.surface,
+                tonalElevation = 8.dp,
+                shadowElevation = 8.dp
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp, vertical = 16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Button(
+                        onClick = onVolver,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(54.dp),
+                        shape = RoundedCornerShape(27.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = if (accesoNotificaciones) TokeGreen else MaterialTheme.colorScheme.primary,
+                            contentColor = Color.White
+                        )
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            Text(
+                                text = "Listo, todo configurado",
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Icon(
+                                imageVector = Icons.Default.ChevronRight,
+                                contentDescription = null,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
+                    }
+
+                    Text(
+                        text = "Puedes modificar estas opciones en cualquier momento.",
+                        fontSize = 12.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.Center
+                    )
+                }
+            }
+        }
+    ) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .padding(16.dp)
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 20.dp),
+            verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
-            Text(
-                text = "Permisos",
-                style = MaterialTheme.typography.headlineMedium
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-
-            if (accesoNotificaciones) {
-                EstadoListoCard(
-                    sinRestriccionesBateria = sinRestriccionesBateria,
-                    onPermitirBateria = {
-                        abrirAjustesBateria(context)
-                    }
+            // ---- CABECERA AMIGABLE (Nodo 1:4) ----
+            Column(
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Text(
+                    text = "¡Vamos a preparar Tu Toke!",
+                    fontSize = 26.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onBackground
                 )
-            } else {
-                EstadoRequiereAtencionCard(
-                    sinRestriccionesBateria = sinRestriccionesBateria,
-                    onSolucionar = {
+                Text(
+                    text = "Solo necesitamos 2 permisos esenciales para el funcionamiento correcto de la app.",
+                    fontSize = 14.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    lineHeight = 20.sp
+                )
+            }
+
+            // ---- TARJETAS MODULARES DE PERMISOS (Nodo 1:9) ----
+            Column(
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                // Tarjeta 1: Avisos por voz de Yape y Plin (Nodo 1:10)
+                TarjetaPermisoModulo(
+                    titulo = "Avisos por voz de Yape y Plin",
+                    descripcion = "Lee los avisos de pagos al instante y los envia a los negocios configurados.",
+                    icono = Icons.Default.NotificationsActive,
+                    concedido = accesoNotificaciones,
+                    chipsCompatibles = listOf("Yape", "Plin", "BCP", "Interbank"),
+                    textoAccion = if (accesoNotificaciones) "Configurado" else "Solucionar",
+                    onClickAccion = {
                         abrirAjustesAccesoNotificaciones(context)
-                    },
-                    onPermitirBateria = {
+                    }
+                )
+
+                // Tarjeta 2: Seguir activo en segundo plano (Nodo 1:39)
+                TarjetaPermisoModulo(
+                    titulo = "Seguir activo en segundo plano",
+                    descripcion = "Evita que el sistema apague TOKE para que no pierdas ninguna confirmación, incluso con la pantalla bloqueada.",
+                    icono = Icons.Default.BatterySaver,
+                    concedido = sinRestriccionesBateria,
+                    chipsCompatibles = emptyList(),
+                    textoAccion = if (sinRestriccionesBateria) "Sin restricciones" else "Permitir",
+                    onClickAccion = {
                         abrirAjustesBateria(context)
                     }
                 )
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
-
-            OutlinedButton(
-                onClick = onVolver,
-                modifier = Modifier.fillMaxWidth()
+            // ---- MENSAJE DE PRIVACIDAD AL PIE (Nodo 1:56) ----
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                )
             ) {
-                Text(text = "Volver")
+                Row(
+                    modifier = Modifier.padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Surface(
+                        modifier = Modifier.size(36.dp),
+                        shape = CircleShape,
+                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
+                    ) {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Shield,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
+                    }
+
+                    Text(
+                        text = "TOKE nunca tiene acceso a tus billeteras,solo recopila los avisos que entregan y los transmite al negocio.",
+                        fontSize = 13.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        lineHeight = 18.sp
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+    }
+}
+
+@Composable
+private fun TarjetaPermisoModulo(
+    titulo: String,
+    descripcion: String,
+    icono: ImageVector,
+    concedido: Boolean,
+    chipsCompatibles: List<String>,
+    textoAccion: String,
+    onClickAccion: () -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp)
+        ) {
+            // Encabezado
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Surface(
+                    modifier = Modifier.size(40.dp),
+                    shape = RoundedCornerShape(10.dp),
+                    color = if (concedido) TokeGreenSoft else MaterialTheme.colorScheme.primaryContainer
+                ) {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = icono,
+                            contentDescription = null,
+                            tint = if (concedido) TokeGreen else MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(22.dp)
+                        )
+                    }
+                }
+
+                Text(
+                    text = titulo,
+                    fontSize = 17.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.weight(1f)
+                )
+
+                if (concedido) {
+                    Icon(
+                        imageVector = Icons.Default.CheckCircle,
+                        contentDescription = "Concedido",
+                        tint = TokeGreen,
+                        modifier = Modifier.size(22.dp)
+                    )
+                }
+            }
+
+            // Descripcion
+            Text(
+                text = descripcion,
+                fontSize = 14.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                lineHeight = 20.sp
+            )
+
+            // Chips de bancos compatibles si existen
+            if (chipsCompatibles.isNotEmpty()) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    Text(
+                        text = "Bancos:",
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    chipsCompatibles.forEach { chip ->
+                        Surface(
+                            shape = RoundedCornerShape(6.dp),
+                            color = MaterialTheme.colorScheme.surfaceVariant
+                        ) {
+                            Text(
+                                text = chip,
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Medium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
+                            )
+                        }
+                    }
+                }
+            }
+
+            // Botón de acción fija de la tarjeta
+            if (!concedido) {
+                Button(
+                    onClick = onClickAccion,
+                    modifier = Modifier.fillMaxWidth().height(46.dp),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Text(
+                        text = textoAccion,
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            } else {
+                OutlinedButton(
+                    onClick = onClickAccion,
+                    modifier = Modifier.fillMaxWidth().height(46.dp),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Check,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = textoAccion,
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
+                }
             }
         }
     }
 }
 
-/** Estado positivo: la app está lista para la detección automática. */
-@Composable
-private fun EstadoListoCard(
-    sinRestriccionesBateria: Boolean,
-    onPermitirBateria: () -> Unit
-) {
-    Card(modifier = Modifier.fillMaxWidth()) {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            Text(
-                text = "✅ TOKE está listo",
-                style = MaterialTheme.typography.titleMedium
-            )
-            Text(
-                text = "El acceso a notificaciones está concedido. La detección " +
-                    "automática de pagos podrá funcionar en segundo plano.",
-                style = MaterialTheme.typography.bodyMedium
-            )
-            // Recomendación secundaria (no bloqueante): batería.
-            SeccionBateria(
-                sinRestriccionesBateria = sinRestriccionesBateria,
-                onPermitirBateria = onPermitirBateria
-            )
-        }
-    }
-}
-
-/** Estado pendiente: acceso a notificaciones no concedido. */
-@Composable
-private fun EstadoRequiereAtencionCard(
-    sinRestriccionesBateria: Boolean,
-    onSolucionar: () -> Unit,
-    onPermitirBateria: () -> Unit
-) {
-    // El acceso a notificaciones es el único chequeo bloqueante. La batería se
-    // trata como recomendación, pero si ambas fallan a la vez conviene ser
-    // preciso sobre cuál es la recomendación pendiente.
-    val mensaje = when (sinRestriccionesBateria) {
-        true -> "Acceso a notificaciones no concedido"
-        false -> "Acceso a notificaciones no concedido · batería sin restricciones pendiente"
-    }
-
-    Card(modifier = Modifier.fillMaxWidth()) {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            Text(
-                text = "⚠️ TOKE necesita tu atención",
-                style = MaterialTheme.typography.titleMedium
-            )
-            Text(
-                text = mensaje,
-                style = MaterialTheme.typography.bodyLarge,
-                textAlign = TextAlign.Start
-            )
-            Text(
-                text = "Para detectar los pagos automáticamente, TOKE necesita " +
-                    "acceso a las notificaciones. Android no permite conceder " +
-                    "este acceso con un diálogo normal; deberás habilitarlo " +
-                    "desde los Ajustes del sistema.",
-                style = MaterialTheme.typography.bodyMedium
-            )
-            Button(
-                onClick = onSolucionar,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(text = "Solucionar")
-            }
-            // Recomendación secundaria (no bloqueante): batería.
-            SeccionBateria(
-                sinRestriccionesBateria = sinRestriccionesBateria,
-                onPermitirBateria = onPermitirBateria
-            )
-        }
-    }
-}
-
-/**
- * Sección de batería (recomendación NO BLOQUEANTE).
- *
- * Elección de intent: usamos
- * [Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS] en lugar de
- * [Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS]. La variante directa
- * requiere declarar `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS` en el manifiesto,
- * que es un permiso sensible en las políticas de algunas tiendas, y además
- * abriría un diálogo del sistema dirigido específicamente a nuestro paquete.
- * Al ser la batería una recomendación OPCIONAL y no un requisito, preferimos
- * la pantalla genérica de optimización de batería, que no exige el permiso y
- * no presiona al usuario de forma intrusiva.
- */
-@Composable
-private fun SeccionBateria(
-    sinRestriccionesBateria: Boolean,
-    onPermitirBateria: () -> Unit
-) {
-    if (sinRestriccionesBateria) {
-        Text(
-            text = "✅ Sin restricciones de batería",
-            style = MaterialTheme.typography.bodySmall
-        )
-    } else {
-        Text(
-            text = "Recomendación opcional: Android podría pausar la detección " +
-                "de pagos en segundo plano para ahorrar batería. Puedes permitir " +
-                "que TOKE funcione sin restricciones, aunque no es obligatorio.",
-            style = MaterialTheme.typography.bodySmall
-        )
-        OutlinedButton(
-            onClick = onPermitirBateria,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text(text = "Permitir")
-        }
-    }
-}
-
-/** Abre los Ajustes de acceso a notificaciones (listeners). */
 private fun abrirAjustesAccesoNotificaciones(context: Context) {
     val intent = Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)
     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
     context.startActivity(intent)
 }
 
-/**
- * Abre la pantalla genérica de optimización de batería.
- *
- * Ver [SeccionBateria] para la justificación de esta elección frente a
- * [Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS].
- */
 private fun abrirAjustesBateria(context: Context) {
     val intent = Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS)
     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)

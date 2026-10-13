@@ -434,8 +434,8 @@ class BusinessViewModel : ViewModel() {
      * Crea un código de invitación para el negocio indicado, actualizando inmediatamente
      * la lista de códigos activos y conciliando en segundo plano.
      */
-    suspend fun crearInvitacion(negocioId: String): Result<InvitacionTrabajador> {
-        val result = InvitacionStore.crear(negocioId)
+    suspend fun crearInvitacion(negocioId: String, requiereAprobacion: Boolean = true): Result<InvitacionTrabajador> {
+        val result = InvitacionStore.crear(negocioId, requiereAprobacion)
         if (result.isSuccess) {
             val creada = result.getOrThrow()
             val actual = _codigosActivos.value.toMutableList()
