@@ -56,12 +56,91 @@ import com.flabs.cobrate.features.business.BusinessViewModel
 import com.flabs.cobrate.features.business.NegocioViewModel
 import com.flabs.cobrate.features.business.ResumenDelDia
 import com.flabs.cobrate.features.worker.WorkerViewModel
-import com.flabs.cobrate.ui.theme.TokeBorder
-import com.flabs.cobrate.ui.theme.TokeSurfaceMuted
+import com.flabs.cobrate.ui.theme.PlusJakartaSans
+import com.flabs.cobrate.core.model.TipoMetodoCobro
+import com.flabs.cobrate.core.data.PreferenciasAppStore
+import com.flabs.cobrate.ui.theme.ThemeMode
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
+
+
+private class HomePalette(
+    val Fondo: Color,
+    val TarjetaFondo: Color,
+    val TarjetaBorde: Color,
+    val TileIconoFondo: Color,
+    val TextoPrincipal: Color,
+    val TextoSecundario: Color,
+    val EnlaceVerTodas: Color,
+    val Chip1Fondo: Color,
+    val Chip1Dot: Color,
+    val Chip1Texto: Color,
+    val Chip2Fondo: Color,
+    val Chip2Texto: Color,
+    val OfflineFondo: Color,
+    val OfflineBorde: Color,
+    val FilaYape: Color,
+    val FilaPlin: Color,
+    val FilaBCP: Color,
+    val IconoTile: Color,
+    val IconoCabecera: Color
+)
+
+private val HomeFigma = HomePalette(
+    Fondo = Color(0xFFF2F4F7), // 1:2
+    TarjetaFondo = Color(0xFFFFFFFF), // 1:23, 1:41, 1:54, 1:67, 1:90
+    TarjetaBorde = Color(0xFFE2E8F0), // 1:23, 1:41, 1:54, 1:67, 1:90
+    TileIconoFondo = Color(0xFFF1F4F9), // 1:43, 1:56
+    TextoPrincipal = Color(0xFF0F172A), // 1:7, 1:28, 1:51, 1:64, 1:73, 1:78, 1:84, 1:97, 1:101
+    TextoSecundario = Color(0xFF64748B), // 1:12, 1:26, 1:53, 1:66, 1:75, 1:99, 1:80
+    EnlaceVerTodas = Color(0xFF0A8F42), // 1:86, 1:88
+    Chip1Fondo = Color(0xFFF1F4F9), // 1:30
+    Chip1Dot = Color(0xFF0F172A), // 1:31
+    Chip1Texto = Color(0xFF0F172A), // 1:33
+    Chip2Fondo = Color(0xFFF59E0B), // 1:34, 1:69
+    Chip2Texto = Color(0xFF181202), // 1:39, 1:70
+    OfflineFondo = Color(0xFFFEE2E2), // 1:13
+    OfflineBorde = Color(0xFFFECACA), // 1:13
+    FilaYape = Color(0xFF732282), // 1:92
+    FilaPlin = Color(0xFF00A4E4), // 1:104
+    FilaBCP = Color(0xFF002A8F), // 1:116
+    IconoTile = Color.Unspecified,
+    IconoCabecera = Color.Unspecified
+)
+
+private val HomeFigmaOscuro = HomePalette(
+    Fondo = Color(0xFF0A0D10), // 1:2
+    TarjetaFondo = Color(0xFF14171D), // 1:24, 1:42, 1:91
+    TarjetaBorde = Color(0xFF1E232B), // 1:24, 1:42, 1:91
+    TileIconoFondo = Color(0xFF1E242F), // 1:44
+    TextoPrincipal = Color(0xFFF8FAFC), // 1:8, 1:29, 1:74, 1:79, 1:85, 1:98
+    TextoSecundario = Color(0xFF8E9BAE), // 1:13, 1:27, 1:76, 1:81
+    EnlaceVerTodas = Color(0xFF00C853), // 1:87, 1:89
+    Chip1Fondo = Color(0xFF1E242F), // 1:31
+    Chip1Dot = Color(0xFFF8FAFC), // 1:32
+    Chip1Texto = Color(0xFFF8FAFC), // 1:34
+    Chip2Fondo = Color(0xFFF59E0B), // 1:35, 1:70
+    Chip2Texto = Color(0xFF181202), // 1:40, 1:71
+    OfflineFondo = Color(0xFF2A1414), // 1:14
+    OfflineBorde = Color(0xFF3D1E1E), // 1:14
+    FilaYape = Color(0xFF732282), // 1:93
+    FilaPlin = Color(0xFF00A4E4), // 1:105
+    FilaBCP = Color(0xFF002A8F), // 1:117
+    IconoTile = Color(0xFFFFFFFF), // 1:45, 1:58
+    IconoCabecera = Color(0xFFFFFFFF) // 1:9
+)
+
+@Composable
+private fun homeColors(): HomePalette {
+    val themeMode by PreferenciasAppStore.themeMode.collectAsState()
+    val isDark = when (themeMode) {
+        ThemeMode.DARK -> true
+        ThemeMode.LIGHT -> false
+    }
+    return if (isDark) HomeFigmaOscuro else HomeFigma
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -222,7 +301,7 @@ private fun HomeScreenContent(
             }
         },
         modifier = Modifier.fillMaxSize(),
-        containerColor = MaterialTheme.colorScheme.background,
+        containerColor = homeColors().Fondo,
     ) { innerPadding ->
         Column(
             modifier = Modifier
@@ -639,228 +718,165 @@ private fun formatearHoraLocal(fechaHora: Long): String {
     return formatter.format(calendar.time)
 }
 
-/**
- * TopBar conforme a Figma (Nodo 7:2891 / Decisión 5 & 6):
- * Sin botón hamburguesa lateral. Selector con ChevronDown.
- */
 @Composable
 private fun HomeTopBarCard(
     negocio: Negocio?,
     onCambiarNegocio: () -> Unit,
     mostrarBadgeOffline: Boolean = false,
 ) {
-    Surface(
-        color = MaterialTheme.colorScheme.background,
-        shadowElevation = 0.dp,
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp)
+            .padding(top = 8.dp, bottom = 10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween,
     ) {
-        Row(
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 12.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween,
+                .weight(1f)
+                .clickable(onClick = onCambiarNegocio)
         ) {
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .clickable(onClick = onCambiarNegocio)
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        text = if (negocio != null) negocio.nombre else "Sin negocio",
-                        style = MaterialTheme.typography.titleMedium.copy(
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 18.sp,
-                            letterSpacing = (-0.45).sp
-                        ),
-                        color = MaterialTheme.colorScheme.onSurface,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                    Spacer(modifier = Modifier.width(6.dp))
-                    Icon(
-                        painter = androidx.compose.ui.res.painterResource(id = com.flabs.cobrate.components.TokeIcons.ChevronDown),
-                        contentDescription = "Cambiar negocio",
-                        tint = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.size(16.dp),
-                    )
-                }
-                Spacer(modifier = Modifier.height(2.dp))
+            Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    text = stringResource(R.string.home_resumen_hoy),
-                    style = MaterialTheme.typography.bodySmall.copy(
-                        fontWeight = FontWeight.Medium,
-                        fontSize = 12.sp
+                    text = negocio?.nombre ?: "Sin negocio",
+                    style = androidx.compose.ui.text.TextStyle(
+                        fontFamily = PlusJakartaSans,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 18.sp,
+                        letterSpacing = (-0.45).sp
                     ),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = homeColors().TextoPrincipal,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                Spacer(modifier = Modifier.width(6.dp))
+                Icon(
+                    painter = androidx.compose.ui.res.painterResource(id = com.flabs.cobrate.components.TokeIcons.ChevronDown),
+                    contentDescription = "Cambiar negocio",
+                    tint = homeColors().IconoCabecera,
+                    modifier = Modifier.size(16.dp),
                 )
             }
-            if (mostrarBadgeOffline) {
-                Surface(
-                    modifier = Modifier.size(36.dp),
-                    shape = RoundedCornerShape(10.dp),
-                    color = MaterialTheme.colorScheme.errorContainer,
-                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.error.copy(alpha = 0.3f))
-                ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Icon(
-                            painter = androidx.compose.ui.res.painterResource(id = com.flabs.cobrate.components.TokeIcons.Offline),
-                            contentDescription = "Sin conexión a internet",
-                            tint = MaterialTheme.colorScheme.error,
-                            modifier = Modifier.size(20.dp)
-                        )
-                    }
+            Spacer(modifier = Modifier.height(2.dp))
+            Text(
+                text = stringResource(R.string.home_resumen_hoy),
+                style = androidx.compose.ui.text.TextStyle(
+                    fontFamily = PlusJakartaSans,
+                    fontWeight = FontWeight.Medium,
+                    fontSize = 12.sp,
+                ),
+                color = homeColors().TextoSecundario,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+        }
+        if (mostrarBadgeOffline) {
+            Surface(
+                modifier = Modifier.size(36.dp),
+                shape = RoundedCornerShape(10.dp),
+                color = homeColors().OfflineFondo,
+                border = BorderStroke(1.dp, homeColors().OfflineBorde)
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(
+                        painter = androidx.compose.ui.res.painterResource(id = com.flabs.cobrate.components.TokeIcons.Offline),
+                        contentDescription = "Sin conexión a internet",
+                        tint = Color.Unspecified,
+                        modifier = Modifier.size(20.dp)
+                    )
                 }
             }
         }
     }
 }
 
-/**
- * Hero Balance Card conforme a Figma (Nodo 7:2905 / Decisión 7 & 9):
- * 358x146, radio 16, borde 2px. Pills con puntos sólidos `#16A34A` y `#D97706`.
- */
 @Composable
 private fun ResumenCard(resumen: ResumenDelDia, esTrabajador: Boolean) {
+    if (esTrabajador) return
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        border = BorderStroke(2.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.25f)),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = homeColors().TarjetaFondo),
+        border = BorderStroke(1.dp, homeColors().TarjetaBorde),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
     ) {
-        Column(modifier = Modifier.padding(22.dp)) {
-            if (esTrabajador) {
-                Text(
-                    text = "RESUMEN DE HOY",
-                    style = MaterialTheme.typography.labelMedium,
+        Column(modifier = Modifier.padding(17.dp)) {
+            Text(
+                text = stringResource(R.string.home_cobros_hoy),
+                style = androidx.compose.ui.text.TextStyle(
+                    fontFamily = PlusJakartaSans,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-                Spacer(modifier = Modifier.height(6.dp))
-                
-                // Conservar vista diferenciada para trabajador (Decisión 9)
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(IntrinsicSize.Min),
-                    horizontalArrangement = Arrangement.SpaceEvenly,
-                    verticalAlignment = Alignment.CenterVertically,
+                    fontSize = 13.sp,
+                ),
+                color = homeColors().TextoSecundario,
+            )
+            Spacer(modifier = Modifier.height(2.5.dp))
+            Text(
+                text = String.format(Locale.US, "S/ %,.2f", resumen.totalDelDia),
+                style = androidx.compose.ui.text.TextStyle(
+                    fontFamily = PlusJakartaSans,
+                    fontWeight = FontWeight.ExtraBold,
+                    fontSize = 34.sp,
+                    letterSpacing = (-0.85).sp
+                ),
+                color = homeColors().TextoPrincipal,
+            )
+            Spacer(modifier = Modifier.height(6.dp))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                // Chip 1
+                Surface(
+                    shape = RoundedCornerShape(9999.dp),
+                    color = homeColors().Chip1Fondo,
+                    border = BorderStroke(1.dp, homeColors().TarjetaBorde)
                 ) {
-                    Column(
-                        modifier = Modifier.weight(1f),
-                        horizontalAlignment = Alignment.CenterHorizontally,
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(horizontal = 13.dp, vertical = 5.dp)
                     ) {
-                        Text(
-                            text = resumen.pagosRecibidos.toString(),
-                            style = MaterialTheme.typography.displaySmall,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onSurface,
+                        Box(
+                            modifier = Modifier
+                                .size(6.dp)
+                                .background(homeColors().Chip1Dot, CircleShape)
                         )
-                        Spacer(modifier = Modifier.height(2.dp))
+                        Spacer(modifier = Modifier.width(6.dp))
                         Text(
-                            text = "Pagos recibidos",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            textAlign = TextAlign.Center,
-                        )
-                    }
-
-                    VerticalDivider(
-                        modifier = Modifier
-                            .fillMaxHeight()
-                            .padding(vertical = 4.dp),
-                        thickness = 1.dp,
-                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
-                    )
-
-                    Column(
-                        modifier = Modifier.weight(1f),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                    ) {
-                        Text(
-                            text = resumen.operacionesPendientes.toString(),
-                            style = MaterialTheme.typography.displaySmall,
-                            fontWeight = FontWeight.Bold,
-                            color = if (resumen.operacionesPendientes > 0) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onSurface,
-                        )
-                        Spacer(modifier = Modifier.height(2.dp))
-                        Text(
-                            text = "Pendientes",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            textAlign = TextAlign.Center,
+                            text = "${resumen.numeroDeOperaciones} cobros",
+                            style = androidx.compose.ui.text.TextStyle(
+                                fontFamily = PlusJakartaSans,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 12.sp,
+                            ),
+                            color = homeColors().Chip1Texto,
                         )
                     }
                 }
-            } else {
-                Text(
-                    text = String.format(Locale.US, "S/ %,.2f", resumen.totalDelDia),
-                    style = MaterialTheme.typography.displayMedium.copy(
-                        fontSize = 34.sp,
-                        letterSpacing = (-0.85).sp
-                    ),
-                    fontWeight = FontWeight.ExtraBold,
-                    color = MaterialTheme.colorScheme.onSurface,
-                )
-
-                Spacer(modifier = Modifier.height(6.dp))
-
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
+                Spacer(modifier = Modifier.width(8.dp))
+                // Chip 2
+                Surface(
+                    shape = RoundedCornerShape(9999.dp),
+                    color = homeColors().Chip2Fondo,
                 ) {
-                    // Pill Operaciones
-                    Surface(
-                        shape = RoundedCornerShape(12.dp),
-                        color = MaterialTheme.colorScheme.surfaceVariant,
-                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)),
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
                     ) {
-                        Row(
-                            modifier = Modifier.padding(horizontal = 13.dp, vertical = 5.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(6.dp)
-                                    .clip(CircleShape)
-                                    .background(MaterialTheme.colorScheme.onSurface),
-                            )
-                            Spacer(modifier = Modifier.width(6.dp))
-                            Text(
-                                text = "${resumen.numeroDeOperaciones} cobros",
-                                style = MaterialTheme.typography.labelMedium.copy(fontSize = 12.sp),
-                                color = MaterialTheme.colorScheme.onSurface,
-                                fontWeight = FontWeight.Bold,
-                            )
-                        }
-                    }
-
-                    // Pill Pendientes
-                    if (resumen.operacionesPendientes > 0) {
-                        Surface(
-                            shape = RoundedCornerShape(12.dp),
-                            color = MaterialTheme.colorScheme.tertiary,
-                        ) {
-                            Row(
-                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                            ) {
-                                Icon(
-                                    painter = androidx.compose.ui.res.painterResource(id = com.flabs.cobrate.components.TokeIcons.Clock),
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.onTertiary,
-                                    modifier = Modifier.size(14.dp)
-                                )
-                                Spacer(modifier = Modifier.width(6.dp))
-                                Text(
-                                    text = "${resumen.operacionesPendientes} pendientes",
-                                    style = MaterialTheme.typography.labelMedium.copy(fontSize = 12.sp),
-                                    color = MaterialTheme.colorScheme.onTertiary,
-                                    fontWeight = FontWeight.SemiBold,
-                                )
-                            }
-                        }
+                        Icon(
+                            painter = androidx.compose.ui.res.painterResource(id = com.flabs.cobrate.components.TokeIcons.Clock),
+                            contentDescription = null,
+                            tint = Color.Unspecified,
+                            modifier = Modifier.size(14.dp)
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = "${resumen.operacionesPendientes} pendientes",
+                            style = androidx.compose.ui.text.TextStyle(
+                                fontFamily = PlusJakartaSans,
+                                fontWeight = FontWeight.SemiBold,
+                                fontSize = 12.sp,
+                            ),
+                            color = homeColors().Chip2Texto,
+                        )
                     }
                 }
             }
@@ -875,130 +891,131 @@ private fun QuickActionsRow(
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        QuickActionButton(
+        // Tile 1
+        Card(
             modifier = Modifier.weight(1f),
-            title = stringResource(R.string.nombre_mis_qr),
-            subtitle = stringResource(R.string.home_yape_plin_bancos),
-            icon = com.flabs.cobrate.components.TokeIcons.Qr,
-            onClick = onMisQRs,
-        )
-        QuickActionButton(
-            modifier = Modifier.weight(1f),
-            title = stringResource(R.string.home_mi_personal),
-            subtitle = stringResource(R.string.home_ver_colaboradores),
-            icon = com.flabs.cobrate.components.TokeIcons.PersonAdd,
-            onClick = onAnadirTrabajador,
-        )
-    }
-}
-
-/**
- * Botón Bubbly conforme a Figma (Nodo 7:2922 / 7:2941):
- * Borde 2px, icono contenedor 40x40 fondo `#ECFDF5` con borde `#A7F3D0`.
- */
-@Composable
-private fun QuickActionButton(
-    modifier: Modifier = Modifier,
-    title: String,
-    subtitle: String,
-    @androidx.annotation.DrawableRes icon: Int,
-    onClick: () -> Unit,
-) {
-    val interactionSource = remember { MutableInteractionSource() }
-    val isPressed by interactionSource.collectIsPressedAsState()
-    val scale by animateFloatAsState(
-        targetValue = if (isPressed) 0.98f else 1.0f,
-        animationSpec = tween(durationMillis = 100),
-        label = "quick_action_scale",
-    )
-
-    Card(
-        onClick = onClick,
-        modifier = modifier.graphicsLayer {
-            scaleX = scale
-            scaleY = scale
-        },
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.25f)),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(15.dp),
-            verticalArrangement = Arrangement.Top,
-            horizontalAlignment = Alignment.Start,
+            shape = RoundedCornerShape(12.dp),
+            colors = CardDefaults.cardColors(containerColor = homeColors().TarjetaFondo),
+            border = BorderStroke(1.dp, homeColors().TarjetaBorde),
+            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+            onClick = onMisQRs
         ) {
-            Surface(
-                shape = RoundedCornerShape(8.dp),
-                color = MaterialTheme.colorScheme.primaryContainer,
-                modifier = Modifier.size(36.dp),
-            ) {
-                Box(contentAlignment = Alignment.Center) {
-                    Icon(
-                        painter = androidx.compose.ui.res.painterResource(id = icon),
-                        contentDescription = title,
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(20.dp),
-                    )
+            Column(modifier = Modifier.padding(15.dp)) {
+                Surface(
+                    shape = RoundedCornerShape(10.dp),
+                    color = homeColors().TileIconoFondo,
+                    border = BorderStroke(1.dp, homeColors().TarjetaBorde),
+                    modifier = Modifier.size(42.dp),
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Icon(
+                            painter = androidx.compose.ui.res.painterResource(id = com.flabs.cobrate.components.TokeIcons.Qr),
+                            contentDescription = null,
+                            tint = homeColors().IconoTile,
+                            modifier = Modifier.size(20.dp),
+                        )
+                    }
                 }
+                Spacer(modifier = Modifier.height(14.dp))
+                Text(
+                    text = stringResource(R.string.nombre_mis_qr),
+                    style = androidx.compose.ui.text.TextStyle(
+                        fontFamily = PlusJakartaSans,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 14.sp,
+                    ),
+                    color = homeColors().TextoPrincipal,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = stringResource(R.string.home_yape_plin_bancos),
+                    style = androidx.compose.ui.text.TextStyle(
+                        fontFamily = PlusJakartaSans,
+                        fontWeight = FontWeight.Medium,
+                        fontSize = 11.sp,
+                        lineHeight = 13.75.sp
+                    ),
+                    color = homeColors().TextoSecundario,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
             }
-            Spacer(modifier = Modifier.height(10.dp))
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleMedium.copy(
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold,
-                ),
-                color = MaterialTheme.colorScheme.onSurface,
-                maxLines = 1,
-            )
-            Spacer(modifier = Modifier.height(2.dp))
-            Text(
-                text = subtitle,
-                style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.sp, fontWeight = FontWeight.Medium),
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 1,
-            )
+        }
+
+        // Tile 2
+        Card(
+            modifier = Modifier.weight(1f),
+            shape = RoundedCornerShape(12.dp),
+            colors = CardDefaults.cardColors(containerColor = homeColors().TarjetaFondo),
+            border = BorderStroke(1.dp, homeColors().TarjetaBorde),
+            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+            onClick = onAnadirTrabajador
+        ) {
+            Column(modifier = Modifier.padding(15.dp)) {
+                Surface(
+                    shape = RoundedCornerShape(10.dp),
+                    color = homeColors().TileIconoFondo,
+                    border = BorderStroke(1.dp, homeColors().TarjetaBorde),
+                    modifier = Modifier.size(42.dp),
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Icon(
+                            painter = androidx.compose.ui.res.painterResource(id = com.flabs.cobrate.components.TokeIcons.PersonAdd),
+                            contentDescription = null,
+                            tint = homeColors().IconoTile,
+                            modifier = Modifier.size(20.dp),
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.height(14.dp))
+                Text(
+                    text = stringResource(R.string.home_mi_personal),
+                    style = androidx.compose.ui.text.TextStyle(
+                        fontFamily = PlusJakartaSans,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 14.sp,
+                    ),
+                    color = homeColors().TextoPrincipal,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = stringResource(R.string.home_ver_colaboradores),
+                    style = androidx.compose.ui.text.TextStyle(
+                        fontFamily = PlusJakartaSans,
+                        fontWeight = FontWeight.Medium,
+                        fontSize = 11.sp,
+                        lineHeight = 13.75.sp
+                    ),
+                    color = homeColors().TextoSecundario,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
         }
     }
 }
 
-/**
- * Banner de pagos pendientes (Decisión 4):
- * Mantiene la lógica dinámica de la app.
- */
 @Composable
 private fun BannerPagosPendientes(
     cantidadPendientes: Int,
     pendientes: List<Operacion>,
-    onClick: () -> Unit,
+    onClick: () -> Unit
 ) {
-    val interactionSource = remember { MutableInteractionSource() }
-    val isPressed by interactionSource.collectIsPressedAsState()
-    val scale by animateFloatAsState(
-        targetValue = if (isPressed) 0.98f else 1.0f,
-        animationSpec = tween(durationMillis = 100),
-        label = "banner_scale",
-    )
-
     val sumaPendientes = pendientes.sumOf { it.monto }
 
     Card(
         onClick = onClick,
-        modifier = Modifier
-            .fillMaxWidth()
-            .graphicsLayer {
-                scaleX = scale
-                scaleY = scale
-            },
         shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.25f)),
+        colors = CardDefaults.cardColors(containerColor = homeColors().TarjetaFondo),
+        border = BorderStroke(1.dp, homeColors().TarjetaBorde),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+        modifier = Modifier.fillMaxWidth()
     ) {
         Row(
             modifier = Modifier
@@ -1013,17 +1030,18 @@ private fun BannerPagosPendientes(
             ) {
                 Surface(
                     shape = RoundedCornerShape(9999.dp),
-                    color = MaterialTheme.colorScheme.tertiary,
+                    color = homeColors().Chip2Fondo,
                     modifier = Modifier.size(28.dp),
                 ) {
                     Box(contentAlignment = Alignment.Center) {
                         Text(
                             text = cantidadPendientes.toString(),
-                            style = MaterialTheme.typography.titleMedium.copy(
-                                fontSize = 14.sp,
+                            style = androidx.compose.ui.text.TextStyle(
+                                fontFamily = PlusJakartaSans,
                                 fontWeight = FontWeight.Bold,
+                                fontSize = 14.sp,
                             ),
-                            color = MaterialTheme.colorScheme.onTertiary,
+                            color = homeColors().Chip2Texto,
                         )
                     }
                 }
@@ -1031,17 +1049,26 @@ private fun BannerPagosPendientes(
                 Column {
                     Text(
                         text = stringResource(R.string.home_pagos_por_asignar),
-                        style = MaterialTheme.typography.titleMedium.copy(
-                            fontSize = 14.sp,
+                        style = androidx.compose.ui.text.TextStyle(
+                            fontFamily = PlusJakartaSans,
                             fontWeight = FontWeight.Bold,
+                            fontSize = 14.sp,
                         ),
-                        color = MaterialTheme.colorScheme.onSurface,
+                        color = homeColors().TextoPrincipal,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                     Spacer(modifier = Modifier.height(2.dp))
                     Text(
                         text = stringResource(R.string.home_hay_cobros_esperando),
-                        style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        style = androidx.compose.ui.text.TextStyle(
+                            fontFamily = PlusJakartaSans,
+                            fontWeight = FontWeight.Normal,
+                            fontSize = 12.sp,
+                        ),
+                        color = homeColors().TextoSecundario,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                 }
             }
@@ -1049,15 +1076,22 @@ private fun BannerPagosPendientes(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     text = String.format(Locale.US, "S/ %.2f", sumaPendientes),
-                    style = MaterialTheme.typography.labelMedium.copy(fontSize = 14.sp, fontWeight = FontWeight.Bold),
-                    color = MaterialTheme.colorScheme.onSurface,
+                    style = androidx.compose.ui.text.TextStyle(
+                        fontFamily = PlusJakartaSans,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 14.sp,
+                    ),
+                    color = homeColors().TextoPrincipal,
                 )
                 Spacer(modifier = Modifier.width(6.dp))
-                Icon(
-                    painter = androidx.compose.ui.res.painterResource(id = com.flabs.cobrate.components.TokeIcons.ChevronDown),
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.size(18.dp).graphicsLayer { rotationZ = -90f }
+                Text(
+                    text = "›",
+                    style = androidx.compose.ui.text.TextStyle(
+                        fontFamily = PlusJakartaSans,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 18.sp,
+                    ),
+                    color = homeColors().TextoSecundario,
                 )
             }
         }
@@ -1103,10 +1137,6 @@ private fun AlertasCard(alerta: Alerta) {
     }
 }
 
-/**
- * Sección de Operaciones Recientes conforme a Figma (Nodo 7:2981 / Decisión 1):
- * Título "Operaciones recientes". Enlace "Ver todas ›".
- */
 @Composable
 private fun RecentOpsSection(
     operaciones: List<Operacion>,
@@ -1116,18 +1146,21 @@ private fun RecentOpsSection(
 ) {
     Column {
         Row(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 2.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 2.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
                 text = stringResource(R.string.home_operaciones_recientes),
-                style = MaterialTheme.typography.titleMedium.copy(
-                    fontSize = 15.sp,
+                style = androidx.compose.ui.text.TextStyle(
+                    fontFamily = PlusJakartaSans,
                     fontWeight = FontWeight.Bold,
+                    fontSize = 15.sp,
                     letterSpacing = (-0.375).sp
                 ),
-                color = MaterialTheme.colorScheme.onSurface,
+                color = homeColors().TextoPrincipal,
             )
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -1135,18 +1168,22 @@ private fun RecentOpsSection(
             ) {
                 Text(
                     text = stringResource(R.string.home_ver_todas),
-                    style = MaterialTheme.typography.labelMedium.copy(
-                        fontSize = 13.sp,
+                    style = androidx.compose.ui.text.TextStyle(
+                        fontFamily = PlusJakartaSans,
                         fontWeight = FontWeight.SemiBold,
+                        fontSize = 13.sp,
                     ),
-                    color = MaterialTheme.colorScheme.primary,
+                    color = homeColors().EnlaceVerTodas,
                 )
                 Spacer(modifier = Modifier.width(2.dp))
-                Icon(
-                    painter = androidx.compose.ui.res.painterResource(id = com.flabs.cobrate.components.TokeIcons.ChevronDown),
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(16.dp).graphicsLayer { rotationZ = -90f }
+                Text(
+                    text = "›",
+                    style = androidx.compose.ui.text.TextStyle(
+                        fontFamily = PlusJakartaSans,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 14.sp,
+                    ),
+                    color = homeColors().EnlaceVerTodas,
                 )
             }
         }
@@ -1157,13 +1194,17 @@ private fun RecentOpsSection(
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.25f)),
+                colors = CardDefaults.cardColors(containerColor = homeColors().TarjetaFondo),
+                border = BorderStroke(1.dp, homeColors().TarjetaBorde),
             ) {
                 Text(
                     text = stringResource(R.string.home_sin_operaciones),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = androidx.compose.ui.text.TextStyle(
+                        fontFamily = PlusJakartaSans,
+                        fontWeight = FontWeight.Medium,
+                        fontSize = 14.sp,
+                    ),
+                    color = homeColors().TextoSecundario,
                     modifier = Modifier.padding(20.dp),
                     textAlign = TextAlign.Center
                 )
@@ -1188,19 +1229,22 @@ private fun HomeOperacionRow(
     asignadoPorNombre: String?,
     onClick: () -> Unit
 ) {
-    val colorFondo = when (operacion.metodoPago?.name?.lowercase()) {
-        // Fallback a surfaceVariant como se instruye, y se reporta.
-        "yape" -> MaterialTheme.colorScheme.surfaceVariant
-        "plin" -> MaterialTheme.colorScheme.surfaceVariant
-        "bcp" -> MaterialTheme.colorScheme.surfaceVariant
-        else -> MaterialTheme.colorScheme.surfaceVariant
+    val methodName = operacion.metodoPago?.name?.lowercase()
+    val colorFondo = when (methodName) {
+        "yape" -> homeColors().FilaYape
+        "plin" -> homeColors().FilaPlin
+        "bcp" -> homeColors().FilaBCP
+        else -> homeColors().TileIconoFondo
     }
+
+    val isWhitePlate = methodName == "yape" || methodName == "plin" || methodName == "bcp"
+    val borderMetodo = if (isWhitePlate) null else BorderStroke(1.dp, homeColors().TarjetaBorde)
 
     Card(
         onClick = onClick,
         shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.25f)),
+        colors = CardDefaults.cardColors(containerColor = homeColors().TarjetaFondo),
+        border = BorderStroke(1.dp, homeColors().TarjetaBorde),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -1218,33 +1262,53 @@ private fun HomeOperacionRow(
                 Surface(
                     shape = RoundedCornerShape(10.dp),
                     color = colorFondo,
+                    border = borderMetodo,
                     modifier = Modifier.size(44.dp),
                 ) {
                     Box(contentAlignment = Alignment.Center) {
                         if (operacion.metodoPago != null) {
-                            com.flabs.cobrate.components.IconoMetodoPago(
-                                tipo = operacion.metodoPago,
-                                tamano = 28.dp
-                            )
+                            if (isWhitePlate) {
+                                Surface(
+                                    shape = RoundedCornerShape(8.dp),
+                                    color = Color(0xFFFFFFFF),
+                                    modifier = Modifier.size(32.dp)
+                                ) {
+                                    Box(contentAlignment = Alignment.Center) {
+                                        com.flabs.cobrate.components.IconoMetodoPago(
+                                            tipo = operacion.metodoPago,
+                                            tamano = 26.dp
+                                        )
+                                    }
+                                }
+                            } else {
+                                com.flabs.cobrate.components.IconoMetodoPago(
+                                    tipo = operacion.metodoPago,
+                                    tamano = 26.dp
+                                )
+                            }
                         } else {
                             Text(
-                                text = "OP",
-                                style = MaterialTheme.typography.titleSmall,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onSurface
+                                text = "?",
+                                style = androidx.compose.ui.text.TextStyle(
+                                    fontFamily = PlusJakartaSans,
+                                    fontWeight = FontWeight.ExtraBold,
+                                    fontSize = 18.sp,
+                                ),
+                                color = homeColors().TextoSecundario
                             )
                         }
                     }
                 }
                 Spacer(modifier = Modifier.width(12.dp))
-                Column {
+                Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = asignadoPorNombre ?: "",
-                        style = MaterialTheme.typography.titleMedium.copy(
-                            fontSize = 14.sp,
+                        text = asignadoPorNombre ?: "Desconocido",
+                        style = androidx.compose.ui.text.TextStyle(
+                            fontFamily = PlusJakartaSans,
                             fontWeight = FontWeight.Bold,
+                            fontSize = 14.sp,
                         ),
-                        color = MaterialTheme.colorScheme.onSurface,
+                        color = homeColors().TextoPrincipal,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -1252,21 +1316,27 @@ private fun HomeOperacionRow(
                     val metodoTexto = operacion.metodoPago?.name?.lowercase()?.replaceFirstChar { it.uppercase() } ?: "Pago"
                     Text(
                         text = "$metodoTexto · ${formatearHoraLocal(operacion.fechaHora)}",
-                        style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        style = androidx.compose.ui.text.TextStyle(
+                            fontFamily = PlusJakartaSans,
+                            fontWeight = FontWeight.Normal,
+                            fontSize = 12.sp,
+                        ),
+                        color = homeColors().TextoSecundario,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
                 }
             }
 
+            Spacer(modifier = Modifier.width(12.dp))
             Text(
                 text = String.format(Locale.US, "S/ %.2f", operacion.monto),
-                style = MaterialTheme.typography.titleMedium.copy(
-                    fontSize = 15.sp,
+                style = androidx.compose.ui.text.TextStyle(
+                    fontFamily = PlusJakartaSans,
                     fontWeight = FontWeight.Bold,
+                    fontSize = 15.sp,
                 ),
-                color = MaterialTheme.colorScheme.onSurface,
+                color = homeColors().TextoPrincipal,
                 textAlign = TextAlign.Right
             )
         }

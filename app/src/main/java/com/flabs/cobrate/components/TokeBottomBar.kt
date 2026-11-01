@@ -25,9 +25,50 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.annotation.DrawableRes
+import androidx.compose.ui.unit.sp
+import com.flabs.cobrate.ui.theme.PlusJakartaSans
+import androidx.compose.runtime.collectAsState
+import com.flabs.cobrate.core.data.PreferenciasAppStore
+import com.flabs.cobrate.ui.theme.ThemeMode
 import com.flabs.cobrate.core.logic.TabRefreshState
-import com.flabs.cobrate.ui.theme.TokeBorder
 import com.flabs.cobrate.ui.theme.TokeGreen
+
+private class NavPalette(
+    val Fondo: Color,
+    val Borde: Color,
+    val Activo: Color,
+    val Inactivo: Color,
+    val FabFondo: Color,
+    val FabContenido: Color
+)
+
+private val NavFigma = NavPalette(
+    Fondo = Color(0xFFFFFFFF), // nodeId 1:141 (light)
+    Borde = Color(0xFFE2E8F0), // nodeId 1:141 (light)
+    Activo = Color(0xFF0F172A), // nodeId 1:147 (light)
+    Inactivo = Color(0xFF64748B), // nodeId 1:152 (light)
+    FabFondo = TokeGreen,
+    FabContenido = Color.White
+)
+
+private val NavFigmaOscuro = NavPalette(
+    Fondo = Color(0xFF0A0D10), // nodeId 1:142 (dark)
+    Borde = Color(0xFF1E232B), // nodeId 1:142 (dark)
+    Activo = Color(0xFFF8FAFC), // nodeId 1:148 (dark)
+    Inactivo = Color(0xFF8E9BAE), // nodeId 1:153 (dark)
+    FabFondo = Color(0xFF00C853), // nodeId 1:171 (dark)
+    FabContenido = Color(0xFF042615) // nodeId 1:180 (dark)
+)
+
+@Composable
+private fun navColors(): NavPalette {
+    val themeMode by PreferenciasAppStore.themeMode.collectAsState()
+    val isDark = when (themeMode) {
+        ThemeMode.DARK -> true
+        ThemeMode.LIGHT -> false
+    }
+    return if (isDark) NavFigmaOscuro else NavFigma
+}
 
 data class ItemNav(
     val id: String,
@@ -58,6 +99,8 @@ fun TokeBottomBar(
         label = "fab_press_scale",
     )
 
+    val colors = navColors()
+
     Box(
         modifier = modifier
             .fillMaxWidth()
@@ -70,13 +113,13 @@ fun TokeBottomBar(
                 .align(Alignment.BottomCenter)
                 .fillMaxWidth()
                 .height(64.dp),
-            color = MaterialTheme.colorScheme.surface,
+            color = colors.Fondo,
             shadowElevation = 0.dp,
         ) {
             Column(modifier = Modifier.fillMaxSize()) {
                 HorizontalDivider(
                     thickness = 1.dp,
-                    color = TokeBorder,
+                    color = colors.Borde,
                 )
                 Row(
                     modifier = Modifier
@@ -141,10 +184,10 @@ fun TokeBottomBar(
                 .shadow(
                     elevation = 8.dp,
                     shape = RoundedCornerShape(12.dp),
-                    ambientColor = TokeGreen,
-                    spotColor = TokeGreen.copy(alpha = 0.35f),
+                    ambientColor = colors.FabFondo,
+                    spotColor = colors.FabFondo.copy(alpha = 0.35f),
                 )
-                .border(2.dp, MaterialTheme.colorScheme.surface, RoundedCornerShape(12.dp))
+                .border(2.dp, colors.Fondo, RoundedCornerShape(12.dp))
                 .clip(RoundedCornerShape(12.dp))
                 .clickable(
                     interactionSource = interactionSource,
@@ -152,7 +195,7 @@ fun TokeBottomBar(
                     onClick = onRecibir,
                 ),
             shape = RoundedCornerShape(12.dp),
-            color = TokeGreen,
+            color = colors.FabFondo,
             shadowElevation = 0.dp,
         ) {
             Column(
@@ -164,13 +207,13 @@ fun TokeBottomBar(
                     imageVector = Icons.Default.QrCode2,
                     contentDescription = "Recibir",
                     modifier = Modifier.size(24.dp),
-                    tint = MaterialTheme.colorScheme.onPrimary,
+                    tint = colors.FabContenido,
                 )
                 Text(
                     text = "Recibir",
                     style = MaterialTheme.typography.labelSmall,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onPrimary,
+                    color = colors.FabContenido,
                 )
             }
         }
@@ -187,11 +230,8 @@ private fun BottomNavItem(
     modifier: Modifier = Modifier,
     insignia: Int = 0,
 ) {
-    val color = if (isSeleccionado) {
-        MaterialTheme.colorScheme.primary
-    } else {
-        MaterialTheme.colorScheme.onSurfaceVariant
-    }
+    val colors = navColors()
+    val color = if (isSeleccionado) colors.Activo else colors.Inactivo
 
     Column(
         modifier = modifier
@@ -223,8 +263,13 @@ private fun BottomNavItem(
         Spacer(modifier = Modifier.height(2.dp))
         Text(
             text = item.label,
-            style = MaterialTheme.typography.labelSmall,
-            fontWeight = if (isSeleccionado) FontWeight.Bold else FontWeight.Medium,
+            style = androidx.compose.ui.text.TextStyle(
+                fontFamily = PlusJakartaSans,
+                fontWeight = FontWeight.Bold,
+                fontSize = 11.sp,
+                lineHeight = 16.5.sp,
+                letterSpacing = (-0.275).sp
+            ),
             color = color,
             maxLines = 1,
         )
