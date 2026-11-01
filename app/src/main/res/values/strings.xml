@@ -118,4 +118,16 @@
     <string name="push_aceptada_texto">Ya puedes entrar al negocio.</string>
     <string name="push_rechazada_titulo">Solicitud rechazada</string>
     <string name="push_rechazada_texto">El dueño no aceptó tu solicitud.</string>
+
+    <string name="home_resumen_hoy">Resumen de hoy</string>
+    <string name="home_cobros_hoy">Cobros de hoy</string>
+    <string name="home_mi_personal">Mi Personal</string>
+    <string name="home_ver_colaboradores">Ver colaboradores</string>
+    <string name="home_pagos_por_asignar">Pagos por asignar</string>
+    <string name="home_hay_cobros_esperando">Hay cobros esperando turno</string>
+    <string name="home_yape_plin_bancos">Yape, Plin y bancos</string>
+    <string name="home_operaciones_recientes">Operaciones recientes</string>
+    <string name="home_ver_todas">Ver todas</string>
+    <string name="home_sin_operaciones">No hay operaciones registradas hoy.</string>
+    <string name="nav_equipo">Equipo</string>
 </resources>

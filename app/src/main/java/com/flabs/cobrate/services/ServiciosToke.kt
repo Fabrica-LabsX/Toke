@@ -102,12 +102,17 @@ object ServiciosToke {
 
         if (!esGeneracionValida(gen)) return@withContext
 
-        runCatching {
-            val intent = Intent(appContext, TokeOperandoService::class.java)
-            ContextCompat.startForegroundService(appContext, intent)
-            LogSeguro.d(TAG, "1. TokeOperandoService -> iniciado")
-        }.onFailure { err ->
-            LogSeguro.w(TAG, "Excepción al iniciar TokeOperandoService", err)
+        val esElegible = TokeOperandoService.esElegibleParaOperar(appContext)
+        if (esElegible) {
+            runCatching {
+                val intent = Intent(appContext, TokeOperandoService::class.java)
+                ContextCompat.startForegroundService(appContext, intent)
+                LogSeguro.d(TAG, "1. TokeOperandoService -> iniciado")
+            }.onFailure { err ->
+                LogSeguro.w(TAG, "Excepción al iniciar TokeOperandoService", err)
+            }
+        } else {
+            LogSeguro.d(TAG, "1. TokeOperandoService omitido: no cumple requisitos de elegibilidad operativa")
         }
 
         if (!esGeneracionValida(gen)) return@withContext

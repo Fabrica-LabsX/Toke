@@ -607,16 +607,19 @@ internal fun resolverNombreDueno(
     val cuenta = cuentasCheadas.find { it.id == duenoCuentaId }
     if (cuenta == null) {
         onCargarFaltante?.invoke(duenoCuentaId)
-        return "Cargando…"
+        return "Dueño del negocio"
     }
 
-    val username = cuenta.username.trim()
-    val correo = cuenta.correoVerificado?.trim()
+    val rawUsername = cuenta.username.trim()
+    val cleanUsername = if (rawUsername.contains("@")) {
+        rawUsername.substringBefore("@")
+    } else {
+        rawUsername
+    }
 
     return when {
-        username.isNotBlank() && username != "Usuario anónimo" && !username.contains("anon") -> username
-        !correo.isNullOrBlank() -> correo
-        username.isNotBlank() -> username
-        else -> "Cargando…"
+        cleanUsername.isNotBlank() && cleanUsername != "Usuario anónimo" && !cleanUsername.contains("anon") -> cleanUsername
+        cleanUsername.isNotBlank() -> cleanUsername
+        else -> "Dueño del negocio"
     }
 }

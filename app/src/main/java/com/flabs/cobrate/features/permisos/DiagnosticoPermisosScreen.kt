@@ -62,6 +62,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
+import com.flabs.cobrate.core.logic.FeedbackManager
 import com.flabs.cobrate.core.logic.PermisosChecker
 import com.flabs.cobrate.core.logic.Requisito
 import com.flabs.cobrate.ui.theme.TokeBorder
@@ -79,6 +80,7 @@ import com.flabs.cobrate.ui.theme.TokeGreenSoft
 @Composable
 fun DiagnosticoPermisosScreen(
     requisitos: Set<Requisito> = emptySet(),
+    esOnboarding: Boolean = false,
     onVolver: () -> Unit
 ) {
     val context = LocalContext.current
@@ -123,57 +125,66 @@ fun DiagnosticoPermisosScreen(
             )
         },
         bottomBar = {
-            // Barra Inferior Fija con Botón Principal "Listo, todo configurado" (Nodo 1:77)
-            Surface(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .navigationBarsPadding(),
-                color = MaterialTheme.colorScheme.surface,
-                tonalElevation = 8.dp,
-                shadowElevation = 8.dp
-            ) {
-                Column(
+            if (esOnboarding) {
+                // Barra Inferior Fija con Botón Principal "Listo, todo configurado" solo para Onboarding/Quick Setup
+                Surface(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 20.dp, vertical = 16.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                        .navigationBarsPadding(),
+                    color = MaterialTheme.colorScheme.surface,
+                    tonalElevation = 8.dp,
+                    shadowElevation = 8.dp
                 ) {
-                    Button(
-                        onClick = onVolver,
+                    Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(54.dp),
-                        shape = RoundedCornerShape(27.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = if (accesoNotificaciones) TokeGreen else MaterialTheme.colorScheme.primary,
-                            contentColor = Color.White
-                        )
+                            .padding(horizontal = 20.dp, vertical = 16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.Center
+                        Button(
+                            onClick = {
+                                if (!accesoNotificaciones) {
+                                    FeedbackManager.showErrorMessage("Activa el acceso a notificaciones para que TOKE pueda leer los avisos de pago.")
+                                    abrirAjustesAccesoNotificaciones(context)
+                                } else {
+                                    onVolver()
+                                }
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(54.dp),
+                            shape = RoundedCornerShape(27.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = if (accesoNotificaciones) TokeGreen else MaterialTheme.colorScheme.primary,
+                                contentColor = Color.White
+                            )
                         ) {
-                            Text(
-                                text = "Listo, todo configurado",
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Bold
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Icon(
-                                imageVector = Icons.Default.ChevronRight,
-                                contentDescription = null,
-                                modifier = Modifier.size(20.dp)
-                            )
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.Center
+                            ) {
+                                Text(
+                                    text = "Listo, todo configurado",
+                                    fontSize = 16.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Icon(
+                                    imageVector = Icons.Default.ChevronRight,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
                         }
-                    }
 
-                    Text(
-                        text = "Puedes modificar estas opciones en cualquier momento.",
-                        fontSize = 12.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        textAlign = TextAlign.Center
-                    )
+                        Text(
+                            text = "Puedes modificar estas opciones en cualquier momento.",
+                            fontSize = 12.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            textAlign = TextAlign.Center
+                        )
+                    }
                 }
             }
         }

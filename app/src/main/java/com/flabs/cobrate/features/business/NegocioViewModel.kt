@@ -205,6 +205,40 @@ class NegocioViewModel : ViewModel() {
                 }
             }
         }
+
+        // Auto-selección determinística de negocio elegible
+        viewModelScope.launch {
+            combine(
+                sesion,
+                relaciones,
+                negocioSeleccionadoId,
+                negocios,
+                datosListos
+            ) { cuenta, todas, seleccionadoId, todosNegocios, listos ->
+                if (!listos) return@combine
+                val cuentaId = cuenta?.id ?: return@combine
+
+                val elegibles = todosNegocios.filter { neg ->
+                    val esDueno = neg.dueñoCuentaId == cuentaId
+                    val rel = todas.find { it.cuentaId == cuentaId && it.negocioId == neg.id }
+                    val esTrabajadorActivo = rel?.estado == EstadoRelacion.ACTIVA
+                    esDueno || esTrabajadorActivo
+                }
+
+                val actualEsElegible = seleccionadoId != null && elegibles.any { it.id == seleccionadoId }
+
+                if (!actualEsElegible) {
+                    if (elegibles.isNotEmpty()) {
+                        val preferido = elegibles.find { it.dueñoCuentaId == cuentaId } ?: elegibles.first()
+                        LogSeguro.d("NegocioViewModel", "[AUTO-SELECT] Seleccionando automáticamente negocio elegible ${preferido.id}")
+                        seleccionarNegocio(preferido.id)
+                    } else if (seleccionadoId != null) {
+                        LogSeguro.d("NegocioViewModel", "[AUTO-SELECT] Limpiando selección porque no hay negocios elegibles")
+                        seleccionarNegocio(null)
+                    }
+                }
+            }.collect {}
+        }
     }
 
     /**

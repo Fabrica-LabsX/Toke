@@ -71,11 +71,18 @@ internal fun Cuenta.toDto() = CuentaRepository.CuentaDto(
     ultimoAcceso = ultimoAcceso
 )
 
-internal fun CuentaRepository.CuentaDto.toDomain() = Cuenta(
-    id = id,
-    username = username,
-    correoVerificado = correoVerificado,
-    telefonoVerificado = telefonoVerificado,
-    fechaCreacion = fechaCreacion,
-    ultimoAcceso = ultimoAcceso
-)
+internal fun CuentaRepository.CuentaDto.toDomain(): Cuenta {
+    val cleanUsername = if (username.contains("@")) {
+        username.substringBefore("@").ifBlank { "Usuario" }
+    } else {
+        username.ifBlank { "Usuario anónimo" }
+    }
+    return Cuenta(
+        id = id,
+        username = cleanUsername,
+        correoVerificado = correoVerificado,
+        telefonoVerificado = telefonoVerificado,
+        fechaCreacion = fechaCreacion,
+        ultimoAcceso = ultimoAcceso
+    )
+}

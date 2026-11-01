@@ -2,10 +2,15 @@ package com.flabs.cobrate.core.data
 
 import com.flabs.cobrate.core.logic.AuthErrorUtils
 import com.flabs.cobrate.core.logic.LogSeguro
+import io.github.jan.supabase.auth.OtpType
+import io.github.jan.supabase.auth.SignOutScope
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.auth.providers.builtin.Email
+import io.github.jan.supabase.auth.providers.builtin.OTP
 import io.github.jan.supabase.auth.status.SessionStatus
 import io.github.jan.supabase.auth.user.UserInfo
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -16,6 +21,7 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import java.util.UUID
 
 sealed interface EstadoSesion {
     object Inicializando : EstadoSesion
@@ -127,5 +133,58 @@ object SupabaseAuthBridge {
     /** Limpia la sesión guardada localmente en Supabase Auth sin hacer llamadas de red. */
     suspend fun limpiarSesionLocal(): Result<Unit> = runCatching {
         SupabaseClientProvider.supabase.auth.clearSession()
+    }
+
+    /** Solicita envío de correo con OTP de recuperación. */
+    suspend fun solicitarRecuperacionPassword(email: String): Result<Unit> = runCatching {
+        SupabaseClientProvider.supabase.auth.resetPasswordForEmail(email.trim())
+    }
+
+    /** Verifica el OTP de recuperación ingresado por el usuario. */
+    suspend fun verificarOtpRecuperacion(email: String, token: String): Result<Unit> = runCatching {
+        SupabaseClientProvider.supabase.auth.verifyEmailOtp(
+            type = OtpType.Email.RECOVERY,
+            email = email.trim(),
+            token = token.trim()
+        )
+    }
+
+    /** Actualiza la contraseña del usuario tras verificar el OTP de recuperación y revoca otras sesiones. */
+    suspend fun actualizarPasswordYRevocarOtros(nuevaPassword: String): Result<Unit> = runCatching {
+        SupabaseClientProvider.supabase.auth.updateUser {
+            password = nuevaPassword
+        }
+        runCatching {
+            SupabaseClientProvider.supabase.auth.signOut(scope = SignOutScope.OTHERS)
+        }
+    }
+
+    /** Solicita OTP para registro en pasos. */
+    suspend fun solicitarOtpRegistro(email: String): Result<Unit> = runCatching {
+        // Genera una contraseña temporal segura de alta entropía para la fase previa a confirmación OTP
+        val tempPassword = UUID.randomUUID().toString() + "A1!"
+        SupabaseClientProvider.supabase.auth.signUpWith(Email) {
+            this.email = email.trim()
+            this.password = tempPassword
+        }
+    }
+
+    /** Verifica el OTP de confirmación de registro ingresado por el usuario. */
+    suspend fun verificarOtpRegistro(email: String, token: String): Result<Unit> = runCatching {
+        SupabaseClientProvider.supabase.auth.verifyEmailOtp(
+            type = OtpType.Email.SIGNUP,
+            email = email.trim(),
+            token = token.trim()
+        )
+    }
+
+    /** Completa el perfil con nombre y contraseña elegidos tras verificar el correo. */
+    suspend fun completarRegistro(nombre: String, passwordElegida: String): Result<Unit> = runCatching {
+        SupabaseClientProvider.supabase.auth.updateUser {
+            password = passwordElegida
+            data = buildJsonObject {
+                put("username", nombre.trim())
+            }
+        }
     }
 }

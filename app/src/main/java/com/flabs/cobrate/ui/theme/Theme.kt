@@ -28,17 +28,17 @@ private val DarkColorScheme = darkColorScheme(
     onPrimary = TokeSurface,
     primaryContainer = Color(0xFF111D16),
     onPrimaryContainer = Color(0xFF10B968),
-    
+
     secondary = Color(0xFF10B968),
     onSecondary = TokeSurface,
     secondaryContainer = Color(0xFF111D16),
     onSecondaryContainer = Color(0xFF10B968),
-    
+
     background = TokeDarkBackground,
     onBackground = Color(0xFFFFFFFF),
     surface = TokeDarkSurface,
     onSurface = Color(0xFFFFFFFF),
-    
+
     outline = Color(0x33FFFFFF),
     surfaceVariant = Color(0xFF1E222B),
     onSurfaceVariant = Color(0xFFD4D4D4),
@@ -58,20 +58,20 @@ private val LightColorScheme = lightColorScheme(
     onPrimary = TokeSurface,
     primaryContainer = TokeGreenSoft,
     onPrimaryContainer = TokeGreenDeep,
-    
+
     secondary = TokeGreen,
     onSecondary = TokeSurface,
     secondaryContainer = TokeGreenSoft,
     onSecondaryContainer = TokeGreenDeep,
-    
+
     background = TokeBackground,
     onBackground = TokeTextPrimary,
     surface = TokeSurface,
     onSurface = TokeTextPrimary,
-    
+
     surfaceVariant = TokeGreenTint,
     onSurfaceVariant = TokeTextSecondary,
-    
+
     outline = TokeOutline,
 
     tertiary = TokeWarning,
@@ -92,7 +92,7 @@ fun CobrateTheme(
     content: @Composable () -> Unit,
 ) {
     val darkTheme = themeMode == ThemeMode.DARK
-    
+
     val colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
 
     MaterialTheme(

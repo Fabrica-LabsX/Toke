@@ -3,6 +3,9 @@ package com.flabs.cobrate
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.ui.res.stringResource
 import com.flabs.cobrate.features.nav.irADetalle
 import com.flabs.cobrate.features.nav.irAPestana
@@ -96,6 +99,7 @@ import com.flabs.cobrate.components.OpcionCard
 import com.flabs.cobrate.components.PedirExencionBateria
 import com.flabs.cobrate.components.PedirPermisoNotificaciones
 import com.flabs.cobrate.components.TokeBottomBar
+import com.flabs.cobrate.components.TokeIcons
 import com.flabs.cobrate.core.data.ConfiguracionDeVozStore
 import com.flabs.cobrate.core.data.MetodoDeCobroStore
 import com.flabs.cobrate.core.data.CuentaStore
@@ -116,6 +120,7 @@ import com.flabs.cobrate.core.data.RelacionCuentaNegocioRepository
 import com.flabs.cobrate.core.logic.AccesoNegocio
 import com.flabs.cobrate.core.logic.FeedbackManager
 import com.flabs.cobrate.core.logic.LogSeguro
+import com.flabs.cobrate.core.logic.LoginRateLimiter
 import com.flabs.cobrate.core.logic.NetworkMonitor
 import com.flabs.cobrate.core.logic.RegistroDispositivos
 import com.flabs.cobrate.core.logic.RequisitosPermisos
@@ -192,6 +197,8 @@ class MainActivity : ComponentActivity() {
         PreferenciasAppStore.init(applicationContext)
         // Carga el estado operativo global (CAPA 57)
         EstadoOperativoStore.init(applicationContext)
+        // Rate Limiter para Auth
+        LoginRateLimiter.init(applicationContext)
 
         setContent {
             val themeMode by PreferenciasAppStore.themeMode.collectAsState()
@@ -339,6 +346,7 @@ fun CobrateApp() {
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
+                val appContext = context.applicationContext
                 val uid = CuentaStore.sesionActual.value?.id
                 val encendido = EstadoOperativoStore.encendido.value
                 if (uid != null && encendido) {
@@ -352,6 +360,18 @@ fun CobrateApp() {
                     }
                 } else {
                     LogSeguro.d("MainActivity", "[ON_RESUME] Omitido por TOKE apagado o sin sesión.")
+                }
+
+                // Re-evaluar servicio operativo al volver a primer plano (p.ej. tras otorgar/revocar permisos)
+                if (TokeOperandoService.esElegibleParaOperar(appContext)) {
+                    runCatching {
+                        val intent = Intent(appContext, TokeOperandoService::class.java)
+                        ContextCompat.startForegroundService(appContext, intent)
+                    }
+                } else {
+                    runCatching {
+                        appContext.stopService(Intent(appContext, TokeOperandoService::class.java))
+                    }
                 }
             }
         }
@@ -397,12 +417,21 @@ fun CobrateApp() {
     }
 
     // Arranque/Monitoreo de TokeOperandoService (CAPA 58)
-    LaunchedEffect(sesionActual?.id, estadoOperativoEncendido) {
-        val uid = sesionActual?.id
+    val relaciones by RelacionCuentaNegocioStore.relaciones.collectAsState()
+
+    LaunchedEffect(sesionActual?.id, estadoOperativoEncendido, negocioSeleccionadoId, relaciones) {
         val appContext = context.applicationContext
-        if (uid != null && estadoOperativoEncendido) {
-            val intent = Intent(appContext, TokeOperandoService::class.java)
-            ContextCompat.startForegroundService(appContext, intent)
+        if (TokeOperandoService.esElegibleParaOperar(appContext)) {
+            runCatching {
+                val intent = Intent(appContext, TokeOperandoService::class.java)
+                ContextCompat.startForegroundService(appContext, intent)
+            }.onFailure { err ->
+                LogSeguro.w("TokeSync", "Error iniciando TokeOperandoService", err)
+            }
+        } else {
+            runCatching {
+                appContext.stopService(Intent(appContext, TokeOperandoService::class.java))
+            }
         }
     }
 
@@ -437,10 +466,10 @@ fun CobrateApp() {
             rutaActual in rutasConBarra
 
     val itemsNav = listOf(
-        ItemNav(Routes.INICIO, stringResource(R.string.nombre_inicio), Icons.Default.Home),
-        ItemNav(Routes.HISTORIAL_DUENO, stringResource(R.string.nombre_mis_cobros), Icons.AutoMirrored.Filled.ListAlt),
-        ItemNav(Routes.TRABAJADORES_DUENO, stringResource(R.string.nombre_mi_equipo), Icons.Default.Person),
-        ItemNav("MAS", stringResource(R.string.nombre_mas), Icons.Default.MoreHoriz)
+        ItemNav(Routes.INICIO, stringResource(R.string.nombre_inicio), TokeIcons.NavInicio),
+        ItemNav(Routes.HISTORIAL_DUENO, stringResource(R.string.nombre_mis_cobros), TokeIcons.NavOperaciones),
+        ItemNav(Routes.TRABAJADORES_DUENO, stringResource(R.string.nombre_mi_equipo), TokeIcons.NavEquipo),
+        ItemNav("MAS", stringResource(R.string.nombre_mas), TokeIcons.NavMas)
     )
 
     val cantidadSolicitudes by businessViewModel.cantidadSolicitudes.collectAsState()
@@ -499,7 +528,11 @@ fun CobrateApp() {
         NavHost(
             navController = navController,
             startDestination = Routes.ARRANQUE,
-            modifier = Modifier.padding(innerPadding)
+            modifier = Modifier.padding(innerPadding),
+            enterTransition = { fadeIn(animationSpec = tween(durationMillis = 140)) },
+            exitTransition = { fadeOut(animationSpec = tween(durationMillis = 140)) },
+            popEnterTransition = { fadeIn(animationSpec = tween(durationMillis = 140)) },
+            popExitTransition = { fadeOut(animationSpec = tween(durationMillis = 140)) }
         ) {
             composable(Routes.ARRANQUE) {
                 ArranqueScreen()
@@ -746,11 +779,6 @@ fun CobrateApp() {
                     }
                 )
             }
-            baseItems.add(
-                ItemMas(stringResource(R.string.dialogo_cerrar_confirmar), Icons.AutoMirrored.Filled.Logout) {
-                    mostrarConfirmarCierre = true
-                }
-            )
             baseItems
         } else {
             val baseItems = mutableListOf(
@@ -786,16 +814,15 @@ fun CobrateApp() {
                     }
                 )
             }
-            baseItems.add(
-                ItemMas(stringResource(R.string.dialogo_cerrar_confirmar), Icons.AutoMirrored.Filled.Logout) {
-                    mostrarConfirmarCierre = true
-                }
-            )
             baseItems
         }
         MasSheet(
             items = itemsMas,
             onDismiss = { mostrarMas = false },
+            onCerrarSesion = {
+                mostrarMas = false
+                mostrarConfirmarCierre = true
+            },
             onApagarToke = {
                 mostrarMas = false
                 val appContext = context.applicationContext

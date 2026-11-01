@@ -50,6 +50,7 @@ import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -105,6 +106,13 @@ fun OwnerWorkersScreen(
         trabajadores.count { it.estado == EstadoRelacion.PAUSADA }
     }
 
+    // Si la cantidad de solicitudes baja a cero y estaba en Solicitudes, volver a Mi Equipo
+    LaunchedEffect(cantidadSolicitudes) {
+        if (cantidadSolicitudes == 0 && pestanaSeleccionada == 2) {
+            pestanaSeleccionada = 0
+        }
+    }
+
     Scaffold { innerPadding ->
         Column(
             modifier = Modifier
@@ -145,13 +153,13 @@ fun OwnerWorkersScreen(
                         )
                     }
                 )
-                Tab(
-                    selected = pestanaSeleccionada == 2,
-                    onClick = { pestanaSeleccionada = 2 },
-                    text = {
-                        BadgedBox(
-                            badge = {
-                                if (cantidadSolicitudes > 0) {
+                if (cantidadSolicitudes > 0) {
+                    Tab(
+                        selected = pestanaSeleccionada == 2,
+                        onClick = { pestanaSeleccionada = 2 },
+                        text = {
+                            BadgedBox(
+                                badge = {
                                     Badge(
                                         containerColor = MaterialTheme.colorScheme.error,
                                         contentColor = MaterialTheme.colorScheme.onError
@@ -159,50 +167,58 @@ fun OwnerWorkersScreen(
                                         Text(text = cantidadSolicitudes.toString())
                                     }
                                 }
+                            ) {
+                                Text(
+                                    text = "Solicitudes",
+                                    fontWeight = if (pestanaSeleccionada == 2) FontWeight.Bold else FontWeight.Medium
+                                )
                             }
-                        ) {
-                            Text(
-                                text = "Solicitudes",
-                                fontWeight = if (pestanaSeleccionada == 2) FontWeight.Bold else FontWeight.Medium
-                            )
                         }
-                    }
-                )
+                    )
+                }
             }
 
-            // ---- TARJETAS DE MÉTRICAS / METRICS CARDS (Nodo Figma 1:371) ----
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                // Tarjeta Activos
-                MetricSummaryCard(
-                    titulo = "Activos",
-                    valor = conteoActivos.toString(),
-                    icono = Icons.Default.Group,
-                    accentColor = TokeGreen,
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    modifier = Modifier.weight(1f)
-                )
+            // ---- TARJETAS DE MÉTRICAS / METRICS CARDS solo en Mi Equipo (Nodo Figma 1:371) ----
+            if (pestanaSeleccionada == 0) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    // Tarjeta Activos
+                    MetricSummaryCard(
+                        titulo = "Activos",
+                        valor = conteoActivos.toString(),
+                        icono = Icons.Default.Group,
+                        accentColor = TokeGreen,
+                        containerColor = MaterialTheme.colorScheme.surface,
+                        modifier = Modifier.weight(1f)
+                    )
 
-                // Tarjeta En Pausa
-                MetricSummaryCard(
-                    titulo = "En Pausa",
-                    valor = conteoPausados.toString(),
-                    icono = Icons.Default.PauseCircle,
-                    accentColor = TokeWarning,
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    modifier = Modifier.weight(1f)
-                )
+                    // Tarjeta En Pausa
+                    MetricSummaryCard(
+                        titulo = "En Pausa",
+                        valor = conteoPausados.toString(),
+                        icono = Icons.Default.PauseCircle,
+                        accentColor = TokeWarning,
+                        containerColor = MaterialTheme.colorScheme.surface,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
             }
 
             // ---- BÚSQUEDA LOCAL (Nodo Figma 1:390) ----
+            val placeholderTexto = when (pestanaSeleccionada) {
+                1 -> "Buscar código..."
+                2 -> "Buscar solicitud..."
+                else -> "Buscar en el equipo..."
+            }
+
             OutlinedTextField(
                 value = textoBusqueda,
                 onValueChange = { textoBusqueda = it },
                 placeholder = {
                     Text(
-                        text = "Buscar en el equipo...",
+                        text = placeholderTexto,
                         fontSize = 14.sp,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )

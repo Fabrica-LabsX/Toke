@@ -55,14 +55,14 @@ class TokeMessagingService : FirebaseMessagingService() {
         EstadoOperativoStore.init(this)
         val tokeOperativo = EstadoOperativoStore.encendido.value
 
-        // Si TOKE está encendido, mantenemos/aseguramos el servicio operativo foreground
-        if (tokeOperativo) {
+        // Si TOKE es elegible para operar, aseguramos/iniciamos el servicio operativo foreground
+        if (TokeOperandoService.esElegibleParaOperar(applicationContext)) {
             runCatching {
                 val intent = Intent(applicationContext, TokeOperandoService::class.java)
                 ContextCompat.startForegroundService(applicationContext, intent)
             }
         } else {
-            LogSeguro.d(TAG, "Mensaje push recibido con TOKE apagado. Se procesará la notificación funcional sin activar servicio operativo.")
+            LogSeguro.d(TAG, "Mensaje push recibido sin elegibilidad operativa. Se procesará la notificación funcional sin activar servicio de primer plano.")
         }
 
         val data = remoteMessage.data

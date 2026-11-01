@@ -22,15 +22,20 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.flabs.cobrate.components.PantallaAccesoPausado
 import com.flabs.cobrate.components.resolverNombreDueno
 import com.flabs.cobrate.core.data.CuentaStore
 import com.flabs.cobrate.core.data.NegocioStore
 import com.flabs.cobrate.core.data.PreferenciasAppStore
+import com.flabs.cobrate.core.data.RelacionCuentaNegocioRepository
+import com.flabs.cobrate.core.data.RelacionCuentaNegocioStore
+import com.flabs.cobrate.core.logic.FeedbackManager
 import com.flabs.cobrate.core.model.EstadoRelacion
 import com.flabs.cobrate.core.model.Negocio
 import com.flabs.cobrate.core.model.RelacionCuentaNegocio
 import com.flabs.cobrate.core.model.RolCuentaNegocio
 import com.flabs.cobrate.ui.theme.ThemeMode
+import kotlinx.coroutines.launch
 
 /**
  * Pantalla "Mis Negocios" (Figma Nodos 1:210 y 1:314).
@@ -52,6 +57,41 @@ fun MisNegociosScreen(
     val sesionActual by CuentaStore.sesionActual.collectAsState()
     val cuentasCheadas by CuentaStore.cuentas.collectAsState()
     val currentUid = sesionActual?.id
+
+    var negocioPausadoAVisualizar by remember { mutableStateOf<Negocio?>(null) }
+
+    if (negocioPausadoAVisualizar != null) {
+        val negocioPausado = negocioPausadoAVisualizar!!
+        val scope = rememberCoroutineScope()
+        PantallaAccesoPausado(
+            negocioNombre = negocioPausado.nombre,
+            onVolver = { negocioPausadoAVisualizar = null },
+            onVerificarEstado = {
+                val negId = negocioPausado.id
+                val uid = sesionActual?.id ?: return@PantallaAccesoPausado
+                scope.launch {
+                    FeedbackManager.setLoading(true, "Verificando acceso...")
+                    RelacionCuentaNegocioRepository().relacionesDe(uid).onSuccess { relaciones ->
+                        FeedbackManager.setLoading(false)
+                        RelacionCuentaNegocioStore.sincronizar(uid, relaciones)
+                        val relActual = relaciones.find { it.negocioId == negId }
+                        if (relActual?.estado == EstadoRelacion.ACTIVA) {
+                            negocioViewModel.seleccionarNegocio(negId)
+                            negocioPausadoAVisualizar = null
+                            onVolver()
+                            FeedbackManager.showSuccess("¡Acceso reactivado por el dueño!")
+                        } else {
+                            FeedbackManager.showSuccess("Tu acceso a «${negocioPausado.nombre}» sigue pausado por el dueño.")
+                        }
+                    }.onFailure { err ->
+                        FeedbackManager.setLoading(false)
+                        FeedbackManager.showErrorMessage(err.message ?: "Error al verificar estado con el servidor")
+                    }
+                }
+            }
+        )
+        return
+    }
 
     val themeMode by PreferenciasAppStore.themeMode.collectAsState()
     val isDark = when (themeMode) {
@@ -402,6 +442,7 @@ fun MisNegociosScreen(
                                 esActivo = esActivo,
                                 nombreDueno = nombreDueno,
                                 isDark = isDark,
+                                onVerEstado = { negocioPausadoAVisualizar = negocio },
                                 onClick = {
                                     if (rel.estado == EstadoRelacion.ACTIVA) {
                                         negocioViewModel.seleccionarNegocio(negocio.id)
@@ -589,6 +630,7 @@ private fun TarjetaNegocioTrabajador(
     esActivo: Boolean,
     nombreDueno: String,
     isDark: Boolean,
+    onVerEstado: (() -> Unit)? = null,
     onClick: () -> Unit
 ) {
     val esSolicitado = relacion.estado == EstadoRelacion.SOLICITADA
@@ -854,6 +896,7 @@ private fun TarjetaNegocioTrabajador(
                 }
             } else if (esPausado) {
                 Surface(
+                    onClick = { onVerEstado?.invoke() },
                     shape = RoundedCornerShape(8.dp),
                     color = Color(0xFFF59E0B),
                     modifier = Modifier.fillMaxWidth()
@@ -866,7 +909,7 @@ private fun TarjetaNegocioTrabajador(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "Pausado",
+                            text = "Ver estado",
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color.Black

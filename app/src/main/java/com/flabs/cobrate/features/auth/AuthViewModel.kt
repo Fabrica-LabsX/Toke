@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.flabs.cobrate.core.data.CuentaStore
 import com.flabs.cobrate.core.data.DispositivoRepository
 import com.flabs.cobrate.core.data.SupabaseAuthBridge
+import com.flabs.cobrate.core.logic.LoginRateLimiter
 import com.flabs.cobrate.core.logic.RegistroDispositivos
 import com.flabs.cobrate.core.model.Cuenta
 import com.flabs.cobrate.services.FirebaseProveedorDeToken
@@ -14,22 +15,67 @@ import kotlinx.coroutines.withTimeoutOrNull
 import kotlin.Result
 
 /**
- * ViewModel de autenticación (CAPA 7b-2 y CAPA 52).
- * Implementa el login real con Supabase Auth y des-registro de token FCM al cerrar sesión.
+ * ViewModel de autenticación (CAPA Auth, Rate Limiting & Recuperación en Línea).
  */
 class AuthViewModel : ViewModel() {
 
     /** Cuenta actualmente logueada (null si no hay sesión activa). */
     val sesionActual: StateFlow<Cuenta?> = CuentaStore.sesionActual
 
-    /** Crea una cuenta Dueño en Supabase. */
-    suspend fun crearCuenta(email: String, password: String): Result<Unit> {
-        return SupabaseAuthBridge.crearCuentaDueño(email, password)
+    /** Inicia sesión de Dueño en Supabase con comprobación de rate limit. */
+    suspend fun iniciarSesion(email: String, password: String): Result<Unit> {
+        val lockUntil = LoginRateLimiter.getLockedUntil(email)
+        val now = System.currentTimeMillis()
+        if (lockUntil > now) {
+            val remSecs = (lockUntil - now) / 1000L + 1L
+            return Result.failure(Exception("Demasiados intentos fallidos. Intenta de nuevo en ${remSecs}s."))
+        }
+
+        val result = SupabaseAuthBridge.iniciarSesionDueño(email, password)
+        if (result.isSuccess) {
+            LoginRateLimiter.registrarExito(email)
+        } else {
+            val ex = result.exceptionOrNull()
+            val msg = ex?.message?.lowercase() ?: ""
+            if (msg.contains("invalid") || msg.contains("credentials") || msg.contains("grant") || msg.contains("wrong")) {
+                val newLock = LoginRateLimiter.registrarFallo(email)
+                if (newLock > now) {
+                    val remSecs = (newLock - now) / 1000L + 1L
+                    return Result.failure(Exception("Credenciales incorrectas. Bloqueado temporalmente por ${remSecs}s."))
+                }
+            }
+        }
+        return result
     }
 
-    /** Inicia sesión de Dueño en Supabase. */
-    suspend fun iniciarSesion(email: String, password: String): Result<Unit> {
-        return SupabaseAuthBridge.iniciarSesionDueño(email, password)
+    /** Solicita correo con OTP de recuperación. */
+    suspend fun solicitarRecuperacionPassword(email: String): Result<Unit> {
+        return SupabaseAuthBridge.solicitarRecuperacionPassword(email)
+    }
+
+    /** Verifica OTP de recuperación. */
+    suspend fun verificarOtpRecuperacion(email: String, token: String): Result<Unit> {
+        return SupabaseAuthBridge.verificarOtpRecuperacion(email, token)
+    }
+
+    /** Actualiza contraseña tras recuperación. */
+    suspend fun actualizarPasswordYRevocarOtros(nuevaPassword: String): Result<Unit> {
+        return SupabaseAuthBridge.actualizarPasswordYRevocarOtros(nuevaPassword)
+    }
+
+    /** Paso 1 & 2 de Registro: solicita OTP enviando correo de confirmación. */
+    suspend fun solicitarOtpRegistro(email: String): Result<Unit> {
+        return SupabaseAuthBridge.solicitarOtpRegistro(email)
+    }
+
+    /** Paso 3 de Registro: verifica OTP de confirmación. */
+    suspend fun verificarOtpRegistro(email: String, token: String): Result<Unit> {
+        return SupabaseAuthBridge.verificarOtpRegistro(email, token)
+    }
+
+    /** Paso 4 & 5 de Registro: establece nombre y contraseña elegida. */
+    suspend fun completarRegistro(nombre: String, passwordElegida: String): Result<Unit> {
+        return SupabaseAuthBridge.completarRegistro(nombre, passwordElegida)
     }
 
     /** Cierra la sesión local y en Supabase previa quita de token FCM. */
@@ -38,8 +84,6 @@ class AuthViewModel : ViewModel() {
             withTimeoutOrNull(3000L) {
                 RegistroDispositivos.quitar(FirebaseProveedorDeToken(), DispositivoRepository())
             }
-            // Invertimos el orden: Primero cerramos Realtime y limpiamos Stores
-            // mientras el token de sesión sigue siendo válido en el cliente HTTP.
             CuentaStore.cerrarSesion()
             SupabaseAuthBridge.cerrarSesionSupabase()
         }

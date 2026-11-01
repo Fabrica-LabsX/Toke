@@ -7,6 +7,7 @@ import io.github.jan.supabase.realtime.RealtimeChannel
 import io.github.jan.supabase.realtime.channel
 import io.github.jan.supabase.realtime.postgresChangeFlow
 import io.github.jan.supabase.realtime.realtime
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -49,6 +50,7 @@ object MetodoDeCobroRealtimeListener {
                     _eventos.emit(action)
                 }
             }.onFailure { e ->
+                if (e is CancellationException) throw e
                 LogSeguro.w(TAG, "Error en flujo Realtime para metodos_de_cobro del negocio $negocioId", e)
             }
         }

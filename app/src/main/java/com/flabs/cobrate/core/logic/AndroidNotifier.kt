@@ -66,6 +66,23 @@ object AndroidNotifier {
     }
 
     /**
+     * Construye la notificación transitoria "TOKE / Comprobando..." mientras el servicio de primer plano valida requisitos.
+     */
+    fun construirComprobando(context: Context): Notification {
+        val appContext = context.applicationContext
+        declararCanales(appContext)
+
+        return NotificationCompat.Builder(appContext, CHANNEL_RUNNING_ID)
+            .setSmallIcon(R.drawable.stat_notify_sync)
+            .setContentTitle("TOKE")
+            .setContentText("Comprobando si puede funcionar…")
+            .setOngoing(true)
+            .setSilent(true)
+            .setPriority(NotificationCompat.PRIORITY_LOW)
+            .build()
+    }
+
+    /**
      * Construye la notificación persistente de "TOKE está operando" (C11 & CAPA 58).
      */
     fun construirOperando(context: Context, negocioNombre: String?): Notification {

@@ -18,7 +18,8 @@ data class PreviewInvitacion(
     @SerialName("expiracion") val expiracion: Long,
     @SerialName("fecha_creacion") val fechaCreacion: Long,
     @SerialName("negocio_nombre") val negocioNombre: String,
-    @SerialName("dueno_username") val duenoUsername: String
+    @SerialName("dueno_username") val duenoUsername: String,
+    @SerialName("dueno_nombre_visible") val duenoNombreVisible: String? = null
 )
 
 /** Convierte el preview en un objeto de dominio de invitación. */

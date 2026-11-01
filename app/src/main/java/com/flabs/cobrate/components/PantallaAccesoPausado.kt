@@ -8,6 +8,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.Add
@@ -43,7 +44,8 @@ fun PantallaAccesoPausado(
     onCrearNegocio: (() -> Unit)? = null,
     onCambiarNegocio: (() -> Unit)? = null,
     onCerrarSesion: (() -> Unit)? = null,
-    onSalirDelNegocio: (() -> Unit)? = null
+    onSalirDelNegocio: (() -> Unit)? = null,
+    onVolver: (() -> Unit)? = null
 ) {
     val themeMode by PreferenciasAppStore.themeMode.collectAsState()
     val isDark = when (themeMode) {
@@ -85,6 +87,25 @@ fun PantallaAccesoPausado(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
+                    if (onVolver != null) {
+                        Surface(
+                            onClick = onVolver,
+                            shape = RoundedCornerShape(12.dp),
+                            color = cardBg,
+                            border = BorderStroke(1.dp, cardBorder),
+                            modifier = Modifier.size(36.dp)
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                    contentDescription = "Volver",
+                                    tint = titleColor,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                            }
+                        }
+                    }
+
                     Surface(
                         shape = RoundedCornerShape(12.dp),
                         color = if (isDark) Color(0x1A00C853) else Color(0x1A006B32),
@@ -102,7 +123,7 @@ fun PantallaAccesoPausado(
 
                     Column {
                         Text(
-                            text = "NEGOCIO ACTUAL",
+                            text = "NEGOCIO PAUSADO",
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Bold,
                             color = subtitleColor,

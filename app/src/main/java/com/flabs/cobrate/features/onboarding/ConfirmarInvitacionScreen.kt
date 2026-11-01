@@ -193,7 +193,16 @@ fun ConfirmarInvitacionScreen(
 
                 if (!loading && errorPreview == null) {
                     val negocioNombreReal = preview?.negocioNombre ?: "Comercio"
-                    val duenoNombreReal = preview?.duenoUsername ?: "El dueño"
+                    val duenoNombreReal = remember(preview) {
+                        val visible = preview?.duenoNombreVisible?.trim()
+                        val username = preview?.duenoUsername?.trim()
+                        when {
+                            !visible.isNullOrBlank() -> visible
+                            !username.isNullOrBlank() && !username.contains("@") -> username
+                            !username.isNullOrBlank() && username.contains("@") -> username.substringBefore("@")
+                            else -> "El dueño"
+                        }
+                    }
 
                     // Módulo 1: Tarjeta Protagonista del Comercio
                     Surface(

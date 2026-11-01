@@ -4,6 +4,7 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.widget.Toast
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -18,6 +19,7 @@ import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -61,6 +63,7 @@ fun InvitarTrabajadorScreen(
     var invitacionActiva by remember { mutableStateOf<InvitacionTrabajador?>(null) }
     var tiempoRestanteMs by remember { mutableStateOf(0L) }
     var creandoInvitacion by remember { mutableStateOf(false) }
+    var requiereAprobacion by remember { mutableStateOf(true) }
 
     val sesion by CuentaStore.sesionActual.collectAsState()
     val relaciones by RelacionCuentaNegocioStore.relaciones.collectAsState()

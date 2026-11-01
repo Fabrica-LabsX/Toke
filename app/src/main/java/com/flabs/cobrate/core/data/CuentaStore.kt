@@ -12,6 +12,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.jsonPrimitive
 
 /**
  * Estados del flujo de sincronización remota de datos del usuario.
@@ -101,9 +103,15 @@ object CuentaStore {
                             var cuenta = _cuentas.value.find { it.id == uid }
 
                             if (cuenta == null) {
+                                val metaUsername = userInfo.userMetadata?.get("username")?.jsonPrimitive?.contentOrNull
+                                    ?: userInfo.userMetadata?.get("full_name")?.jsonPrimitive?.contentOrNull
+                                    ?: userInfo.userMetadata?.get("nombre")?.jsonPrimitive?.contentOrNull
+                                    ?: userInfo.email?.substringBefore("@")
+                                    ?: "Usuario anónimo"
+
                                 cuenta = Cuenta(
                                     id = uid,
-                                    username = userInfo.email ?: "Usuario anónimo",
+                                    username = metaUsername.ifBlank { "Usuario" },
                                     correoVerificado = userInfo.email,
                                     ultimoAcceso = System.currentTimeMillis(),
                                     fechaCreacion = System.currentTimeMillis()

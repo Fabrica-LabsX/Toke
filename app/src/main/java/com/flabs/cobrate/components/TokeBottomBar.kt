@@ -21,9 +21,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.annotation.DrawableRes
 import com.flabs.cobrate.core.logic.TabRefreshState
 import com.flabs.cobrate.ui.theme.TokeBorder
 import com.flabs.cobrate.ui.theme.TokeGreen
@@ -31,7 +32,7 @@ import com.flabs.cobrate.ui.theme.TokeGreen
 data class ItemNav(
     val id: String,
     val label: String,
-    val icono: ImageVector,
+    @DrawableRes val icono: Int,
 )
 
 /**
@@ -254,7 +255,7 @@ private fun RenderIconContent(
         }
         TabRefreshState.IDLE -> {
             Icon(
-                imageVector = item.icono,
+                painter = painterResource(id = item.icono),
                 contentDescription = null,
                 modifier = Modifier.size(24.dp),
                 tint = color,
