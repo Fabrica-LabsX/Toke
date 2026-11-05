@@ -38,6 +38,7 @@ import com.flabs.cobrate.components.OperacionCard
 import com.flabs.cobrate.components.PantallaAccesoPausado
 import com.flabs.cobrate.components.PantallaEsperandoAceptacion
 import com.flabs.cobrate.components.PantallaSolicitudRechazada
+import com.flabs.cobrate.components.colorBilletera
 import com.flabs.cobrate.components.rememberSwipeUpRefreshConnection
 import com.flabs.cobrate.features.onboarding.EmpezarScreen
 import com.flabs.cobrate.core.data.*
@@ -81,9 +82,6 @@ private class HomePalette(
     val Chip2Texto: Color,
     val OfflineFondo: Color,
     val OfflineBorde: Color,
-    val FilaYape: Color,
-    val FilaPlin: Color,
-    val FilaBCP: Color,
     val IconoTile: Color,
     val IconoCabecera: Color
 )
@@ -103,9 +101,6 @@ private val HomeFigma = HomePalette(
     Chip2Texto = Color(0xFF181202), // 1:39, 1:70
     OfflineFondo = Color(0xFFFEE2E2), // 1:13
     OfflineBorde = Color(0xFFFECACA), // 1:13
-    FilaYape = Color(0xFF732282), // 1:92
-    FilaPlin = Color(0xFF00A4E4), // 1:104
-    FilaBCP = Color(0xFF002A8F), // 1:116
     IconoTile = Color.Unspecified,
     IconoCabecera = Color.Unspecified
 )
@@ -125,9 +120,6 @@ private val HomeFigmaOscuro = HomePalette(
     Chip2Texto = Color(0xFF181202), // 1:40, 1:71
     OfflineFondo = Color(0xFF2A1414), // 1:14
     OfflineBorde = Color(0xFF3D1E1E), // 1:14
-    FilaYape = Color(0xFF732282), // 1:93
-    FilaPlin = Color(0xFF00A4E4), // 1:105
-    FilaBCP = Color(0xFF002A8F), // 1:117
     IconoTile = Color(0xFFFFFFFF), // 1:45, 1:58
     IconoCabecera = Color(0xFFFFFFFF) // 1:9
 )
@@ -1229,13 +1221,9 @@ private fun HomeOperacionRow(
     asignadoPorNombre: String?,
     onClick: () -> Unit
 ) {
+    val themeMode by PreferenciasAppStore.themeMode.collectAsState()
     val methodName = operacion.metodoPago?.name?.lowercase()
-    val colorFondo = when (methodName) {
-        "yape" -> homeColors().FilaYape
-        "plin" -> homeColors().FilaPlin
-        "bcp" -> homeColors().FilaBCP
-        else -> homeColors().TileIconoFondo
-    }
+    val colorFondo = colorBilletera(operacion.metodoPago, themeMode) ?: homeColors().TileIconoFondo
 
     val isWhitePlate = methodName == "yape" || methodName == "plin" || methodName == "bcp"
     val borderMetodo = if (isWhitePlate) null else BorderStroke(1.dp, homeColors().TarjetaBorde)
