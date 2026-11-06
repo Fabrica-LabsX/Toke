@@ -27,6 +27,9 @@ data class TokePaleta(
     val ambar: Color,
     val ambarTexto: Color,
     val enlaceVerde: Color,
+    /** Verde de acción principal y de estado "recibido", con el color del texto sobre él. */
+    val verde: Color,
+    val verdeTexto: Color,
 )
 
 val TokePaletaClara = TokePaleta(
@@ -41,6 +44,8 @@ val TokePaletaClara = TokePaleta(
     ambar = Color(0xFFF59E0B),
     ambarTexto = Color(0xFF181202),
     enlaceVerde = Color(0xFF0A8F42),
+    verde = Color(0xFF00C853),
+    verdeTexto = Color(0xFF042615),
 )
 
 val TokePaletaOscura = TokePaleta(
@@ -55,6 +60,8 @@ val TokePaletaOscura = TokePaleta(
     ambar = Color(0xFFF59E0B),
     ambarTexto = Color(0xFF181202),
     enlaceVerde = Color(0xFF00C853),
+    verde = Color(0xFF00C853),
+    verdeTexto = Color(0xFF042615),
 )
 
 /** Paleta vigente según el aspecto elegido en la app. */

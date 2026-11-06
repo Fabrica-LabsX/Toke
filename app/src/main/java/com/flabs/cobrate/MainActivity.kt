@@ -153,7 +153,7 @@ import com.flabs.cobrate.features.business.OwnerWorkersScreen
 import com.flabs.cobrate.features.business.PaymentMethodsScreen
 import com.flabs.cobrate.features.permisos.DiagnosticoPermisosScreen
 import com.flabs.cobrate.features.settings.VoiceSettingsScreen
-import com.flabs.cobrate.features.shared.DetalleOperacionScreen
+import com.flabs.cobrate.features.operaciones.DetalleOperacionScreen
 import com.flabs.cobrate.features.shared.HomeScreen
 import com.flabs.cobrate.features.worker.WorkerOperationsScreen
 import com.flabs.cobrate.features.worker.EncuentraMiPedidoScreen
