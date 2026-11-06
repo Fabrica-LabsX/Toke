@@ -11,6 +11,9 @@
         <item name="colorOnSecondary">@color/black</item>
         <!-- Status bar color. -->
         <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
+        <!-- El aspecto claro/oscuro lo elige el usuario dentro de la app: se evita que
+             Xiaomi/MIUI y otros fabricantes recoloreen los textos por su cuenta. -->
+        <item name="android:forceDarkAllowed" tools:targetApi="q">false</item>
         <!-- Customize your theme here. -->
     </style>
 
