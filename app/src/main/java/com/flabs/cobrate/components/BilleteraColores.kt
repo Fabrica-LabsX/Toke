@@ -10,6 +10,8 @@ object BilleteraColores {
         val oscuro: Color
     )
 
+    val PlacaLogo = Color(0xFFFFFFFF)
+
     val Yape = ColorPar(
         claro = Color(0xFF8F00A9), // Referencia de diseño: nodo 1:270
         oscuro = Color(0xFF732282) // Referencia de diseño: nodo 1:90

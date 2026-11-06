@@ -1223,10 +1223,11 @@ private fun HomeOperacionRow(
 ) {
     val themeMode by PreferenciasAppStore.themeMode.collectAsState()
     val methodName = operacion.metodoPago?.name?.lowercase()
-    val colorFondo = colorBilletera(operacion.metodoPago, themeMode) ?: homeColors().TileIconoFondo
+    val colorMarca = colorBilletera(operacion.metodoPago, themeMode) ?: homeColors().TileIconoFondo
 
     val isWhitePlate = methodName == "yape" || methodName == "plin" || methodName == "bcp"
-    val borderMetodo = if (isWhitePlate) null else BorderStroke(1.dp, homeColors().TarjetaBorde)
+    val colorFondoPlaca = if (isWhitePlate) com.flabs.cobrate.components.BilleteraColores.PlacaLogo else colorMarca
+    val borderMetodo = if (isWhitePlate) BorderStroke(2.dp, colorMarca) else BorderStroke(1.dp, homeColors().TarjetaBorde)
 
     Card(
         onClick = onClick,
@@ -1249,25 +1250,17 @@ private fun HomeOperacionRow(
             ) {
                 Surface(
                     shape = RoundedCornerShape(10.dp),
-                    color = colorFondo,
+                    color = colorFondoPlaca,
                     border = borderMetodo,
                     modifier = Modifier.size(44.dp),
                 ) {
                     Box(contentAlignment = Alignment.Center) {
                         if (operacion.metodoPago != null) {
                             if (isWhitePlate) {
-                                Surface(
-                                    shape = RoundedCornerShape(8.dp),
-                                    color = Color(0xFFFFFFFF),
-                                    modifier = Modifier.size(32.dp)
-                                ) {
-                                    Box(contentAlignment = Alignment.Center) {
-                                        com.flabs.cobrate.components.IconoMetodoPago(
-                                            tipo = operacion.metodoPago,
-                                            tamano = 26.dp
-                                        )
-                                    }
-                                }
+                                com.flabs.cobrate.components.IconoMetodoPago(
+                                    tipo = operacion.metodoPago,
+                                    tamano = 34.dp
+                                )
                             } else {
                                 com.flabs.cobrate.components.IconoMetodoPago(
                                     tipo = operacion.metodoPago,

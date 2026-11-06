@@ -89,15 +89,23 @@ internal object RealtimeSyncManager {
             initialized = true
             // Monitorear conectividad para pausar/reanudar Realtime websocket según disponibilidad de red
             scope.launch {
-                NetworkMonitor.disponible.collect { disponible ->
+                var redPrevia: android.net.Network? = null
+                NetworkMonitor.redActiva.collect { red ->
                     runCatching {
                         val supabase = SupabaseClientProvider.supabase
-                        if (disponible) {
-                            Log.d(TAG, "Red disponible: reconectando Realtime...")
+                        if (red == null) {
+                            if (redPrevia != null) {
+                                Log.d(TAG, "Sin red validada: desconectando Realtime para pausar reintentos...")
+                                supabase.realtime.disconnect()
+                                redPrevia = null
+                            }
+                        } else if (red != redPrevia) {
+                            Log.d(TAG, "Red validada disponible y cambió: reconectando Realtime...")
+                            if (redPrevia != null) {
+                                supabase.realtime.disconnect()
+                            }
                             supabase.realtime.connect()
-                        } else {
-                            Log.d(TAG, "Sin red: desconectando Realtime para pausar reintentos...")
-                            supabase.realtime.disconnect()
+                            redPrevia = red
                         }
                     }.onFailure { err ->
                         LogSeguro.w(TAG, "Error al gestionar estado de Realtime con NetworkMonitor", err)
