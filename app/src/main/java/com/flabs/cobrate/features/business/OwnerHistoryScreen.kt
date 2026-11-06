@@ -1,7 +1,7 @@
 package com.flabs.cobrate.features.business
 
 import androidx.compose.runtime.*
-import com.flabs.cobrate.features.shared.OperacionesScreen
+import com.flabs.cobrate.features.operaciones.OperacionesScreen
 
 /**
  * Historial del dueño: pantalla de Operaciones unificada conforme a la Ronda 9 de Figma.

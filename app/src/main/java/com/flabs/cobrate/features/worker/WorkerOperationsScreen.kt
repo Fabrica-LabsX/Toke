@@ -4,7 +4,7 @@ import androidx.compose.runtime.*
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import com.flabs.cobrate.core.model.EstadoOperacion
-import com.flabs.cobrate.features.shared.OperacionesScreen
+import com.flabs.cobrate.features.operaciones.OperacionesScreen
 
 /**
  * Pantalla de Operaciones para Trabajador conforme a Ronda 9.
