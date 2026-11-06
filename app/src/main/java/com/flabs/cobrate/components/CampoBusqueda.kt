@@ -1,6 +1,7 @@
-package com.flabs.cobrate.features.operaciones
+package com.flabs.cobrate.components
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -24,16 +25,20 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.flabs.cobrate.components.TokeIcons
 import com.flabs.cobrate.ui.theme.PlusJakartaSans
 import com.flabs.cobrate.ui.theme.TokePaleta
 
-/** Campo de búsqueda de Operaciones. Solo muestra y edita el texto; el filtrado vive en [FiltroOperaciones]. */
+/**
+ * Campo de búsqueda común de las pantallas nuevas (Operaciones, Equipo). Solo muestra y
+ * edita el texto: qué se filtra y cómo lo decide cada pantalla.
+ */
 @Composable
-fun OperacionesBuscador(
+fun CampoBusqueda(
     paleta: TokePaleta,
     texto: String,
+    placeholder: String,
     onTextoCambia: (String) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     val estilo = TextStyle(
         fontFamily = PlusJakartaSans,
@@ -44,7 +49,7 @@ fun OperacionesBuscador(
         shape = RoundedCornerShape(14.dp),
         color = paleta.tarjeta,
         border = BorderStroke(1.dp, paleta.borde),
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .height(48.dp),
     ) {
@@ -64,7 +69,7 @@ fun OperacionesBuscador(
             Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.CenterStart) {
                 if (texto.isEmpty()) {
                     Text(
-                        text = "Buscar cliente o monto...",
+                        text = placeholder,
                         style = estilo,
                         color = paleta.textoSecundario,
                         maxLines = 1,
@@ -77,6 +82,17 @@ fun OperacionesBuscador(
                     textStyle = estilo.copy(color = paleta.textoPrincipal),
                     cursorBrush = SolidColor(paleta.textoPrincipal),
                     modifier = Modifier.fillMaxWidth(),
+                )
+            }
+            if (texto.isNotEmpty()) {
+                Spacer(modifier = Modifier.width(8.dp))
+                Icon(
+                    painter = painterResource(id = TokeIcons.Cerrar),
+                    contentDescription = "Limpiar búsqueda",
+                    tint = paleta.textoSecundario,
+                    modifier = Modifier
+                        .size(18.dp)
+                        .clickable { onTextoCambia("") },
                 )
             }
         }

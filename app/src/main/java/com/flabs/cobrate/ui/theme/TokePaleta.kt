@@ -30,6 +30,9 @@ data class TokePaleta(
     /** Verde de acción principal y de estado "recibido", con el color del texto sobre él. */
     val verde: Color,
     val verdeTexto: Color,
+    /** Verde del estado "Activo" (chips) y borde de los controles pequeños (botones, menús). */
+    val activo: Color,
+    val bordeControl: Color,
 )
 
 val TokePaletaClara = TokePaleta(
@@ -44,6 +47,8 @@ val TokePaletaClara = TokePaleta(
     ambar = Color(0xFFF59E0B),
     ambarTexto = Color(0xFF181202),
     enlaceVerde = Color(0xFF0A8F42),
+    activo = Color(0xFF059669),
+    bordeControl = Color(0xFFE2E8F0),
     verde = Color(0xFF00C853),
     verdeTexto = Color(0xFF042615),
 )
@@ -60,6 +65,8 @@ val TokePaletaOscura = TokePaleta(
     ambar = Color(0xFFF59E0B),
     ambarTexto = Color(0xFF181202),
     enlaceVerde = Color(0xFF00C853),
+    activo = Color(0xFF059669),
+    bordeControl = Color(0xFF2D3546),
     verde = Color(0xFF00C853),
     verdeTexto = Color(0xFF042615),
 )

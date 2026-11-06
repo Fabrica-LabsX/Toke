@@ -149,7 +149,7 @@ import com.flabs.cobrate.features.business.BusinessViewModel
 import com.flabs.cobrate.features.business.EstablishmentsScreen
 import com.flabs.cobrate.features.business.MisNegociosScreen
 import com.flabs.cobrate.features.business.OwnerHistoryScreen
-import com.flabs.cobrate.features.business.OwnerWorkersScreen
+import com.flabs.cobrate.features.equipo.EquipoScreen
 import com.flabs.cobrate.features.business.PaymentMethodsScreen
 import com.flabs.cobrate.features.permisos.DiagnosticoPermisosScreen
 import com.flabs.cobrate.features.settings.VoiceSettingsScreen
@@ -647,10 +647,9 @@ fun CobrateApp() {
             }
 
             composable(Routes.TRABAJADORES_DUENO) {
-                OwnerWorkersScreen(
+                EquipoScreen(
                     businessViewModel = businessViewModel,
-                    soloLectura = (rolActivo == RolCuentaNegocio.TRABAJADOR && !esDuenoReal),
-                    onRefrescarTab = { onRefrescarTab(Routes.TRABAJADORES_DUENO) }
+                    soloLectura = (rolActivo == RolCuentaNegocio.TRABAJADOR && !esDuenoReal)
                 )
             }
 

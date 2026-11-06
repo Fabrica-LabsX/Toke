@@ -27,6 +27,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.flabs.cobrate.components.CampoBusqueda
 import com.flabs.cobrate.core.model.EstadoOperacion
 import com.flabs.cobrate.core.model.Operacion
 import com.flabs.cobrate.ui.theme.PlusJakartaSans
@@ -85,9 +86,10 @@ fun OperacionesScreen(
                 )
             }
             item {
-                OperacionesBuscador(
+                CampoBusqueda(
                     paleta = paleta,
                     texto = filtros.texto,
+                    placeholder = "Buscar cliente o monto...",
                     onTextoCambia = { filtros = filtros.copy(texto = it) },
                 )
             }
