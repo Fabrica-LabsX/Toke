@@ -288,7 +288,8 @@ private fun HomeScreenContent(
                 HomeTopBarCard(
                     negocio = negocio,
                     onCambiarNegocio = { mostrarSelectorNegocio = true },
-                    mostrarBadgeOffline = mostrarOffline && !disponible
+                    mostrarBadgeOffline = mostrarOffline && !disponible,
+                    mostrarBadgeOnline = disponible
                 )
             }
         },
@@ -715,6 +716,7 @@ private fun HomeTopBarCard(
     negocio: Negocio?,
     onCambiarNegocio: () -> Unit,
     mostrarBadgeOffline: Boolean = false,
+    mostrarBadgeOnline: Boolean = false,
 ) {
     Row(
         modifier = Modifier
@@ -762,6 +764,9 @@ private fun HomeTopBarCard(
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
+        }
+        if (mostrarBadgeOnline && !mostrarBadgeOffline) {
+            com.flabs.cobrate.components.BadgeConexionOnline()
         }
         if (mostrarBadgeOffline) {
             Surface(
