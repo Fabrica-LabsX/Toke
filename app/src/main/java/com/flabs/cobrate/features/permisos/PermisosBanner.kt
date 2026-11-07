@@ -1,4 +1,6 @@
 package com.flabs.cobrate.features.permisos
+import com.flabs.cobrate.ui.theme.TokeRojo
+import com.flabs.cobrate.ui.theme.TokeAmbarTexto
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
@@ -27,7 +29,7 @@ import com.flabs.cobrate.components.TokeIcons
 import com.flabs.cobrate.ui.theme.PlusJakartaSans
 import com.flabs.cobrate.ui.theme.TokePaleta
 
-private val Rojo = Color(0xFFDC2626)
+private val Rojo = TokeRojo
 
 /** Tarjeta grande de estado del servicio: verde (operativo), ámbar (parcial) o roja (desactivado). */
 @Composable
@@ -119,7 +121,7 @@ fun PermisosBanner(
                             fontWeight = FontWeight.Bold,
                             fontSize = 12.sp,
                         ),
-                        color = if (estado == EstadoServicio.PARCIAL) Color(0xFFB45309) else Rojo,
+                        color = if (estado == EstadoServicio.PARCIAL) TokeAmbarTexto else Rojo,
                         modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
                     )
                 }

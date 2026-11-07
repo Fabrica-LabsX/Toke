@@ -1,4 +1,6 @@
 package com.flabs.cobrate.features.equipo
+import com.flabs.cobrate.ui.theme.TokeRojo
+import com.flabs.cobrate.ui.theme.TokeAmbarTexto
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
@@ -28,7 +30,7 @@ import com.flabs.cobrate.features.business.SolicitudUi
 import com.flabs.cobrate.ui.theme.PlusJakartaSans
 import com.flabs.cobrate.ui.theme.TokePaleta
 
-private val RojoRechazar = Color(0xFFDC2626)
+private val RojoRechazar = TokeRojo
 
 /** Fila de una solicitud de ingreso, con los botones Aceptar y Rechazar. */
 @Composable

@@ -1,4 +1,6 @@
 package com.flabs.cobrate.components
+import com.flabs.cobrate.ui.theme.TokeRojo
+import com.flabs.cobrate.ui.theme.TokeAmbarTexto
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -295,7 +297,7 @@ fun MasSheet(
                         .height(44.dp),
                     shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFFDC2626),
+                        containerColor = TokeRojo,
                         contentColor = Color.White
                     )
                 ) {

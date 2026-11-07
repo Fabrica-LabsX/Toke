@@ -1,4 +1,6 @@
 package com.flabs.cobrate.features.negocios
+import com.flabs.cobrate.ui.theme.TokeRojo
+import com.flabs.cobrate.ui.theme.TokeAmbarTexto
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Box
@@ -39,8 +41,8 @@ fun NegocioTile(
     val esActual = item.esActual
     val fondo = if (esActual) paleta.activo else paleta.tileFondo
     val colorIcono = when {
-        esActual -> Color.White
-        item.estado == EstadoEnNegocio.PENDIENTE -> Color(0xFFD97706)
+        esActual -> paleta.verdeTexto
+        item.estado == EstadoEnNegocio.PENDIENTE -> TokeAmbarTexto
         else -> paleta.textoPrincipal
     }
     Surface(
@@ -73,7 +75,7 @@ fun NegocioEtiqueta(
         item.estado == EstadoEnNegocio.PAUSADO ->
             Triple(paleta.ambar, paleta.ambarTexto, "Pausado")
         item.rol == RolEnNegocio.DUENO ->
-            Triple(paleta.activo, Color.White, "Dueño")
+            Triple(paleta.verde, paleta.verdeTexto, "Dueño")
         else ->
             Triple(paleta.bordeControl, paleta.textoPrincipal, "Colaborador")
     }

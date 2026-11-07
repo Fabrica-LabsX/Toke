@@ -1,4 +1,6 @@
 package com.flabs.cobrate.features.permisos
+import com.flabs.cobrate.ui.theme.TokeRojo
+import com.flabs.cobrate.ui.theme.TokeAmbarTexto
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -85,7 +87,7 @@ private fun PermisoFila(paleta: TokePaleta, permiso: PermisoUi) {
                 Icon(
                     painter = painterResource(id = permiso.icono),
                     contentDescription = null,
-                    tint = if (permiso.resaltado) Color(0xFFB45309) else paleta.textoPrincipal,
+                    tint = if (permiso.resaltado) TokeAmbarTexto else paleta.textoPrincipal,
                     modifier = Modifier.size(24.dp),
                 )
             }

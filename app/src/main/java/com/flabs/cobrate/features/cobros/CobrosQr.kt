@@ -1,4 +1,5 @@
 package com.flabs.cobrate.features.cobros
+import com.flabs.cobrate.ui.theme.TokePaletaClara
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -111,7 +112,7 @@ fun QrCuadro(
                 Icon(
                     painter = painterResource(id = TokeIcons.Camara),
                     contentDescription = null,
-                    tint = Color(0xFF64748B),
+                    tint = TokePaletaClara.textoSecundario,
                     modifier = Modifier.size(34.dp),
                 )
                 Spacer(modifier = Modifier.height(8.dp))
@@ -122,7 +123,7 @@ fun QrCuadro(
                         fontWeight = FontWeight.SemiBold,
                         fontSize = 14.sp,
                     ),
-                    color = Color(0xFF64748B),
+                    color = TokePaletaClara.textoSecundario,
                 )
             }
         }

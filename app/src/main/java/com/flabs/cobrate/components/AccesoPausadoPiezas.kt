@@ -1,4 +1,6 @@
 package com.flabs.cobrate.components
+import com.flabs.cobrate.ui.theme.TokeRojo
+import com.flabs.cobrate.ui.theme.TokeAmbarTexto
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -30,7 +32,7 @@ import androidx.compose.ui.unit.sp
 import com.flabs.cobrate.ui.theme.PlusJakartaSans
 import com.flabs.cobrate.ui.theme.TokePaleta
 
-private val RojoPausa = Color(0xFFBA1A1A)
+private val RojoPausa = TokeRojo
 
 /** Icono grande de pausa en un cuadro rosado, con el punto rojo de alerta. */
 @Composable
@@ -178,8 +180,8 @@ fun AccesoPausadoBoton(
     relleno: Boolean,
     onClick: () -> Unit,
 ) {
-    val fondo = if (relleno) paleta.activo else paleta.tarjeta
-    val colorContenido = if (relleno) Color.White else paleta.textoPrincipal
+    val fondo = if (relleno) paleta.verde else paleta.tarjeta
+    val colorContenido = if (relleno) paleta.verdeTexto else paleta.textoPrincipal
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(9999.dp),

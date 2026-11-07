@@ -1,4 +1,6 @@
 package com.flabs.cobrate.features.cobros
+import com.flabs.cobrate.ui.theme.TokeRojo
+import com.flabs.cobrate.ui.theme.TokeAmbarTexto
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
@@ -72,7 +74,7 @@ fun EliminarMetodoDialogo(
     onDismiss: () -> Unit,
     onConfirm: () -> Unit,
 ) {
-    val rojo = androidx.compose.ui.graphics.Color(0xFFDC2626)
+    val rojo = TokeRojo
     Dialogo(
         paleta = paleta,
         titulo = "¿Eliminar ${MetodosCobroLogica.nombreLegible(metodo.tipo)}?",

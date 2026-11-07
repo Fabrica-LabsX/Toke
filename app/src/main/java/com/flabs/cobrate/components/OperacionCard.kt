@@ -8,6 +8,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import com.flabs.cobrate.ui.theme.ThemeMode
+import com.flabs.cobrate.ui.theme.tokeEsOscuro
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -150,11 +152,9 @@ fun OperacionCard(
  */
 @Composable
 private fun AvatarMedioPago(metodo: TipoMetodoCobro?) {
-    val fondoColor = when (metodo) {
-        TipoMetodoCobro.YAPE -> Color(0xFF742284)
-        TipoMetodoCobro.PLIN -> Color(0xFF00B4D8)
-        TipoMetodoCobro.BCP -> Color(0xFF002A8F)
-        TipoMetodoCobro.INTERBANK -> Color(0xFF05BE50)
+    val aspecto = if (tokeEsOscuro()) ThemeMode.DARK else ThemeMode.LIGHT
+    val fondoColor = colorBilletera(metodo, aspecto) ?: when (metodo) {
+        TipoMetodoCobro.INTERBANK -> MaterialTheme.colorScheme.primary
         else -> MaterialTheme.colorScheme.primaryContainer
     }
 

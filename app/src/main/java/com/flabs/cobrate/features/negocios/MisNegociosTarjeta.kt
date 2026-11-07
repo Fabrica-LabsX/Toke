@@ -1,4 +1,6 @@
 package com.flabs.cobrate.features.negocios
+import com.flabs.cobrate.ui.theme.TokeRojo
+import com.flabs.cobrate.ui.theme.TokeAmbarTexto
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -30,8 +32,8 @@ import com.flabs.cobrate.components.TokeIcons
 import com.flabs.cobrate.ui.theme.PlusJakartaSans
 import com.flabs.cobrate.ui.theme.TokePaleta
 
-private val RojoCancelar = Color(0xFFDC2626)
-private val AmbarAviso = Color(0xFFD97706)
+private val RojoCancelar = TokeRojo
+private val AmbarAviso = TokeAmbarTexto
 
 /**
  * Tarjeta de un negocio en Mis Negocios. Según el estado muestra "Actual", "Entrar",

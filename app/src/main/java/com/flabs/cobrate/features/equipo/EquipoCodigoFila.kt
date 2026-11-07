@@ -1,4 +1,6 @@
 package com.flabs.cobrate.features.equipo
+import com.flabs.cobrate.ui.theme.TokeRojo
+import com.flabs.cobrate.ui.theme.TokeAmbarTexto
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Box
@@ -27,7 +29,7 @@ import com.flabs.cobrate.core.model.InvitacionTrabajador
 import com.flabs.cobrate.ui.theme.PlusJakartaSans
 import com.flabs.cobrate.ui.theme.TokePaleta
 
-private val RojoRevocar = Color(0xFFDC2626)
+private val RojoRevocar = TokeRojo
 
 /** Fila de un código de invitación vigente, con el botón para revocarlo. */
 @Composable

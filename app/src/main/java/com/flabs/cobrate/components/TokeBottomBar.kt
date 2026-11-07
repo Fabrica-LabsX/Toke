@@ -31,7 +31,8 @@ import androidx.compose.runtime.collectAsState
 import com.flabs.cobrate.core.data.PreferenciasAppStore
 import com.flabs.cobrate.ui.theme.ThemeMode
 import com.flabs.cobrate.core.logic.TabRefreshState
-import com.flabs.cobrate.ui.theme.TokeGreen
+import com.flabs.cobrate.ui.theme.tokeEsOscuro
+import com.flabs.cobrate.ui.theme.tokePaleta
 
 private class NavPalette(
     val Fondo: Color,
@@ -42,32 +43,18 @@ private class NavPalette(
     val FabContenido: Color
 )
 
-private val NavFigma = NavPalette(
-    Fondo = Color(0xFFFFFFFF), // nodeId 1:141 (light)
-    Borde = Color(0xFFE2E8F0), // nodeId 1:141 (light)
-    Activo = Color(0xFF0F172A), // nodeId 1:147 (light)
-    Inactivo = Color(0xFF64748B), // nodeId 1:152 (light)
-    FabFondo = TokeGreen,
-    FabContenido = Color.White
-)
-
-private val NavFigmaOscuro = NavPalette(
-    Fondo = Color(0xFF0A0D10), // nodeId 1:142 (dark)
-    Borde = Color(0xFF1E232B), // nodeId 1:142 (dark)
-    Activo = Color(0xFFF8FAFC), // nodeId 1:148 (dark)
-    Inactivo = Color(0xFF8E9BAE), // nodeId 1:153 (dark)
-    FabFondo = Color(0xFF00C853), // nodeId 1:171 (dark)
-    FabContenido = Color(0xFF042615) // nodeId 1:180 (dark)
-)
-
+/** Colores de la barra inferior: salen de la paleta única de la app. */
 @Composable
 private fun navColors(): NavPalette {
-    val themeMode by PreferenciasAppStore.themeMode.collectAsState()
-    val isDark = when (themeMode) {
-        ThemeMode.DARK -> true
-        ThemeMode.LIGHT -> false
-    }
-    return if (isDark) NavFigmaOscuro else NavFigma
+    val p = tokePaleta()
+    return NavPalette(
+        Fondo = if (tokeEsOscuro()) p.fondo else p.tarjeta,
+        Borde = p.borde,
+        Activo = p.textoPrincipal,
+        Inactivo = p.textoSecundario,
+        FabFondo = p.verde,
+        FabContenido = p.verdeTexto
+    )
 }
 
 data class ItemNav(
@@ -295,7 +282,7 @@ private fun RenderIconContent(
                 imageVector = Icons.Default.Check,
                 contentDescription = "Éxito",
                 modifier = Modifier.size(20.dp),
-                tint = TokeGreen
+                tint = MaterialTheme.colorScheme.primary
             )
         }
         TabRefreshState.IDLE -> {

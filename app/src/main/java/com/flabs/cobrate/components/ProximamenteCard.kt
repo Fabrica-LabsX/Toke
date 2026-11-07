@@ -23,7 +23,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.flabs.cobrate.ui.theme.TokeGreenDeep
 
 /**
  * Card reutilizable que representa un control o sección aún no disponible.
@@ -72,7 +71,7 @@ fun ProximamenteCard(
                 Box(
                     modifier = Modifier
                         .clip(CircleShape)
-                        .background(TokeGreenDeep)
+                        .background(MaterialTheme.colorScheme.primary)
                         .padding(horizontal = 10.dp, vertical = 4.dp)
                 ) {
                     Text(

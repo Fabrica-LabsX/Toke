@@ -1,4 +1,6 @@
 package com.flabs.cobrate.features.onboarding
+import com.flabs.cobrate.ui.theme.TokeRojo
+import com.flabs.cobrate.ui.theme.TokeAmbarTexto
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
@@ -109,7 +111,7 @@ fun EmpezarScreen(
         }
 
         if (onCerrarSesion != null) {
-            val rojo = Color(0xFFDC2626)
+            val rojo = TokeRojo
             Surface(
                 onClick = onCerrarSesion,
                 shape = RoundedCornerShape(9999.dp),

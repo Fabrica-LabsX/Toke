@@ -1,4 +1,6 @@
 package com.flabs.cobrate.features.cobros
+import com.flabs.cobrate.ui.theme.TokeRojo
+import com.flabs.cobrate.ui.theme.TokeAmbarTexto
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
@@ -137,7 +139,7 @@ fun TituloGrupo(paleta: TokePaleta, texto: String) {
 /** Aviso previo de Plin: con qué billeteras y bancos trabaja. */
 @Composable
 fun AvisoPlin(paleta: TokePaleta) {
-    val ambar = Color(0xFFB45309)
+    val ambar = TokeAmbarTexto
     Surface(
         shape = RoundedCornerShape(18.dp),
         color = paleta.ambar.copy(alpha = 0.14f),

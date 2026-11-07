@@ -61,6 +61,8 @@ import com.flabs.cobrate.ui.theme.PlusJakartaSans
 import com.flabs.cobrate.core.model.TipoMetodoCobro
 import com.flabs.cobrate.core.data.PreferenciasAppStore
 import com.flabs.cobrate.ui.theme.ThemeMode
+import com.flabs.cobrate.ui.theme.tokeEsOscuro
+import com.flabs.cobrate.ui.theme.tokePaleta
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -86,53 +88,31 @@ private class HomePalette(
     val IconoCabecera: Color
 )
 
-private val HomeFigma = HomePalette(
-    Fondo = Color(0xFFF2F4F7), // 1:2
-    TarjetaFondo = Color(0xFFFFFFFF), // 1:23, 1:41, 1:54, 1:67, 1:90
-    TarjetaBorde = Color(0xFFE2E8F0), // 1:23, 1:41, 1:54, 1:67, 1:90
-    TileIconoFondo = Color(0xFFF1F4F9), // 1:43, 1:56
-    TextoPrincipal = Color(0xFF0F172A), // 1:7, 1:28, 1:51, 1:64, 1:73, 1:78, 1:84, 1:97, 1:101
-    TextoSecundario = Color(0xFF64748B), // 1:12, 1:26, 1:53, 1:66, 1:75, 1:99, 1:80
-    EnlaceVerTodas = Color(0xFF0A8F42), // 1:86, 1:88
-    Chip1Fondo = Color(0xFFF1F4F9), // 1:30
-    Chip1Dot = Color(0xFF0F172A), // 1:31
-    Chip1Texto = Color(0xFF0F172A), // 1:33
-    Chip2Fondo = Color(0xFFF59E0B), // 1:34, 1:69
-    Chip2Texto = Color(0xFF181202), // 1:39, 1:70
-    OfflineFondo = Color(0xFFFEE2E2), // 1:13
-    OfflineBorde = Color(0xFFFECACA), // 1:13
-    IconoTile = Color.Unspecified,
-    IconoCabecera = Color.Unspecified
-)
-
-private val HomeFigmaOscuro = HomePalette(
-    Fondo = Color(0xFF0A0D10), // 1:2
-    TarjetaFondo = Color(0xFF14171D), // 1:24, 1:42, 1:91
-    TarjetaBorde = Color(0xFF1E232B), // 1:24, 1:42, 1:91
-    TileIconoFondo = Color(0xFF1E242F), // 1:44
-    TextoPrincipal = Color(0xFFF8FAFC), // 1:8, 1:29, 1:74, 1:79, 1:85, 1:98
-    TextoSecundario = Color(0xFF8E9BAE), // 1:13, 1:27, 1:76, 1:81
-    EnlaceVerTodas = Color(0xFF00C853), // 1:87, 1:89
-    Chip1Fondo = Color(0xFF1E242F), // 1:31
-    Chip1Dot = Color(0xFFF8FAFC), // 1:32
-    Chip1Texto = Color(0xFFF8FAFC), // 1:34
-    Chip2Fondo = Color(0xFFF59E0B), // 1:35, 1:70
-    Chip2Texto = Color(0xFF181202), // 1:40, 1:71
-    OfflineFondo = Color(0xFF2A1414), // 1:14
-    OfflineBorde = Color(0xFF3D1E1E), // 1:14
-    IconoTile = Color(0xFFFFFFFF), // 1:45, 1:58
-    IconoCabecera = Color(0xFFFFFFFF) // 1:9
-)
-
+/** Colores del Home: salen de la paleta única de la app; solo los iconos tiñen distinto en oscuro. */
 @Composable
 private fun homeColors(): HomePalette {
-    val themeMode by PreferenciasAppStore.themeMode.collectAsState()
-    val isDark = when (themeMode) {
-        ThemeMode.DARK -> true
-        ThemeMode.LIGHT -> false
-    }
-    return if (isDark) HomeFigmaOscuro else HomeFigma
+    val p = tokePaleta()
+    val oscuro = tokeEsOscuro()
+    return HomePalette(
+        Fondo = p.fondo,
+        TarjetaFondo = p.tarjeta,
+        TarjetaBorde = p.borde,
+        TileIconoFondo = p.tileFondo,
+        TextoPrincipal = p.textoPrincipal,
+        TextoSecundario = p.textoSecundario,
+        EnlaceVerTodas = p.enlaceVerde,
+        Chip1Fondo = p.tileFondo,
+        Chip1Dot = p.textoPrincipal,
+        Chip1Texto = p.textoPrincipal,
+        Chip2Fondo = p.ambar,
+        Chip2Texto = p.ambarTexto,
+        OfflineFondo = p.rojoFondo,
+        OfflineBorde = p.rojoBorde,
+        IconoTile = if (oscuro) Color.White else Color.Unspecified,
+        IconoCabecera = if (oscuro) Color.White else Color.Unspecified
+    )
 }
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

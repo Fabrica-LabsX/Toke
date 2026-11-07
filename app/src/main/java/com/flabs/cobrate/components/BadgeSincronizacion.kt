@@ -12,7 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import com.flabs.cobrate.ui.theme.tokeEsOscuro
+import com.flabs.cobrate.ui.theme.tokePaleta
 
 /**
  * Badge del estado del servicio de TOKE, junto al de conexión (mismo tamaño y forma):
@@ -26,16 +26,14 @@ fun BadgeSincronizacion(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val esOscuro = tokeEsOscuro()
+    val paleta = tokePaleta()
     val fondo = when {
-        operativo -> Color(0xFF00C853)
-        esOscuro -> Color(0xFF2A1414)
-        else -> Color(0xFFFEE2E2)
+        operativo -> paleta.verde
+        else -> paleta.rojoFondo
     }
     val borde = when {
-        operativo -> Color(0xFF00B44A)
-        esOscuro -> Color(0xFF3D1E1E)
-        else -> Color(0xFFFECACA)
+        operativo -> paleta.verde
+        else -> paleta.rojoBorde
     }
 
     Surface(

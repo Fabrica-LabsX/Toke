@@ -1,4 +1,6 @@
 package com.flabs.cobrate.features.equipo
+import com.flabs.cobrate.ui.theme.TokeRojo
+import com.flabs.cobrate.ui.theme.TokeAmbarTexto
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -41,7 +43,7 @@ import com.flabs.cobrate.features.business.TrabajadorRealInfo
 import com.flabs.cobrate.ui.theme.PlusJakartaSans
 import com.flabs.cobrate.ui.theme.TokePaleta
 
-private val RojoExpulsar = Color(0xFFDC2626)
+private val RojoExpulsar = TokeRojo
 
 /**
  * Fila de un colaborador: iniciales, nombre, estado y, si quien mira puede administrar,

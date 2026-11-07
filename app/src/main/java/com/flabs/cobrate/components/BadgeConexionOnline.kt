@@ -1,4 +1,5 @@
 package com.flabs.cobrate.components
+import com.flabs.cobrate.ui.theme.tokePaleta
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Box
@@ -15,19 +16,20 @@ import androidx.compose.ui.unit.dp
 
 /**
  * Badge de conexión en línea (cabecera del Home del dueño y del trabajador).
- * Mismos valores en claro y en oscuro: cuadro de 36 dp, radio 10 dp, relleno #00C853,
- * borde de 1 dp #00B44A y glifo de 20 dp centrado.
+ * Mismos valores en claro y en oscuro: cuadro de 36 dp, radio 10 dp, relleno verde de la paleta,
+ * borde del mismo verde y glifo de 20 dp centrado.
  *
  * Solo dibuja el estado verde. Quién lo muestra y cuándo lo decide quien lo llama,
  * a partir de NetworkMonitor.disponible (única fuente de red).
  */
 @Composable
 fun BadgeConexionOnline(modifier: Modifier = Modifier) {
+    val paleta = tokePaleta()
     Surface(
         modifier = modifier.size(36.dp),
         shape = RoundedCornerShape(10.dp),
-        color = Color(0xFF00C853),
-        border = BorderStroke(1.dp, Color(0xFF00B44A)),
+        color = paleta.verde,
+        border = BorderStroke(1.dp, paleta.verde),
     ) {
         Box(contentAlignment = Alignment.Center) {
             Icon(

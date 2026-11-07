@@ -1,4 +1,6 @@
 package com.flabs.cobrate.components
+import com.flabs.cobrate.ui.theme.TokeAmbarTexto
+import com.flabs.cobrate.ui.theme.tokePaleta
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -51,11 +53,12 @@ fun PantallaEsperandoAceptacion(
         ThemeMode.LIGHT -> false
     }
 
-    val bgScreen = if (isDark) Color(0xFF0D1117) else Color(0xFFF4FBF6)
-    val cardBg = if (isDark) Color(0xFF1A1F26) else Color.White
-    val cardBorder = if (isDark) Color(0xFF2D333B) else Color(0xFFE2E8F0)
-    val titleColor = if (isDark) Color.White else Color(0xFF131E18)
-    val bodyTextColor = if (isDark) Color(0xFF94A3B8) else Color(0xFF3D4A3E)
+    val paleta = tokePaleta()
+    val bgScreen = paleta.fondo
+    val cardBg = paleta.tarjeta
+    val cardBorder = paleta.borde
+    val titleColor = paleta.textoPrincipal
+    val bodyTextColor = paleta.textoSecundario
 
     Box(
         modifier = Modifier
@@ -102,15 +105,15 @@ fun PantallaEsperandoAceptacion(
                         ) {
                             Surface(
                                 shape = CircleShape,
-                                color = if (isDark) Color(0x26F59E0B) else Color(0xFFFEF3C7),
-                                border = BorderStroke(1.dp, if (isDark) Color(0x66F59E0B) else Color(0xFFFDE68A)),
+                                color = paleta.ambar.copy(alpha = 0.14f),
+                                border = BorderStroke(1.dp, paleta.ambar.copy(alpha = 0.4f)),
                                 modifier = Modifier.size(64.dp)
                             ) {
                                 Box(contentAlignment = Alignment.Center) {
                                     Icon(
                                         imageVector = Icons.Outlined.HourglassTop,
                                         contentDescription = null,
-                                        tint = Color(0xFFF59E0B),
+                                        tint = paleta.ambar,
                                         modifier = Modifier.size(28.dp)
                                     )
                                 }
@@ -118,8 +121,8 @@ fun PantallaEsperandoAceptacion(
 
                             Surface(
                                 shape = CircleShape,
-                                color = if (isDark) Color(0x26F59E0B) else Color(0xFFFEF3C7),
-                                border = BorderStroke(1.dp, if (isDark) Color(0x66F59E0B) else Color(0xFFFDE68A))
+                                color = paleta.ambar.copy(alpha = 0.14f),
+                                border = BorderStroke(1.dp, paleta.ambar.copy(alpha = 0.4f))
                             ) {
                                 Row(
                                     modifier = Modifier.padding(horizontal = 13.dp, vertical = 5.dp),
@@ -130,13 +133,13 @@ fun PantallaEsperandoAceptacion(
                                         modifier = Modifier
                                             .size(8.dp)
                                             .clip(CircleShape)
-                                            .background(Color(0xFFF59E0B))
+                                            .background(paleta.ambar)
                                     )
                                     Text(
                                         text = "Pendiente de aprobación",
                                         fontSize = 12.sp,
                                         fontWeight = FontWeight.Bold,
-                                        color = if (isDark) Color(0xFFF59E0B) else Color(0xFFB45309)
+                                        color = if (isDark) paleta.ambar else TokeAmbarTexto
                                     )
                                 }
                             }
@@ -156,8 +159,8 @@ fun PantallaEsperandoAceptacion(
                         // Tarjeta Resumen del Negocio Solicitado
                         Surface(
                             shape = RoundedCornerShape(20.dp),
-                            color = if (isDark) Color(0xFF12161A) else Color(0xFFF8FAFC),
-                            border = BorderStroke(1.dp, if (isDark) Color(0xFF2D333B) else Color(0xFFE2E8F0)),
+                            color = paleta.fondo,
+                            border = BorderStroke(1.dp, paleta.bordeControl),
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             Row(
@@ -169,7 +172,7 @@ fun PantallaEsperandoAceptacion(
                             ) {
                                 Surface(
                                     shape = RoundedCornerShape(12.dp),
-                                    color = Color(0xFF00A651),
+                                    color = paleta.verde,
                                     modifier = Modifier.size(44.dp)
                                 ) {
                                     Box(contentAlignment = Alignment.Center) {
@@ -187,7 +190,7 @@ fun PantallaEsperandoAceptacion(
                                         text = "SOLICITUD ENVIADA A",
                                         fontSize = 11.sp,
                                         fontWeight = FontWeight.Bold,
-                                        color = Color(0xFF00A651),
+                                        color = paleta.verde,
                                         letterSpacing = 0.55.sp
                                     )
                                     Text(
@@ -231,7 +234,7 @@ fun PantallaEsperandoAceptacion(
                                         .fillMaxWidth()
                                         .height(48.dp),
                                     shape = RoundedCornerShape(20.dp),
-                                    color = if (isDark) Color(0xFF00C853) else Color(0xFF00A651),
+                                    color = paleta.verde,
                                     shadowElevation = 2.dp
                                 ) {
                                     Row(
@@ -320,8 +323,8 @@ fun PantallaEsperandoAceptacion(
                         .fillMaxWidth()
                         .height(48.dp),
                     shape = RoundedCornerShape(12.dp),
-                    color = if (isDark) Color(0x33DC2626) else Color(0xEEFEF2F2),
-                    border = BorderStroke(1.dp, if (isDark) Color(0x66DC2626) else Color(0xCCFECACA))
+                    color = paleta.rojoFondo,
+                    border = BorderStroke(1.dp, paleta.rojoBorde)
                 ) {
                     Row(
                         modifier = Modifier.fillMaxSize(),
@@ -331,7 +334,7 @@ fun PantallaEsperandoAceptacion(
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.Logout,
                             contentDescription = null,
-                            tint = Color(0xFFDC2626),
+                            tint = paleta.rojo,
                             modifier = Modifier.size(16.dp)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
@@ -339,7 +342,7 @@ fun PantallaEsperandoAceptacion(
                             text = stringResource(R.string.dialogo_cerrar_confirmar),
                             fontSize = 13.sp,
                             fontWeight = FontWeight.Bold,
-                            color = Color(0xFFDC2626)
+                            color = paleta.rojo
                         )
                     }
                 }

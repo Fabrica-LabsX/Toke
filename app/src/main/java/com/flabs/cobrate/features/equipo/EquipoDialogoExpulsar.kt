@@ -1,4 +1,6 @@
 package com.flabs.cobrate.features.equipo
+import com.flabs.cobrate.ui.theme.TokeRojo
+import com.flabs.cobrate.ui.theme.TokeAmbarTexto
 
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
@@ -12,7 +14,7 @@ import com.flabs.cobrate.features.business.TrabajadorRealInfo
 import com.flabs.cobrate.ui.theme.PlusJakartaSans
 import com.flabs.cobrate.ui.theme.TokePaleta
 
-private val RojoExpulsar = Color(0xFFDC2626)
+private val RojoExpulsar = TokeRojo
 
 /** Confirmación antes de expulsar a un colaborador del negocio. */
 @Composable

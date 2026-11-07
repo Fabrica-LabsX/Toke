@@ -12,7 +12,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.flabs.cobrate.core.logic.FeedbackManager
 import com.flabs.cobrate.core.logic.FeedbackType
-import com.flabs.cobrate.ui.theme.TokeSuccess
 
 /**
  * Overlay global que reacciona al estado de FeedbackManager.
@@ -54,7 +53,7 @@ fun FeedbackOverlay() {
         ) { data ->
             // Defecto 4: Uso de roles del colorScheme en lugar de literales
             val (containerColor, contentColor) = when (feedback?.type) {
-                FeedbackType.SUCCESS -> TokeSuccess to MaterialTheme.colorScheme.onPrimary
+                FeedbackType.SUCCESS -> MaterialTheme.colorScheme.primary to MaterialTheme.colorScheme.onPrimary
                 FeedbackType.WARNING -> MaterialTheme.colorScheme.tertiaryContainer to MaterialTheme.colorScheme.onTertiaryContainer
                 else -> MaterialTheme.colorScheme.inverseSurface to MaterialTheme.colorScheme.inverseOnSurface
             }
