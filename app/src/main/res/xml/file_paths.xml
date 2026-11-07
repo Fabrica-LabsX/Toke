@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths>
+    <!-- Imágenes de QR que se comparten con el cliente (se guardan solo en la caché de la app). -->
+    <cache-path name="qr" path="qr/" />
+</paths>

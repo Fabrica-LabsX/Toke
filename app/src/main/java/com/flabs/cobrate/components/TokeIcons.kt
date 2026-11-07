@@ -91,4 +91,7 @@ object TokeIcons {
     // Estado del servicio de TOKE (junto al icono de conexión): con check verde / rojo sin check.
     @DrawableRes val SyncOk = R.drawable.ic_sync_ok
     @DrawableRes val SyncError = R.drawable.ic_sync_error
+
+    // Borrar un método de cobro.
+    @DrawableRes val Papelera = R.drawable.ic_papelera
 }

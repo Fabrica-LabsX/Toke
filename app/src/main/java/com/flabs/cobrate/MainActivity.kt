@@ -150,7 +150,7 @@ import com.flabs.cobrate.features.business.EstablishmentsScreen
 import com.flabs.cobrate.features.negocios.MisNegociosScreen
 import com.flabs.cobrate.features.business.OwnerHistoryScreen
 import com.flabs.cobrate.features.equipo.EquipoScreen
-import com.flabs.cobrate.features.business.PaymentMethodsScreen
+import com.flabs.cobrate.features.cobros.MetodosDeCobroScreen
 import com.flabs.cobrate.features.permisos.DiagnosticoPermisosScreen
 import com.flabs.cobrate.features.settings.VoiceSettingsScreen
 import com.flabs.cobrate.features.operaciones.DetalleOperacionScreen
@@ -656,7 +656,7 @@ fun CobrateApp() {
             composable(Routes.METODOS_COBRO_DUENO) {
                 val esTrabajador = (rolActivo == RolCuentaNegocio.TRABAJADOR && !esDuenoReal)
                 if (esTrabajador) {
-                    PaymentMethodsScreen(
+                    MetodosDeCobroScreen(
                         businessViewModel = businessViewModel,
                         soloLectura = true
                     )
@@ -678,7 +678,7 @@ fun CobrateApp() {
                     }
 
                     if (esAutorizado) {
-                        PaymentMethodsScreen(
+                        MetodosDeCobroScreen(
                             businessViewModel = businessViewModel,
                             soloLectura = false
                         )

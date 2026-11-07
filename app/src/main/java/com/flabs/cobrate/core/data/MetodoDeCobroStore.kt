@@ -117,6 +117,7 @@ object MetodoDeCobroStore {
      * Elimina un método de Supabase y la caché.
      */
     suspend fun eliminar(id: String, negocioId: String): Result<Unit> {
+        val qrUrl = obtenerPorNegocio(negocioId).find { it.id == id }?.qrUrl
         val result = repository.eliminar(id)
         if (result.isSuccess) {
             val lista = obtenerPorNegocio(negocioId).filterNot { it.id == id }
@@ -124,6 +125,8 @@ object MetodoDeCobroStore {
                 this[negocioId] = lista
             }
             persistir(negocioId)
+            // Se borra también la imagen del QR para no dejarla huérfana en Storage.
+            QrImageUploader.tryDeleteOldQr(negocioId, qrUrl)
             return Result.success(Unit)
         }
         return result
