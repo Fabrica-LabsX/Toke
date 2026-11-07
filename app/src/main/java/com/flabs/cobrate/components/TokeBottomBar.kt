@@ -115,8 +115,8 @@ fun TokeBottomBar(
                     horizontalArrangement = Arrangement.SpaceEvenly,
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    // Primeros dos items (Inicio, Mis Cobros)
-                    items.take(2).forEach { item ->
+                    // Mitad izquierda del FAB (con 4 pestañas son 2; con 3, la barra del trabajador, son 2 y 1)
+                    items.take((items.size + 1) / 2).forEach { item ->
                         val state = refreshStates[item.id] ?: TabRefreshState.IDLE
                         BottomNavItem(
                             item = item,
@@ -137,8 +137,9 @@ fun TokeBottomBar(
                     // Espacio central para el botón FAB "Recibir"
                     Spacer(modifier = Modifier.width(72.dp))
 
-                    // Últimos dos items (Equipo, Más)
-                    items.takeLast(2).forEach { item ->
+                    // Si a la derecha hay menos pestañas que a la izquierda, se deja un hueco para que el FAB quede centrado.
+                    repeat(((items.size + 1) / 2) - items.drop((items.size + 1) / 2).size) { Spacer(modifier = Modifier.weight(1f)) }
+                    items.drop((items.size + 1) / 2).forEach { item ->
                         val state = refreshStates[item.id] ?: TabRefreshState.IDLE
                         BottomNavItem(
                             item = item,
