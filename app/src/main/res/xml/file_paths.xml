@@ -2,4 +2,6 @@
 <paths>
     <!-- Imágenes de QR que se comparten con el cliente (se guardan solo en la caché de la app). -->
     <cache-path name="qr" path="qr/" />
+    <!-- Excel de reportes que se comparte con otra app (solo en la caché). -->
+    <cache-path name="reportes" path="reportes/" />
 </paths>
