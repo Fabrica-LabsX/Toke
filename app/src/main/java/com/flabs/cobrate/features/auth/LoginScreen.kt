@@ -70,6 +70,8 @@ fun LoginScreen(
     var otpTokenRegistro by rememberSaveable { mutableStateOf("") }
     var passwordRegistro by rememberSaveable { mutableStateOf("") }
     var confirmarPasswordRegistro by rememberSaveable { mutableStateOf("") }
+    // El código de correo solo sirve una vez: si crear la cuenta falla, se reintenta sin pedirlo otra vez.
+    var codigoRegistroVerificado by rememberSaveable { mutableStateOf(false) }
 
     val scope = rememberCoroutineScope()
     val paleta = tokePaleta()
@@ -243,6 +245,7 @@ fun LoginScreen(
                                     FeedbackManager.setLoading(false)
                                     res.onSuccess {
                                         FeedbackManager.showSuccess("Código enviado a $email")
+                                        codigoRegistroVerificado = false
                                         pasoRegistro = 2
                                     }.onFailure { err -> FeedbackManager.showError(err) }
                                 }
@@ -254,7 +257,10 @@ fun LoginScreen(
                         paleta = paleta,
                         email = email,
                         codigo = otpTokenRegistro,
-                        onCodigo = { otpTokenRegistro = it },
+                        onCodigo = {
+                            otpTokenRegistro = it
+                            codigoRegistroVerificado = false
+                        },
                         password = passwordRegistro,
                         onPassword = { passwordRegistro = it },
                         confirmacion = confirmarPasswordRegistro,
@@ -268,13 +274,16 @@ fun LoginScreen(
                             } else {
                                 scope.launch {
                                     FeedbackManager.setLoading(true, "Verificando código...")
-                                    val verif = authViewModel.verificarOtpRegistro(email, otpTokenRegistro)
-                                    if (verif.isFailure) {
-                                        FeedbackManager.setLoading(false)
-                                        FeedbackManager.showErrorMessage(
-                                            verif.exceptionOrNull()?.message ?: "Código incorrecto o expirado."
-                                        )
-                                        return@launch
+                                    if (!codigoRegistroVerificado) {
+                                        val verif = authViewModel.verificarOtpRegistro(email, otpTokenRegistro)
+                                        if (verif.isFailure) {
+                                            FeedbackManager.setLoading(false)
+                                            FeedbackManager.showErrorMessage(
+                                                verif.exceptionOrNull()?.message ?: "Código incorrecto o expirado."
+                                            )
+                                            return@launch
+                                        }
+                                        codigoRegistroVerificado = true
                                     }
                                     FeedbackManager.setLoading(true, "Completando registro...")
                                     val res = authViewModel.completarRegistro(nombreRegistro, passwordRegistro)
