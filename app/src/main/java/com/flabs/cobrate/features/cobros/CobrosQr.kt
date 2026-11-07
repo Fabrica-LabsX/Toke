@@ -117,7 +117,7 @@ fun QrCuadro(
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = if (puedeCargar) "Toca para cargar tu QR" else "Sin QR cargado",
+                    text = if (puedeCargar) "Toca para cargar tu QR" else "El dueño aún no cargó el QR",
                     style = TextStyle(
                         fontFamily = PlusJakartaSans,
                         fontWeight = FontWeight.SemiBold,

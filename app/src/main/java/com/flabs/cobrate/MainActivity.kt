@@ -675,7 +675,8 @@ fun CobrateApp() {
                 if (esTrabajador) {
                     MetodosDeCobroScreen(
                         businessViewModel = businessViewModel,
-                        soloLectura = true
+                        soloLectura = true,
+                        onBack = { navController.popBackStack() }
                     )
                 } else {
                     val uid = CuentaStore.sesionActual.collectAsState().value?.id
@@ -697,7 +698,8 @@ fun CobrateApp() {
                     if (esAutorizado) {
                         MetodosDeCobroScreen(
                             businessViewModel = businessViewModel,
-                            soloLectura = false
+                            soloLectura = false,
+                            onBack = { navController.popBackStack() }
                         )
                     } else {
                         LaunchedEffect(Unit) {

@@ -14,11 +14,12 @@ enum class PestanaOperaciones { TODAS, PENDIENTES }
 
 /** Rango de tiempo. [minutos] null significa "sin límite". */
 enum class RangoTiempo(val etiqueta: String, val minutos: Long?) {
+    HOY("Hoy", null),
     DIEZ_MIN("10 min", 10),
     TREINTA_MIN("30 min", 30),
     SESENTA_MIN("60 min", 60),
-    UNA_HORA("1h", 60),
-    PERSONALIZADO("Personalizado", null),
+    UNA_HORA("1 h", 60),
+    PERSONALIZADO("Todo", null),
 }
 
 /** Grupos de billetera que se pueden filtrar. [BANCOS] agrupa todo lo que no es Yape ni Plin. */
@@ -37,7 +38,7 @@ enum class FiltroBilletera(val etiqueta: String) {
 data class FiltrosOperaciones(
     val pestana: PestanaOperaciones = PestanaOperaciones.TODAS,
     val texto: String = "",
-    val rango: RangoTiempo = RangoTiempo.DIEZ_MIN,
+    val rango: RangoTiempo = RangoTiempo.HOY,
     val billetera: FiltroBilletera? = null,
 )
 
@@ -49,7 +50,8 @@ object FiltroOperaciones {
         filtros: FiltrosOperaciones,
         ahora: Long,
     ): List<Operacion> {
-        val limiteTiempo = filtros.rango.minutos?.let { ahora - it * 60 * 1000L } ?: 0L
+        val limiteTiempo = if (filtros.rango == RangoTiempo.HOY) inicioDelDia(ahora)
+        else filtros.rango.minutos?.let { ahora - it * 60 * 1000L } ?: 0L
 
         return operaciones.filter { op ->
             val cumplePestana = when (filtros.pestana) {
@@ -63,6 +65,15 @@ object FiltroOperaciones {
             cumplePestana && cumpleBusqueda && cumpleTiempo && cumpleBilletera
         }.sortedByDescending { it.fechaHora }
     }
+
+    /** Medianoche de hoy en la hora del celular, en milisegundos. */
+    fun inicioDelDia(ahora: Long): Long = java.util.Calendar.getInstance().apply {
+        timeInMillis = ahora
+        set(java.util.Calendar.HOUR_OF_DAY, 0)
+        set(java.util.Calendar.MINUTE, 0)
+        set(java.util.Calendar.SECOND, 0)
+        set(java.util.Calendar.MILLISECOND, 0)
+    }.timeInMillis
 
     fun contarPendientes(operaciones: List<Operacion>): Int =
         operaciones.count { it.estado == EstadoOperacion.SIN_ASIGNAR }

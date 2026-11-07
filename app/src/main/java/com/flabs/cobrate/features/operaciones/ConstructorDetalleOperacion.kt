@@ -63,7 +63,7 @@ object ConstructorDetalleOperacion {
                     ),
                 )
             }
-            add(FilaDetalle(IconoFila.ID, "ID Operación", operacion.id.take(12)))
+            add(FilaDetalle(IconoFila.ID, "ID Operación", "#" + operacion.id.takeLast(6)))
         }
 
         return DetalleOperacion(

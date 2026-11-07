@@ -45,8 +45,8 @@ class FiltroOperacionesTest {
         FiltroOperaciones.aplicar(operaciones, f, ahora).map { it.id }
 
     @Test
-    fun rangoPorDefectoSonLosUltimosDiezMinutos_ordenadoDeNuevoAAntiguo() {
-        assertEquals(listOf("e-sin-metodo-3", "a-yape-5"), ids(FiltrosOperaciones()))
+    fun rangoDeDiezMinutos_ordenadoDeNuevoAAntiguo() {
+        assertEquals(listOf("e-sin-metodo-3", "a-yape-5"), ids(FiltrosOperaciones(rango = RangoTiempo.DIEZ_MIN)))
     }
 
     @Test
@@ -117,5 +117,16 @@ class FiltroOperacionesTest {
     @Test
     fun contarPendientesCuentaSoloSinAsignar() {
         assertEquals(2, FiltroOperaciones.contarPendientes(operaciones))
+    }
+}
+
+class FiltroOperacionesHoyTest {
+    @org.junit.Test
+    fun hoyMuestraLoDeHoyYNoLoDeAyer() {
+        val ahora = System.currentTimeMillis()
+        val inicio = FiltroOperaciones.inicioDelDia(ahora)
+        org.junit.Assert.assertTrue(inicio <= ahora)
+        org.junit.Assert.assertTrue(ahora - inicio < 24L * 60 * 60 * 1000)
+        org.junit.Assert.assertEquals(RangoTiempo.HOY, FiltrosOperaciones().rango)
     }
 }

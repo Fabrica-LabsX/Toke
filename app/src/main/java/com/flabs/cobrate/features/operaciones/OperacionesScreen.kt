@@ -141,7 +141,7 @@ fun OperacionesScreen(
                     EncabezadoSeccion(
                         paleta = paleta,
                         titulo = "Cobros recibidos",
-                        textoDerecha = "${recibidas.size} Detectadas",
+                        textoDerecha = if (recibidas.size == 1) "1 detectado" else "${recibidas.size} detectados",
                     )
                 }
                 items(recibidas, key = { it.id }) { op ->

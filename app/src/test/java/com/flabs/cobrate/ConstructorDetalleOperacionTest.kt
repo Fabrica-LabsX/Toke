@@ -91,8 +91,8 @@ class ConstructorDetalleOperacionTest {
     }
 
     @Test
-    fun idSeRecortaADoceCaracteres() {
+    fun idMuestraLosUltimosSeisCaracteresComoEnLaLista() {
         val d = ConstructorDetalleOperacion.construir(op(id = "abcdefghijklmnopqrstuvwxyz"), null, null, 0, null)
-        assertEquals("abcdefghijkl", d.filas.last { it.icono == IconoFila.ID }.valor)
+        assertEquals("#uvwxyz", d.filas.last { it.icono == IconoFila.ID }.valor)
     }
 }

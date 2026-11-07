@@ -76,7 +76,8 @@ fun MisNegociosTarjeta(
                         overflow = TextOverflow.Ellipsis,
                     )
                     Text(
-                        text = if (item.rol == RolEnNegocio.DUENO) "Tu negocio" else "Dueño: $nombreDueno",
+                        text = if (item.rol == RolEnNegocio.DUENO) "Tu negocio"
+                        else if (nombreDueno == "Dueño del negocio") "Negocio donde colaboras" else "Dueño: $nombreDueno",
                         style = TextStyle(
                             fontFamily = PlusJakartaSans,
                             fontWeight = FontWeight.Medium,

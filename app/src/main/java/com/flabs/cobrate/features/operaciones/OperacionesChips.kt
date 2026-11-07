@@ -122,7 +122,7 @@ private fun ChipRango(
             onDismissRequest = { menuAbierto = false },
             containerColor = paleta.tarjeta,
         ) {
-            RangoTiempo.entries.forEach { opcion ->
+            RangoTiempo.entries.filter { it != RangoTiempo.SESENTA_MIN }.forEach { opcion ->
                 DropdownMenuItem(
                     text = {
                         Text(
