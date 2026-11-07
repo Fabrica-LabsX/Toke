@@ -23,7 +23,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -39,7 +38,6 @@ import com.flabs.cobrate.components.PantallaAccesoPausado
 import com.flabs.cobrate.components.PantallaEsperandoAceptacion
 import com.flabs.cobrate.components.PantallaSolicitudRechazada
 import com.flabs.cobrate.components.colorBilletera
-import com.flabs.cobrate.components.rememberSwipeUpRefreshConnection
 import com.flabs.cobrate.features.onboarding.EmpezarScreen
 import com.flabs.cobrate.core.data.*
 import com.flabs.cobrate.core.logic.AccesoNegocio.EstadoAcceso
@@ -203,7 +201,7 @@ private fun HomeScreenContent(
     val estaCargandoGlobal = rolEfectivo == RolEfectivo.CARGANDO ||
             !negocioStoreListo ||
             !relacionStoreListo ||
-            estadoSync == EstadoSincronizacionRemota.SINCRONIZANDO
+            (estadoSync == EstadoSincronizacionRemota.SINCRONIZANDO && negocio == null && misNegocios.isEmpty())
 
     val operacionesRecientes = remember(operaciones) {
         operaciones.sortedByDescending { it.fechaHora }.take(5)
@@ -261,9 +259,6 @@ private fun HomeScreenContent(
         }
     }
 
-    val swipeConnection = rememberSwipeUpRefreshConnection(enabled = onRefrescarTab != null) {
-        onRefrescarTab?.invoke()
-    }
 
     Scaffold(
         topBar = {
@@ -283,14 +278,11 @@ private fun HomeScreenContent(
         Column(
             modifier = Modifier
                 .padding(innerPadding)
-                .nestedScroll(swipeConnection)
         ) {
             if (estaCargandoGlobal) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Text("Sincronizando negocios...", style = MaterialTheme.typography.bodyMedium)
                     }
                 }
             } else if (negocio == null && misNegocios.isEmpty()) {
@@ -349,8 +341,6 @@ private fun HomeScreenContent(
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
-                            Spacer(modifier = Modifier.height(16.dp))
-                            Text("Comprobando información...", style = MaterialTheme.typography.bodyMedium)
                         }
                     }
                 }

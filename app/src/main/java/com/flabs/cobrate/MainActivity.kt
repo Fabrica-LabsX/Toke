@@ -103,6 +103,7 @@ import com.flabs.cobrate.components.TokeIcons
 import com.flabs.cobrate.core.data.ConfiguracionDeVozStore
 import com.flabs.cobrate.core.data.MetodoDeCobroStore
 import com.flabs.cobrate.core.data.CuentaStore
+import com.flabs.cobrate.core.data.EstadoSincronizacionRemota
 import com.flabs.cobrate.core.data.InMemoryOperationStore
 import com.flabs.cobrate.core.data.EstadoServiciosStore
 import com.flabs.cobrate.core.data.EstadoOperativoStore
@@ -350,7 +351,7 @@ fun CobrateApp() {
                 val appContext = context.applicationContext
                 val uid = CuentaStore.sesionActual.value?.id
                 val encendido = EstadoOperativoStore.encendido.value
-                if (uid != null && encendido) {
+                if (uid != null && encendido && CuentaStore.estadoSincronizacion.value != EstadoSincronizacionRemota.SINCRONIZANDO) {
                     LogSeguro.d("MainActivity", "[ON_RESUME] Sincronizando datos de ${uid.take(6)}")
                     scopeLifecycle.launch {
                         CuentaStore.sincronizarDatos(uid).onSuccess {
