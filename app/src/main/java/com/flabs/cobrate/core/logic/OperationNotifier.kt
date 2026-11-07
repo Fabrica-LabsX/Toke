@@ -72,7 +72,8 @@ object OperationNotifier {
         }
         
         if (config.activada) {
-            val frase = VoicePhraseBuilder.construirFrase(config, monto)
+            val billetera = operacion.metodoPago?.name?.lowercase()?.replaceFirstChar { it.uppercase() }
+            val frase = VoicePhraseBuilder.construirFrase(config, monto, billetera = billetera)
             obtenerSpeaker(context).hablar(frase, config.velocidad)
         }
     }

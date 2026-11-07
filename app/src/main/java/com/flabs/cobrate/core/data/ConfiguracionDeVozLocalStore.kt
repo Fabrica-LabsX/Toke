@@ -6,7 +6,7 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.flabs.cobrate.core.model.ConfiguracionDeVoz
 import com.flabs.cobrate.core.model.ModoVoz
-import com.flabs.cobrate.core.model.SubModoToki
+import com.flabs.cobrate.core.model.ModoVozMigracion
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.Serializable
@@ -55,8 +55,9 @@ internal class ConfiguracionDeVozLocalStore(private val context: Context) {
     @Serializable
     internal data class ConfiguracionDeVozDto(
         val activada: Boolean = true,
-        val modo: ModoVoz = ModoVoz.TOKI,
-        val subModoToki: SubModoToki? = null,
+        // Texto para poder leer lo guardado con versiones anteriores (había un modo "TOKI").
+        val modo: String = ModoVoz.CAUTELOSO.name,
+        val subModoToki: String? = null,
         val vozSeleccionada: String? = null,
         val velocidad: Float = 1.0f,
         val vibrarAlAnunciar: Boolean = true,
@@ -70,8 +71,7 @@ internal class ConfiguracionDeVozLocalStore(private val context: Context) {
 private fun ConfiguracionDeVoz.aDto(): ConfiguracionDeVozLocalStore.ConfiguracionDeVozDto =
     ConfiguracionDeVozLocalStore.ConfiguracionDeVozDto(
         activada = activada,
-        modo = modo,
-        subModoToki = subModoToki,
+        modo = modo.name,
         vozSeleccionada = vozSeleccionada,
         velocidad = velocidad,
         vibrarAlAnunciar = vibrarAlAnunciar,
@@ -82,8 +82,7 @@ private fun ConfiguracionDeVoz.aDto(): ConfiguracionDeVozLocalStore.Configuracio
 internal fun ConfiguracionDeVozLocalStore.ConfiguracionDeVozDto.aModelo(): ConfiguracionDeVoz =
     ConfiguracionDeVoz(
         activada = activada,
-        modo = modo,
-        subModoToki = subModoToki,
+        modo = ModoVozMigracion.desdeGuardado(modo, subModoToki),
         vozSeleccionada = vozSeleccionada,
         velocidad = velocidad,
         vibrarAlAnunciar = vibrarAlAnunciar,

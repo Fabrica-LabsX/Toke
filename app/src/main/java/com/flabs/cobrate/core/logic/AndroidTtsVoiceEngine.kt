@@ -49,7 +49,8 @@ class AndroidTtsVoiceEngine(application: Application) : AndroidViewModel(applica
         VoicePhraseBuilder.construirFrase(
             config = ConfiguracionDeVozStore.configuracion.value,
             monto = 25.50,
-            cliente = null
+            cliente = null,
+            billetera = "Yape"
         )
 
     /** Libera los recursos del TTS. Se llama automáticamente al morir el ViewModel. */
@@ -57,4 +58,4 @@ class AndroidTtsVoiceEngine(application: Application) : AndroidViewModel(applica
         speaker.liberar()
         super.onCleared()
     }
-}
+}

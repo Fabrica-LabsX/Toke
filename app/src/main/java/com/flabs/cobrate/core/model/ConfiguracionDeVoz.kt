@@ -3,20 +3,15 @@ package com.flabs.cobrate.core.model
 import kotlin.math.roundToInt
 
 /**
- * Configuración de aviso por voz del trabajador (CAPA 14).
+ * Configuración de aviso por voz de quien usa la app.
  *
- * Representa todas las opciones configurables por el trabajador para el
- * anuncio vocal de pagos confirmados. Esta capa solo construye el motor y la
- * pantalla de configuración; la integración real en el flujo de confirmación
- * llega en una capa posterior.
+ * Representa las opciones configurables del anuncio vocal de pagos confirmados.
  */
 data class ConfiguracionDeVoz(
     // ¿Está activada la confirmación de pagos en voz alta?
     val activada: Boolean = true,
-    // Modo de la frase que se anuncia (ver regla de los 3 modos).
-    val modo: ModoVoz = ModoVoz.TOKI,
-    // Sub-modo únicamente relevante cuando modo == TOKI (inclusión del monto).
-    val subModoToki: SubModoToki? = null,
+    // Qué tanto dice la voz (ver [ModoVoz]).
+    val modo: ModoVoz = ModoVoz.CAUTELOSO,
     // Voz seleccionada por el usuario (id de locale/engine); null = por defecto.
     val vozSeleccionada: String? = null,
     // Velocidad de habla (rango típico 0.1f..2.0f, 1.0f = normal).
@@ -38,22 +33,19 @@ data class ConfiguracionDeVoz(
 }
 
 /** Modos de voz al confirmarse un pago. */
-enum class ModoVoz {
-    /** Sin mencionar el monto, nunca. */
-    CAUTELOSO,
+enum class ModoVoz(val titulo: String, val explicacion: String) {
+    /** Solo avisa que llegó un pago: no dice billetera, quién pagó ni monto. */
+    CAUTELOSO("Cauteloso", "Solo dice que llegó un pago. No menciona billetera, nombre ni monto."),
 
-    /** Menciona el monto en soles. */
-    NEGOCIO,
-
-    /** Estilo "¡TOKE!" (el monto según [SubModoToki]). */
-    TOKI
+    /** Dicta toda la notificación: la billetera, quién pagó (si se sabe) y el monto. */
+    BASICO("Básico", "Dice todo: la billetera, quién pagó y cuánto. Ideal si atiendes solo."),
 }
 
-/** Sub-modo exclusivo de [ModoVoz.TOKI]. */
-enum class SubModoToki {
-    /** No incluye el monto en la frase. */
-    DISCRETO,
-
-    /** Incluye el monto en soles. */
-    NEGOCIO
+/** Convierte lo que se guardó en versiones anteriores (había un modo "Toke") al modo actual. */
+object ModoVozMigracion {
+    fun desdeGuardado(modo: String?, subModoToki: String?): ModoVoz = when (modo) {
+        "BASICO", "NEGOCIO" -> ModoVoz.BASICO
+        "TOKI" -> if (subModoToki == "NEGOCIO") ModoVoz.BASICO else ModoVoz.CAUTELOSO
+        else -> ModoVoz.CAUTELOSO
+    }
 }
