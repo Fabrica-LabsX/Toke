@@ -49,6 +49,15 @@ object OperationNotifier {
             return
         }
 
+        // El "pago confirmado" (notificación y voz) es para el trabajador o colaborador; el dueño solo
+        // recibe los avisos de "esperando red" y "cobro no enviado", que salen de otro lado.
+        val esDueno = com.flabs.cobrate.core.data.NegocioStore.negocios.value
+            .find { it.id == operacion.negocioId }?.dueñoCuentaId == cuentaId
+        if (!DestinatarioAviso.avisaPagoConfirmado(esDueno)) {
+            Log.d(TAG, "Pago confirmado no se avisa al dueño del negocio")
+            return
+        }
+
         val monto = operacion.monto
         val modoCauteloso = ConfiguracionDeVozStore.configuracion.value.modo == ModoVoz.CAUTELOSO ||
             !com.flabs.cobrate.features.planes.PlanLogica.puedeVozBasica(com.flabs.cobrate.features.planes.PlanStore.plan)

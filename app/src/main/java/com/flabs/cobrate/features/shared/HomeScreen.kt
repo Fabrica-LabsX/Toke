@@ -208,8 +208,9 @@ private fun HomeScreenContent(
             !relacionStoreListo ||
             (estadoSync == EstadoSincronizacionRemota.SINCRONIZANDO && negocio == null && misNegocios.isEmpty())
 
-    val operacionesRecientes = remember(operaciones) {
-        operaciones.sortedByDescending { it.fechaHora }.take(5)
+    // Solo las del negocio abierto: al cambiar de negocio no deben quedar cobros del anterior.
+    val operacionesRecientes = remember(operaciones, negocio?.id) {
+        operaciones.filter { it.negocioId == negocio?.id }.sortedByDescending { it.fechaHora }.take(5)
     }
 
     val uid = sesionActual?.id
@@ -238,7 +239,9 @@ private fun HomeScreenContent(
     if (cuota != null && cuota.nivel == com.flabs.cobrate.features.planes.NivelCuota.AGOTADA && !avisoCuotaVisto) {
         com.flabs.cobrate.features.planes.CuotaAgotadaDialogo(onCerrar = { avisoCuotaVisto = true })
     }
-    val hayPendientes = resumen.operacionesPendientes > 0
+    // Los pagos por asignar solo existen con 2 o más trabajadores activos en el negocio.
+    val asignacionHabilitada = com.flabs.cobrate.features.operaciones.rememberAsignacionHabilitada()
+    val hayPendientes = asignacionHabilitada && resumen.operacionesPendientes > 0
     // Panel del trabajador: su último cobro (el que le asignaron o reclamó), sin importar el día.
     val ultimoCobro = remember(operaciones, negocio, uid) {
         operaciones
@@ -246,8 +249,8 @@ private fun HomeScreenContent(
             .maxByOrNull { it.fechaHora }
     }
 
-    val pendientes = remember(operaciones, negocio) {
-        if (negocio == null) emptyList()
+    val pendientes = remember(operaciones, negocio, asignacionHabilitada) {
+        if (negocio == null || !asignacionHabilitada) emptyList()
         else operaciones.filter { it.negocioId == negocio.id && it.estado == EstadoOperacion.SIN_ASIGNAR }
     }
 
@@ -558,6 +561,7 @@ private fun HomeScreenContent(
                                     resumen = resumen,
                                     esTrabajador = false,
                                     cuota = cuota,
+                                    mostrarPendientes = asignacionHabilitada,
                                 )
                             }
 
@@ -820,7 +824,12 @@ private fun HomeTopBarCard(
 }
 
 @Composable
-private fun ResumenCard(resumen: ResumenDelDia, esTrabajador: Boolean, cuota: com.flabs.cobrate.features.planes.CuotaUi? = null) {
+private fun ResumenCard(
+    resumen: ResumenDelDia,
+    esTrabajador: Boolean,
+    cuota: com.flabs.cobrate.features.planes.CuotaUi? = null,
+    mostrarPendientes: Boolean = true,
+) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
@@ -887,9 +896,9 @@ private fun ResumenCard(resumen: ResumenDelDia, esTrabajador: Boolean, cuota: co
                         )
                     }
                 }
-                Spacer(modifier = Modifier.width(8.dp))
+                if (mostrarPendientes) Spacer(modifier = Modifier.width(8.dp))
                 // Chip 2
-                Surface(
+                if (mostrarPendientes) Surface(
                     shape = RoundedCornerShape(9999.dp),
                     color = homeColors().Chip2Fondo,
                 ) {

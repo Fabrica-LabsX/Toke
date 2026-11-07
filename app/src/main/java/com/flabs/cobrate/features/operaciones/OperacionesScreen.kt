@@ -49,15 +49,24 @@ fun OperacionesScreen(
 ) {
     val paleta = tokePaleta()
     val esOscuro = tokeEsOscuro()
+    // Sin 2 trabajadores activos no hay pagos por asignar: no hay pestaña ni sección ni botón de asignar.
+    val asignacionHabilitada = rememberAsignacionHabilitada()
 
-    var filtros by remember { mutableStateOf(FiltrosOperaciones()) }
+    var filtrosElegidos by remember { mutableStateOf(FiltrosOperaciones()) }
+    val filtros = if (asignacionHabilitada) filtrosElegidos else filtrosElegidos.copy(pestana = PestanaOperaciones.TODAS)
 
     val visibles = remember(operaciones, filtros) {
         FiltroOperaciones.aplicar(operaciones, filtros, System.currentTimeMillis())
     }
-    val porAsignar = remember(visibles) { visibles.filter { it.estado == EstadoOperacion.SIN_ASIGNAR } }
-    val recibidas = remember(visibles) { visibles.filter { it.estado != EstadoOperacion.SIN_ASIGNAR } }
-    val totalPendientes = remember(operaciones) { FiltroOperaciones.contarPendientes(operaciones) }
+    val porAsignar = remember(visibles, asignacionHabilitada) {
+        if (asignacionHabilitada) visibles.filter { it.estado == EstadoOperacion.SIN_ASIGNAR } else emptyList()
+    }
+    val recibidas = remember(visibles, asignacionHabilitada) {
+        if (asignacionHabilitada) visibles.filter { it.estado != EstadoOperacion.SIN_ASIGNAR } else visibles
+    }
+    val totalPendientes = remember(operaciones, asignacionHabilitada) {
+        if (asignacionHabilitada) FiltroOperaciones.contarPendientes(operaciones) else 0
+    }
 
     Scaffold(
         containerColor = paleta.fondo,
@@ -65,7 +74,7 @@ fun OperacionesScreen(
             OperacionesCabecera(
                 paleta = paleta,
                 onBack = onBack,
-                onRestablecerFiltros = { filtros = FiltrosOperaciones() },
+                onRestablecerFiltros = { filtrosElegidos = FiltrosOperaciones() },
             )
         },
     ) { innerPadding ->
@@ -76,13 +85,13 @@ fun OperacionesScreen(
             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 14.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
-            item {
+            if (asignacionHabilitada) item {
                 OperacionesPestanas(
                     paleta = paleta,
                     seleccionada = filtros.pestana,
                     totalOperaciones = operaciones.size,
                     totalPendientes = totalPendientes,
-                    onSeleccionar = { filtros = filtros.copy(pestana = it) },
+                    onSeleccionar = { filtrosElegidos = filtrosElegidos.copy(pestana = it) },
                 )
             }
             item {
@@ -90,7 +99,7 @@ fun OperacionesScreen(
                     paleta = paleta,
                     texto = filtros.texto,
                     placeholder = "Buscar cliente o monto...",
-                    onTextoCambia = { filtros = filtros.copy(texto = it) },
+                    onTextoCambia = { filtrosElegidos = filtrosElegidos.copy(texto = it) },
                 )
             }
             item {
@@ -99,8 +108,8 @@ fun OperacionesScreen(
                     esOscuro = esOscuro,
                     rango = filtros.rango,
                     billetera = filtros.billetera,
-                    onRango = { filtros = filtros.copy(rango = it) },
-                    onBilletera = { filtros = filtros.copy(billetera = it) },
+                    onRango = { filtrosElegidos = filtrosElegidos.copy(rango = it) },
+                    onBilletera = { filtrosElegidos = filtrosElegidos.copy(billetera = it) },
                 )
             }
 

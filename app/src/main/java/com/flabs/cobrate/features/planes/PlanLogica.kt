@@ -14,6 +14,7 @@ data class EstadoPlanDto(
     @SerialName("limite") val limite: Int? = null,
     @SerialName("usadas") val usadas: Int = 0,
     @SerialName("max_colaboradores") val maxColaboradores: Int? = null,
+    @SerialName("trabajadores_activos") val trabajadoresActivos: Int? = null,
 )
 
 data class EstadoPlan(
@@ -22,6 +23,7 @@ data class EstadoPlan(
     val limite: Int?,
     val usadas: Int,
     val maxColaboradores: Int?,
+    val trabajadoresActivos: Int? = null,
 )
 
 /** Cómo se ve la cuota: de más tranquila a agotada. */
@@ -43,6 +45,7 @@ object PlanLogica {
         limite = dto.limite,
         usadas = dto.usadas,
         maxColaboradores = dto.maxColaboradores,
+        trabajadoresActivos = dto.trabajadoresActivos,
     )
 
     /** Se usa lo mayor entre lo que cuenta el servidor y lo que ya llegó a este celular hoy. */
