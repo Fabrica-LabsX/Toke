@@ -28,7 +28,6 @@ fun ActivarProDialogo(onCerrar: () -> Unit) {
                     Intent(Intent.ACTION_VIEW, Uri.parse(
                         PlanLogica.enlaceWhatsApp(
                             telefono,
-                            com.flabs.cobrate.core.data.CuentaStore.sesionActual.value?.correoVerificado,
                             com.flabs.cobrate.core.data.CuentaStore.sesionActual.value?.id,
                         )
                     ))
