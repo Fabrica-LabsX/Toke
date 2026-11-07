@@ -147,7 +147,7 @@ import com.flabs.cobrate.features.business.BillingPlanScreen
 import com.flabs.cobrate.features.business.BusinessStatsScreen
 import com.flabs.cobrate.features.business.BusinessViewModel
 import com.flabs.cobrate.features.business.EstablishmentsScreen
-import com.flabs.cobrate.features.business.MisNegociosScreen
+import com.flabs.cobrate.features.negocios.MisNegociosScreen
 import com.flabs.cobrate.features.business.OwnerHistoryScreen
 import com.flabs.cobrate.features.equipo.EquipoScreen
 import com.flabs.cobrate.features.business.PaymentMethodsScreen
