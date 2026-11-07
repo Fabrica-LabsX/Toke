@@ -75,6 +75,7 @@ class BusinessViewModel : ViewModel() {
     init {
         viewModelScope.launch {
             negocioActualId.collect { negId ->
+                com.flabs.cobrate.features.planes.PlanStore.refrescar(negId)
                 if (negId != null) {
                     cargarEquipoDelNegocio()
                     cargarEquipoVisible()
@@ -138,11 +139,14 @@ class BusinessViewModel : ViewModel() {
     }
 
     // Operaciones del negocio activo (C9 - Aislamiento).
+    // Free ve los últimos 30 días; Pro, todo el historial.
     val operaciones: StateFlow<List<Operacion>> = combine(
         InMemoryOperationStore.operaciones,
-        negocioActualId
-    ) { allOps, negId ->
-        if (negId == null) emptyList() else allOps.filter { it.negocioId == negId }
+        negocioActualId,
+        com.flabs.cobrate.features.planes.PlanStore.estado
+    ) { allOps, negId, plan ->
+        val desde = com.flabs.cobrate.features.planes.PlanLogica.desdeHistorial(plan?.plan, System.currentTimeMillis())
+        if (negId == null) emptyList() else allOps.filter { it.negocioId == negId && it.fechaHora >= desde }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     // Resumen del día calculado a partir de las operaciones del negocio activo (C9).

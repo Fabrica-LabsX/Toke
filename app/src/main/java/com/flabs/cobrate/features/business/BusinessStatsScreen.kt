@@ -44,6 +44,9 @@ import com.flabs.cobrate.R
 import com.flabs.cobrate.components.TokeIcons
 import com.flabs.cobrate.features.acceso.BotonAcceso
 import com.flabs.cobrate.features.reportes.PeriodoReporte
+import com.flabs.cobrate.features.planes.ActivarProDialogo
+import com.flabs.cobrate.features.planes.PlanLogica
+import com.flabs.cobrate.features.planes.PlanStore
 import com.flabs.cobrate.features.reportes.ReportesAcciones
 import com.flabs.cobrate.features.reportes.ReportesLogica
 import com.flabs.cobrate.ui.theme.PlusJakartaSans
@@ -67,6 +70,11 @@ fun BusinessStatsScreen(businessViewModel: BusinessViewModel) {
 
     var periodo by remember { mutableStateOf(PeriodoReporte.DIA) }
     var elegirParaExportar by remember { mutableStateOf(false) }
+    val planEstado by PlanStore.estado.collectAsState()
+    var verActivacion by remember { mutableStateOf(false) }
+    // En Free solo se ve el día; el resto lleva al aviso del plan Pro.
+    val puede = { p: PeriodoReporte -> PlanLogica.puedeVerPeriodo(planEstado?.plan, p) }
+    if (verActivacion) ActivarProDialogo(onCerrar = { verActivacion = false })
 
     val resumen = remember(operaciones, periodo) {
         ReportesLogica.resumen(ReportesLogica.filtrar(operaciones, periodo, System.currentTimeMillis()))
@@ -101,7 +109,7 @@ fun BusinessStatsScreen(businessViewModel: BusinessViewModel) {
             )
         }
 
-        SelectorPeriodo(paleta, periodo) { periodo = it }
+        SelectorPeriodo(paleta, periodo, bloqueado = { !puede(it) }) { if (puede(it)) periodo = it else verActivacion = true }
 
         Surface(
             shape = RoundedCornerShape(24.dp),
@@ -158,14 +166,15 @@ fun BusinessStatsScreen(businessViewModel: BusinessViewModel) {
             onExportar = { elegido ->
                 elegirParaExportar = false
                 val nombres = trabajadores.associate { it.cuentaId to it.username }
-                scope.launch { ReportesAcciones.exportarExcel(context, operaciones, nombres, elegido) }
+                if (!puede(elegido)) verActivacion = true
+                else scope.launch { ReportesAcciones.exportarExcel(context, operaciones, nombres, elegido) }
             },
         )
     }
 }
 
 @Composable
-private fun SelectorPeriodo(paleta: TokePaleta, actual: PeriodoReporte, onElegir: (PeriodoReporte) -> Unit) {
+private fun SelectorPeriodo(paleta: TokePaleta, actual: PeriodoReporte, bloqueado: (PeriodoReporte) -> Boolean, onElegir: (PeriodoReporte) -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -185,7 +194,7 @@ private fun SelectorPeriodo(paleta: TokePaleta, actual: PeriodoReporte, onElegir
                     Text(
                         text = corto(p),
                         style = TextStyle(fontFamily = PlusJakartaSans, fontWeight = if (elegido) FontWeight.Bold else FontWeight.Medium, fontSize = 14.sp),
-                        color = if (elegido) paleta.seleccionTexto else paleta.textoSecundario,
+                        color = if (elegido) paleta.seleccionTexto else if (bloqueado(p)) paleta.textoSecundario.copy(alpha = 0.55f) else paleta.textoSecundario,
                         maxLines = 1,
                     )
                 }

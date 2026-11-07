@@ -43,6 +43,12 @@ import com.flabs.cobrate.core.logic.AndroidTtsVoiceEngine
 import com.flabs.cobrate.core.model.ConfiguracionDeVoz
 import com.flabs.cobrate.core.model.ModoVoz
 import com.flabs.cobrate.features.acceso.BotonAcceso
+import com.flabs.cobrate.features.planes.ActivarProDialogo
+import com.flabs.cobrate.features.planes.PlanLogica
+import com.flabs.cobrate.features.planes.PlanStore
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import com.flabs.cobrate.ui.theme.PlusJakartaSans
 import com.flabs.cobrate.ui.theme.TokeMedidas
 import com.flabs.cobrate.ui.theme.TokePaleta
@@ -60,6 +66,11 @@ fun VoiceSettingsScreen(
     val config by ConfiguracionDeVozStore.configuracion.collectAsState()
     val ttsDisponible by ttsEngine.disponible.collectAsState()
     val hablando by ttsEngine.hablando.collectAsState()
+    val planEstado by PlanStore.estado.collectAsState()
+    val puedeBasico = PlanLogica.puedeVozBasica(planEstado?.plan)
+    var verActivacion by remember { mutableStateOf(false) }
+    // En Free la voz es Cauteloso aunque antes quedara guardado Básico.
+    val modoEfectivo = if (puedeBasico) config.modo else ModoVoz.CAUTELOSO
 
     Column(
         modifier = Modifier
@@ -102,7 +113,9 @@ fun VoiceSettingsScreen(
                 modifier = Modifier.padding(start = 4.dp, top = 6.dp),
             )
             ModoVoz.entries.forEach { modo ->
-                TarjetaModo(paleta, modo, elegido = config.modo == modo) {
+                val bloqueado = modo == ModoVoz.BASICO && !puedeBasico
+                TarjetaModo(paleta, modo, elegido = modoEfectivo == modo, bloqueado = bloqueado) {
+                    if (bloqueado) verActivacion = true else
                     ConfiguracionDeVozStore.actualizar { it.copy(modo = modo) }
                 }
             }
@@ -127,6 +140,7 @@ fun VoiceSettingsScreen(
             }
         }
     }
+    if (verActivacion) ActivarProDialogo(onCerrar = { verActivacion = false })
 }
 
 @Composable
@@ -168,7 +182,7 @@ private fun TarjetaActivacion(paleta: TokePaleta, activada: Boolean, onCambia: (
 }
 
 @Composable
-private fun TarjetaModo(paleta: TokePaleta, modo: ModoVoz, elegido: Boolean, onClick: () -> Unit) {
+private fun TarjetaModo(paleta: TokePaleta, modo: ModoVoz, elegido: Boolean, bloqueado: Boolean, onClick: () -> Unit) {
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(20.dp),
@@ -179,7 +193,7 @@ private fun TarjetaModo(paleta: TokePaleta, modo: ModoVoz, elegido: Boolean, onC
         Row(modifier = Modifier.padding(TokeMedidas.PaddingTarjeta), verticalAlignment = Alignment.CenterVertically) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = modo.titulo,
+                    text = modo.titulo + if (bloqueado) "  ·  Pro" else "",
                     style = TextStyle(fontFamily = PlusJakartaSans, fontWeight = FontWeight.ExtraBold, fontSize = 17.sp),
                     color = paleta.textoPrincipal,
                 )

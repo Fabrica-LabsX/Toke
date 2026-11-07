@@ -125,6 +125,13 @@ object InMemoryOperationStore {
             
             val error = result.exceptionOrNull()
 
+            if (com.flabs.cobrate.features.planes.PlanLogica.esCuotaAgotada(error?.message)) {
+                // Cuota diaria del plan Free agotada: no se guarda para reintentar, el servidor no la va a aceptar hoy.
+                Log.w("InMemoryOperationStore", "Cobro rechazado: cuota diaria agotada")
+                com.flabs.cobrate.features.planes.PlanStore.marcarCuotaAgotada()
+                return Result.failure(error!!)
+            }
+
             if (error is SecurityException) {
                 Log.w("InMemoryOperationStore", "Operación rechazada por permisos: ${error.message}")
                 return Result.failure(error)

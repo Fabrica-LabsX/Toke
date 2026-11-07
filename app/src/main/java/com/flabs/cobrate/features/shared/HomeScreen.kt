@@ -225,6 +225,13 @@ private fun HomeScreenContent(
         if (esTrabajador) com.flabs.cobrate.features.worker.ResumenHoy.delTrabajador(delNegocio, uid, ahora)
         else com.flabs.cobrate.features.worker.ResumenHoy.delNegocio(delNegocio, ahora)
     }
+    // Cuota del plan Free: solo la ve quien administra (el trabajador no ve la del negocio).
+    val planEstado by com.flabs.cobrate.features.planes.PlanStore.estado.collectAsState()
+    val cuota = if (esTrabajador) null else com.flabs.cobrate.features.planes.cuotaDeHoy(planEstado, resumen.numeroDeOperaciones)
+    var avisoCuotaVisto by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf(false) }
+    if (cuota != null && cuota.nivel == com.flabs.cobrate.features.planes.NivelCuota.AGOTADA && !avisoCuotaVisto) {
+        com.flabs.cobrate.features.planes.CuotaAgotadaDialogo(onCerrar = { avisoCuotaVisto = true })
+    }
     val hayPendientes = resumen.operacionesPendientes > 0
 
     val pendientes = remember(operaciones, negocio) {
@@ -520,6 +527,7 @@ private fun HomeScreenContent(
                             ResumenCard(
                                 resumen = resumen,
                                 esTrabajador = esTrabajador,
+                                cuota = cuota,
                             )
                         }
 
@@ -777,7 +785,7 @@ private fun HomeTopBarCard(
 }
 
 @Composable
-private fun ResumenCard(resumen: ResumenDelDia, esTrabajador: Boolean) {
+private fun ResumenCard(resumen: ResumenDelDia, esTrabajador: Boolean, cuota: com.flabs.cobrate.features.planes.CuotaUi? = null) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
@@ -786,6 +794,10 @@ private fun ResumenCard(resumen: ResumenDelDia, esTrabajador: Boolean) {
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
     ) {
         Column(modifier = Modifier.padding(17.dp)) {
+            if (cuota != null) {
+                com.flabs.cobrate.features.planes.CuotaMensaje(tokePaleta(), cuota)
+                Spacer(modifier = Modifier.height(6.dp))
+            }
             Text(
                 text = if (esTrabajador) "Mis cobros de hoy" else stringResource(R.string.home_cobros_hoy),
                 style = androidx.compose.ui.text.TextStyle(
@@ -806,6 +818,11 @@ private fun ResumenCard(resumen: ResumenDelDia, esTrabajador: Boolean) {
                 ),
                 color = homeColors().TextoPrincipal,
             )
+            if (cuota != null) {
+                Spacer(modifier = Modifier.height(8.dp))
+                com.flabs.cobrate.features.planes.CuotaBarra(tokePaleta(), cuota)
+                Spacer(modifier = Modifier.height(2.dp))
+            }
             Spacer(modifier = Modifier.height(6.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {
                 // Chip 1

@@ -50,7 +50,8 @@ object OperationNotifier {
         }
 
         val monto = operacion.monto
-        val modoCauteloso = ConfiguracionDeVozStore.configuracion.value.modo == ModoVoz.CAUTELOSO
+        val modoCauteloso = ConfiguracionDeVozStore.configuracion.value.modo == ModoVoz.CAUTELOSO ||
+            !com.flabs.cobrate.features.planes.PlanLogica.puedeVozBasica(com.flabs.cobrate.features.planes.PlanStore.plan)
 
         // 1. Notificación de Android (CAPA 13)
         when (operacion.estado) {
@@ -66,7 +67,10 @@ object OperationNotifier {
         }
 
         // 2. Voz y Vibración (CAPA 14+)
-        val config = ConfiguracionDeVozStore.configuracion.value
+        val configGuardada = ConfiguracionDeVozStore.configuracion.value
+        // En el plan Free la voz es Cauteloso aunque quedara guardado otro modo.
+        val config = if (com.flabs.cobrate.features.planes.PlanLogica.puedeVozBasica(com.flabs.cobrate.features.planes.PlanStore.plan)) configGuardada
+        else configGuardada.copy(modo = com.flabs.cobrate.core.model.ModoVoz.CAUTELOSO)
         if (config.vibrarAlAnunciar) {
             vibrar(context)
         }
