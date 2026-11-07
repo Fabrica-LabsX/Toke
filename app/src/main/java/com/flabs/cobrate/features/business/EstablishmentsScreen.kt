@@ -1,4 +1,5 @@
 package com.flabs.cobrate.features.business
+import com.flabs.cobrate.ui.theme.TokeMedidas
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -122,7 +123,7 @@ fun EstablishmentsScreen(
             ) {
                 Button(
                     onClick = onNuevoNegocio,
-                    modifier = Modifier.fillMaxWidth().height(52.dp),
+                    modifier = Modifier.fillMaxWidth().height(TokeMedidas.BotonAltura),
                     shape = MaterialTheme.shapes.medium
                 ) {
                     Icon(Icons.Default.Add, contentDescription = null)
@@ -132,7 +133,7 @@ fun EstablishmentsScreen(
 
                 OutlinedButton(
                     onClick = onUnirmeNegocio,
-                    modifier = Modifier.fillMaxWidth().height(52.dp),
+                    modifier = Modifier.fillMaxWidth().height(TokeMedidas.BotonAltura),
                     shape = MaterialTheme.shapes.medium
                 ) {
                     Icon(Icons.Default.Link, contentDescription = null)

@@ -1,4 +1,5 @@
 package com.flabs.cobrate.features.business
+import com.flabs.cobrate.ui.theme.TokeMedidas
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -329,7 +330,7 @@ fun QrEditorScreen(
                     },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(56.dp),
+                        .height(TokeMedidas.BotonAltura),
                     shape = RoundedCornerShape(16.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.primary,

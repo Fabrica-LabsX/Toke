@@ -1,28 +1,16 @@
 package com.flabs.cobrate.components
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.size
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
+import com.flabs.cobrate.features.acceso.CampoAcceso
+import com.flabs.cobrate.ui.theme.tokePaleta
 
 /**
- * Diálogo genérico reutilizable para confirmar acciones importantes o destructivas (CAPA 40 & 41).
+ * Confirmación de acciones importantes o destructivas. Si [textoQueHayQueEscribir] no es nulo,
+ * el botón de confirmar solo se habilita cuando la persona escribe ese texto (por ejemplo el nombre del negocio).
  */
 @Composable
 fun ConfirmarAccionDialog(
@@ -38,71 +26,32 @@ fun ConfirmarAccionDialog(
     alVolverAtras: (() -> Unit)? = null
 ) {
     var textoIngresado by remember { mutableStateOf("") }
-
-    val habilitado = if (textoQueHayQueEscribir != null) {
+    val paleta = tokePaleta()
+    val habilitado = textoQueHayQueEscribir == null ||
         textoIngresado.trim().equals(textoQueHayQueEscribir.trim(), ignoreCase = true)
-    } else {
-        true
-    }
 
-    AlertDialog(
-        onDismissRequest = {
-            if (!cargando) {
-                (alVolverAtras ?: onCancelar).invoke()
+    DialogoToke(
+        titulo = titulo,
+        texto = texto,
+        textoConfirmar = textoConfirmar,
+        textoCancelar = textoCancelar,
+        destructivo = destructivo,
+        cargando = cargando,
+        confirmarHabilitado = habilitado,
+        onConfirmar = onConfirmar,
+        onCancelar = alVolverAtras ?: onCancelar,
+        contenidoExtra = if (textoQueHayQueEscribir != null) {
+            {
+                CampoAcceso(
+                    paleta = paleta,
+                    etiqueta = "Escribe el nombre del negocio para confirmar",
+                    valor = textoIngresado,
+                    placeholder = textoQueHayQueEscribir,
+                    onCambia = { textoIngresado = it },
+                )
             }
+        } else {
+            null
         },
-        title = {
-            Text(text = titulo, style = MaterialTheme.typography.titleMedium)
-        },
-        text = {
-            Column(modifier = Modifier.fillMaxWidth()) {
-                Text(text = texto, style = MaterialTheme.typography.bodyMedium)
-                if (textoQueHayQueEscribir != null) {
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Text(
-                        text = "Escribe el nombre del negocio para confirmar:",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    OutlinedTextField(
-                        value = textoIngresado,
-                        onValueChange = { textoIngresado = it },
-                        modifier = Modifier.fillMaxWidth(),
-                        singleLine = true,
-                        enabled = !cargando
-                    )
-                }
-            }
-        },
-        confirmButton = {
-            Button(
-                onClick = onConfirmar,
-                enabled = habilitado && !cargando,
-                colors = if (destructivo) {
-                    ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
-                } else {
-                    ButtonDefaults.buttonColors()
-                }
-            ) {
-                if (cargando) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(18.dp),
-                        strokeWidth = 2.dp,
-                        color = MaterialTheme.colorScheme.onError
-                    )
-                } else {
-                    Text(text = textoConfirmar)
-                }
-            }
-        },
-        dismissButton = {
-            OutlinedButton(
-                onClick = onCancelar,
-                enabled = !cargando
-            ) {
-                Text(text = textoCancelar)
-            }
-        }
     )
 }

@@ -1,4 +1,5 @@
 package com.flabs.cobrate.features.negocios
+import com.flabs.cobrate.ui.theme.TokeMedidas
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
@@ -72,7 +73,7 @@ private fun Boton(
         border = borde,
         modifier = Modifier
             .fillMaxWidth()
-            .height(56.dp),
+            .height(TokeMedidas.BotonAltura),
     ) {
         Box(contentAlignment = Alignment.Center) {
             Text(

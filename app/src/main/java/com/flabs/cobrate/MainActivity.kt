@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
+import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.fadeOut
 import androidx.compose.ui.res.stringResource
 import com.flabs.cobrate.features.nav.irADetalle
@@ -531,10 +532,10 @@ fun CobrateApp() {
             navController = navController,
             startDestination = Routes.ARRANQUE,
             modifier = Modifier.padding(innerPadding),
-            enterTransition = { fadeIn(animationSpec = tween(durationMillis = 140)) },
-            exitTransition = { fadeOut(animationSpec = tween(durationMillis = 140)) },
-            popEnterTransition = { fadeIn(animationSpec = tween(durationMillis = 140)) },
-            popExitTransition = { fadeOut(animationSpec = tween(durationMillis = 140)) }
+            enterTransition = { fadeIn(tween(180)) + slideInHorizontally(tween(180)) { it / 14 } },
+            exitTransition = { fadeOut(tween(120)) },
+            popEnterTransition = { fadeIn(tween(180)) + slideInHorizontally(tween(180)) { -it / 14 } },
+            popExitTransition = { fadeOut(tween(120)) }
         ) {
             composable(Routes.ARRANQUE) {
                 ArranqueScreen()

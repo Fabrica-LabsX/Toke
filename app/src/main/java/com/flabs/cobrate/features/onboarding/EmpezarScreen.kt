@@ -1,4 +1,5 @@
 package com.flabs.cobrate.features.onboarding
+import com.flabs.cobrate.ui.theme.TokeMedidas
 import com.flabs.cobrate.ui.theme.TokeRojo
 import com.flabs.cobrate.ui.theme.TokeAmbarTexto
 
@@ -119,7 +120,7 @@ fun EmpezarScreen(
                 border = BorderStroke(1.dp, rojo.copy(alpha = 0.4f)),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(52.dp),
+                    .height(TokeMedidas.BotonAltura),
             ) {
                 Row(
                     modifier = Modifier.fillMaxSize(),

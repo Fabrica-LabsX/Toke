@@ -1,4 +1,5 @@
 package com.flabs.cobrate.features.cobros
+import com.flabs.cobrate.ui.theme.TokeMedidas
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Box
@@ -44,7 +45,7 @@ fun CobrosCabecera(
                 shape = RoundedCornerShape(12.dp),
                 color = paleta.tarjeta,
                 border = BorderStroke(1.dp, paleta.borde),
-                modifier = Modifier.size(44.dp),
+                modifier = Modifier.size(TokeMedidas.BotonIcono),
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     Icon(

@@ -1,4 +1,5 @@
 package com.flabs.cobrate.features.cobros
+import com.flabs.cobrate.ui.theme.TokeMedidas
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
@@ -203,7 +204,7 @@ fun EditarMetodoHoja(
                 color = if (habilitado) paleta.verde else paleta.bordeControl,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(56.dp),
+                    .height(TokeMedidas.BotonAltura),
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     Text(

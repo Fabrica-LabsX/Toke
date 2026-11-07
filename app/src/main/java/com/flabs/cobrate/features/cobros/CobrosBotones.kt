@@ -1,4 +1,6 @@
 package com.flabs.cobrate.features.cobros
+import com.flabs.cobrate.ui.theme.TokeMedidas
+import com.flabs.cobrate.ui.theme.rememberPulsacion
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Box
@@ -34,14 +36,17 @@ fun CobrosBoton(
 ) {
     val fondo = if (principal) paleta.seleccionFondo else paleta.tarjeta
     val colorContenido = if (principal) paleta.seleccionTexto else paleta.textoPrincipal
+    val pulso = rememberPulsacion()
     Surface(
         onClick = onClick,
+        interactionSource = pulso.fuente,
         shape = RoundedCornerShape(9999.dp),
         color = fondo,
         border = if (principal) null else BorderStroke(1.dp, paleta.bordeControl),
         modifier = Modifier
             .fillMaxWidth()
-            .height(56.dp),
+            .height(TokeMedidas.BotonAltura)
+            .then(pulso.modificador),
     ) {
         Box(contentAlignment = Alignment.Center) {
             Row(verticalAlignment = Alignment.CenterVertically) {

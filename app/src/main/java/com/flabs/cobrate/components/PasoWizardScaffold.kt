@@ -1,4 +1,5 @@
 package com.flabs.cobrate.components
+import com.flabs.cobrate.ui.theme.TokeMedidas
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -111,7 +112,7 @@ fun PasoWizardScaffold(
                     enabled = botonPrincipalHabilitado,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(56.dp),
+                        .height(TokeMedidas.BotonAltura),
                     shape = RoundedCornerShape(28.dp) // Tipo píldora
                 ) {
                     Text(

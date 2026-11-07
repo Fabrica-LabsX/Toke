@@ -1,4 +1,5 @@
 package com.flabs.cobrate.features.operaciones
+import com.flabs.cobrate.ui.theme.TokeMedidas
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Box
@@ -42,7 +43,7 @@ fun DetalleOperacionCabecera(
             border = BorderStroke(1.dp, paleta.borde),
             modifier = Modifier
                 .align(Alignment.CenterStart)
-                .size(44.dp),
+                .size(TokeMedidas.BotonIcono),
         ) {
             Box(contentAlignment = Alignment.Center) {
                 Icon(

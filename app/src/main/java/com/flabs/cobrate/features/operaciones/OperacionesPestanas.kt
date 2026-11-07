@@ -1,4 +1,5 @@
 package com.flabs.cobrate.features.operaciones
+import com.flabs.cobrate.ui.theme.TokeMedidas
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
@@ -82,7 +83,7 @@ private fun Pildora(
         shape = RoundedCornerShape(9999.dp),
         color = fondo,
         border = borde?.let { BorderStroke(1.dp, it) },
-        modifier = modifier.height(46.dp),
+        modifier = modifier.height(TokeMedidas.ChipAltura),
     ) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Row(verticalAlignment = Alignment.CenterVertically) {

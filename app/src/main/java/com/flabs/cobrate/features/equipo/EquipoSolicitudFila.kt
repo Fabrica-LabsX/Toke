@@ -1,4 +1,5 @@
 package com.flabs.cobrate.features.equipo
+import com.flabs.cobrate.ui.theme.TokeMedidas
 import com.flabs.cobrate.ui.theme.TokeRojo
 import com.flabs.cobrate.ui.theme.TokeAmbarTexto
 
@@ -132,7 +133,7 @@ private fun Boton(
         shape = RoundedCornerShape(12.dp),
         color = fondo,
         border = borde,
-        modifier = modifier.height(44.dp),
+        modifier = modifier.height(TokeMedidas.ChipAltura),
     ) {
         Box(contentAlignment = Alignment.Center) {
             Text(

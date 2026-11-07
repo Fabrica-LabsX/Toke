@@ -1,4 +1,6 @@
 package com.flabs.cobrate.features.equipo
+import com.flabs.cobrate.ui.theme.TokeMedidas
+import com.flabs.cobrate.ui.theme.rememberPulsacion
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -30,13 +32,16 @@ fun EquipoBotonPrincipal(
     texto: String,
     onClick: () -> Unit,
 ) {
+    val pulso = rememberPulsacion()
     Surface(
         onClick = onClick,
+        interactionSource = pulso.fuente,
         shape = RoundedCornerShape(16.dp),
         color = paleta.seleccionFondo,
         modifier = Modifier
             .fillMaxWidth()
-            .height(56.dp),
+            .height(TokeMedidas.BotonAltura)
+            .then(pulso.modificador),
     ) {
         Box(contentAlignment = Alignment.Center) {
             Row(verticalAlignment = Alignment.CenterVertically) {

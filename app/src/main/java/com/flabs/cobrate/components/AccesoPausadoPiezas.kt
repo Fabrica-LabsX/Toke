@@ -1,4 +1,5 @@
 package com.flabs.cobrate.components
+import com.flabs.cobrate.ui.theme.TokeMedidas
 import com.flabs.cobrate.ui.theme.TokeRojo
 import com.flabs.cobrate.ui.theme.TokeAmbarTexto
 
@@ -189,7 +190,7 @@ fun AccesoPausadoBoton(
         border = if (relleno) null else BorderStroke(1.dp, paleta.bordeControl),
         modifier = Modifier
             .fillMaxWidth()
-            .height(56.dp),
+            .height(TokeMedidas.BotonAltura),
     ) {
         Box(contentAlignment = Alignment.Center) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {

@@ -1,4 +1,5 @@
 package com.flabs.cobrate.features.cobros
+import com.flabs.cobrate.ui.theme.TokeMedidas
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -82,7 +83,7 @@ private fun Chip(
         shape = RoundedCornerShape(9999.dp),
         color = if (elegido) colorMarca else paleta.tarjeta,
         border = if (elegido) null else BorderStroke(1.dp, paleta.bordeControl),
-        modifier = Modifier.height(44.dp),
+        modifier = Modifier.height(TokeMedidas.ChipAltura),
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 14.dp),

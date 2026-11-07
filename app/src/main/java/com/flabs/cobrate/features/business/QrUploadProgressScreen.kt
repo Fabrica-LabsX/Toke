@@ -1,4 +1,5 @@
 package com.flabs.cobrate.features.business
+import com.flabs.cobrate.ui.theme.TokeMedidas
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -79,7 +80,7 @@ fun QrUploadProgressScreen(
             Spacer(modifier = Modifier.height(24.dp))
             Button(
                 onClick = onRetry,
-                modifier = Modifier.fillMaxWidth().height(48.dp),
+                modifier = Modifier.fillMaxWidth().height(TokeMedidas.BotonAltura),
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
             ) {
                 Text("Reintentar", fontWeight = FontWeight.Bold)

@@ -1,4 +1,6 @@
 package com.flabs.cobrate.features.acceso
+import com.flabs.cobrate.ui.theme.TokeMedidas
+import com.flabs.cobrate.ui.theme.rememberPulsacion
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
@@ -105,12 +107,14 @@ fun LogoToke(paleta: TokePaleta, tamano: Int, descripcion: String, modifier: Mod
 
 @Composable
 fun BotonAtras(paleta: TokePaleta, onClick: () -> Unit) {
+    val pulso = rememberPulsacion()
     Surface(
         onClick = onClick,
+        interactionSource = pulso.fuente,
         shape = RoundedCornerShape(12.dp),
         color = paleta.tarjeta,
         border = BorderStroke(1.dp, paleta.borde),
-        modifier = Modifier.size(42.dp),
+        modifier = Modifier.size(TokeMedidas.BotonIcono).then(pulso.modificador),
     ) {
         Box(contentAlignment = Alignment.Center) {
             Icon(
@@ -256,14 +260,17 @@ private fun Row14(
 /** Botón en píldora: [principal] va en verde; si no, blanco con borde. */
 @Composable
 fun BotonAcceso(paleta: TokePaleta, texto: String, principal: Boolean, onClick: () -> Unit) {
+    val pulso = rememberPulsacion()
     Surface(
         onClick = onClick,
+        interactionSource = pulso.fuente,
         shape = RoundedCornerShape(9999.dp),
         color = if (principal) paleta.verde else paleta.tarjeta,
         border = if (principal) null else BorderStroke(1.dp, paleta.bordeControl),
         modifier = Modifier
             .fillMaxWidth()
-            .height(50.dp),
+            .height(TokeMedidas.BotonAltura)
+            .then(pulso.modificador),
     ) {
         Box(contentAlignment = Alignment.Center) {
             Text(

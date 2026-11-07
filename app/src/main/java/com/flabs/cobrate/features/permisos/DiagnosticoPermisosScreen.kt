@@ -1,4 +1,5 @@
 package com.flabs.cobrate.features.permisos
+import com.flabs.cobrate.ui.theme.TokeMedidas
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
@@ -200,7 +201,7 @@ private fun BotonListo(paleta: TokePaleta, onClick: () -> Unit) {
                 color = paleta.verde,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(56.dp),
+                    .height(TokeMedidas.BotonAltura),
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     Text(

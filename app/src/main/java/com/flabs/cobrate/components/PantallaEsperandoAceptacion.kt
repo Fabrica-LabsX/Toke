@@ -1,4 +1,5 @@
 package com.flabs.cobrate.components
+import com.flabs.cobrate.ui.theme.TokeMedidas
 import com.flabs.cobrate.ui.theme.TokeAmbarTexto
 import com.flabs.cobrate.ui.theme.tokePaleta
 
@@ -232,7 +233,7 @@ fun PantallaEsperandoAceptacion(
                                     onClick = onCrearNegocio,
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .height(48.dp),
+                                        .height(TokeMedidas.BotonAltura),
                                     shape = RoundedCornerShape(20.dp),
                                     color = paleta.verde,
                                     shadowElevation = 2.dp

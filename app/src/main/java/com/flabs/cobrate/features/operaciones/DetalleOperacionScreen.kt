@@ -1,4 +1,5 @@
 package com.flabs.cobrate.features.operaciones
+import com.flabs.cobrate.ui.theme.TokeMedidas
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -141,7 +142,7 @@ private fun BotonVolverInicio(paleta: TokePaleta, onClick: () -> Unit) {
                 .navigationBarsPadding()
                 .padding(horizontal = 16.dp, vertical = 12.dp)
                 .fillMaxWidth()
-                .height(56.dp),
+                .height(TokeMedidas.BotonAltura),
         ) {
             Box(contentAlignment = Alignment.Center) {
                 Text(
