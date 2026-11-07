@@ -20,6 +20,15 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import com.flabs.cobrate.components.IconoMetodoPago
+import com.flabs.cobrate.core.model.MetodoDeCobro
+import com.flabs.cobrate.core.model.TipoMetodoCobro
+import com.flabs.cobrate.features.cobros.MetodosCobroLogica
+import com.flabs.cobrate.features.cobros.NuevoMetodoHoja
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -57,19 +66,19 @@ private fun iconoDeTipo(tipo: TipoNegocio): Int = when (tipo) {
 }
 
 @Composable
-private fun CabeceraPaso(paleta: TokePaleta, paso: Int, onAtras: () -> Unit) {
+private fun CabeceraPaso(paleta: TokePaleta, paso: Int, onAtras: (() -> Unit)?) {
     Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-        BotonAtras(paleta, onAtras)
+        if (onAtras != null) BotonAtras(paleta, onAtras) else Spacer(modifier = Modifier.size(42.dp))
         Spacer(modifier = Modifier.weight(1f))
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
-                text = "Paso $paso de 3",
+                text = "Paso $paso de 4",
                 style = TextStyle(fontFamily = PlusJakartaSans, fontWeight = FontWeight.Bold, fontSize = 13.sp),
                 color = paleta.textoSecundario,
             )
             Spacer(modifier = Modifier.size(6.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                (1..3).forEach { n ->
+                (1..4).forEach { n ->
                     Box(
                         modifier = Modifier
                             .size(width = 26.dp, height = 6.dp)
@@ -300,10 +309,9 @@ fun PasoFinal(
     nombreNegocio: String,
     tipo: TipoNegocio?,
     onEntrar: () -> Unit,
-    onAtras: () -> Unit,
 ) {
     AccesoFondo(paleta = paleta) {
-        CabeceraPaso(paleta, 3, onAtras)
+        CabeceraPaso(paleta, 4, null)
         TituloAcceso(paleta, "¡Tu negocio está listo!", "Ya puedes recibir y organizar tus pagos al instante.")
         TarjetaNegocioCreado(paleta, nombreNegocio, CrearNegocioLogica.tituloDeTipo(tipo))
         AvisoAcceso(
@@ -313,5 +321,72 @@ fun PasoFinal(
         )
         EspacioAcceso(4)
         BotonAcceso(paleta, "Entrar a mi negocio", principal = true, onClick = onEntrar)
+    }
+}
+
+/** Paso 3: medios de cobro. El negocio ya existe; se pueden vincular ahora o dejarlo para después. */
+@Composable
+fun PasoMediosCobro(
+    paleta: TokePaleta,
+    existentes: List<MetodoDeCobro>,
+    onVincular: (TipoMetodoCobro, String, String) -> Unit,
+    onContinuar: () -> Unit,
+) {
+    var mostrarHoja by remember { mutableStateOf(false) }
+    AccesoFondo(paleta = paleta) {
+        CabeceraPaso(paleta, 3, null)
+        TituloAcceso(
+            paleta,
+            "¿Cómo te pagan tus clientes?",
+            "Vincula Yape, Plin o tu banco para que TOKE te avise de cada cobro. También puedes hacerlo después.",
+        )
+        existentes.forEach { metodo ->
+            Surface(
+                shape = RoundedCornerShape(18.dp),
+                color = paleta.tarjeta,
+                border = BorderStroke(1.dp, paleta.borde),
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Row(modifier = Modifier.padding(14.dp), verticalAlignment = Alignment.CenterVertically) {
+                    IconoMetodoPago(tipo = metodo.tipo, tamano = 44.dp)
+                    Spacer(modifier = Modifier.width(14.dp))
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = MetodosCobroLogica.nombreLegible(metodo.tipo),
+                            style = TextStyle(fontFamily = PlusJakartaSans, fontWeight = FontWeight.ExtraBold, fontSize = 16.sp),
+                            color = paleta.textoPrincipal,
+                        )
+                        Text(
+                            text = metodo.datoDeCobro,
+                            style = TextStyle(fontFamily = PlusJakartaSans, fontWeight = FontWeight.Medium, fontSize = 13.sp),
+                            color = paleta.textoSecundario,
+                            maxLines = 1,
+                        )
+                    }
+                    Icon(
+                        painter = painterResource(id = TokeIcons.CheckVerde),
+                        contentDescription = "Vinculado",
+                        tint = Color.Unspecified,
+                        modifier = Modifier.size(24.dp),
+                    )
+                }
+            }
+        }
+        BotonAcceso(paleta, if (existentes.isEmpty()) "Vincular un método" else "Vincular otro método", principal = false) {
+            mostrarHoja = true
+        }
+        Spacer(modifier = Modifier.weight(1f))
+        BotonAcceso(paleta, if (existentes.isEmpty()) "Lo haré después" else "Continuar", principal = existentes.isNotEmpty(), onClick = onContinuar)
+    }
+    if (mostrarHoja) {
+        NuevoMetodoHoja(
+            paleta = paleta,
+            existentes = existentes,
+            onDismiss = { mostrarHoja = false },
+            onConfirm = { tipo, dato, titular ->
+                onVincular(tipo, dato, titular)
+                mostrarHoja = false
+            },
+        )
     }
 }

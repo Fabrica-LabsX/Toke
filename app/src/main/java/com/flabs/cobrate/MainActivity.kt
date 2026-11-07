@@ -615,6 +615,13 @@ fun CobrateApp() {
             composable(Routes.CREAR_NEGOCIO) {
                 CrearNegocioScreen(
                     negocioViewModel = negocioViewModel,
+                    businessViewModel = businessViewModel,
+                    onIrAMisQRs = {
+                        navController.navigate(Routes.INICIO) {
+                            popUpTo(Routes.INICIO) { inclusive = true }
+                        }
+                        navController.irADetalle(Routes.METODOS_COBRO_DUENO)
+                    },
                     onCreado = {
                         navController.navigate(Routes.INICIO) {
                             popUpTo(Routes.INICIO) { inclusive = true }

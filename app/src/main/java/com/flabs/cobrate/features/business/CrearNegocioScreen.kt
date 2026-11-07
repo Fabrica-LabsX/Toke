@@ -2,18 +2,21 @@ package com.flabs.cobrate.features.business
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import com.flabs.cobrate.core.data.MetodoDeCobroStore
 import com.flabs.cobrate.core.logic.FeedbackManager
 import com.flabs.cobrate.core.model.Negocio
 import com.flabs.cobrate.core.model.TipoNegocio
 import com.flabs.cobrate.features.crearnegocio.CrearNegocioLogica
 import com.flabs.cobrate.features.crearnegocio.PasoConexion
 import com.flabs.cobrate.features.crearnegocio.PasoFinal
+import com.flabs.cobrate.features.crearnegocio.PasoMediosCobro
 import com.flabs.cobrate.features.crearnegocio.PasoNombreYColor
 import com.flabs.cobrate.features.crearnegocio.PasoTipo
 import com.flabs.cobrate.ui.theme.tokePaleta
@@ -22,20 +25,23 @@ import kotlinx.coroutines.launch
 private enum class PasoWizard {
     PASO_1_NOMBRE_Y_COLOR,
     PASO_2_TIPO_NEGOCIO,
+    PASO_3_MEDIOS_COBRO,
     CONEXION_EXITOSA,
-    PASO_3_FINALIZADO
+    PASO_4_FINALIZADO
 }
 
 /**
- * Asistente para crear el negocio: nombre y color, rubro, conexión exitosa y confirmación final.
- * Guarda el estado y crea el negocio; el dibujo de cada paso vive en `features/crearnegocio`.
+ * Asistente para crear el negocio: nombre y color, rubro, medios de cobro, conexión exitosa y
+ * confirmación final. Guarda el estado y crea el negocio; el dibujo de cada paso vive en
+ * `features/crearnegocio`. Sin [businessViewModel] el paso de medios de cobro se salta.
  */
 @Composable
 fun CrearNegocioScreen(
     negocioViewModel: NegocioViewModel,
     onCreado: () -> Unit,
     onIrAMisQRs: (() -> Unit)? = null,
-    onVolver: (() -> Unit)? = null
+    onVolver: (() -> Unit)? = null,
+    businessViewModel: BusinessViewModel? = null,
 ) {
     val scope = rememberCoroutineScope()
     val paleta = tokePaleta()
@@ -47,14 +53,12 @@ fun CrearNegocioScreen(
     var tipoSeleccionado by rememberSaveable { mutableStateOf<TipoNegocio?>(null) }
     var negocioCreado by remember { mutableStateOf<Negocio?>(null) }
 
-    // Una vez creado el negocio no se vuelve al paso 2: se crearía otro igual.
+    val metodosPorNegocio by MetodoDeCobroStore.metodosPorNegocio.collectAsState()
+    val metodosDelNegocio = negocioCreado?.id?.let { metodosPorNegocio[it] } ?: emptyList()
+
+    // Una vez creado el negocio no se vuelve atrás: se crearía otro igual.
     BackHandler(paso != PasoWizard.PASO_1_NOMBRE_Y_COLOR) {
-        when (paso) {
-            PasoWizard.PASO_2_TIPO_NEGOCIO -> paso = PasoWizard.PASO_1_NOMBRE_Y_COLOR
-            PasoWizard.CONEXION_EXITOSA -> onCreado()
-            PasoWizard.PASO_3_FINALIZADO -> paso = PasoWizard.CONEXION_EXITOSA
-            else -> Unit
-        }
+        if (paso == PasoWizard.PASO_2_TIPO_NEGOCIO) paso = PasoWizard.PASO_1_NOMBRE_Y_COLOR
     }
 
     when (paso) {
@@ -88,7 +92,7 @@ fun CrearNegocioScreen(
                     result.onSuccess { neg ->
                         negocioCreado = neg
                         FeedbackManager.showSuccess("¡Listo! Negocio creado.")
-                        paso = PasoWizard.CONEXION_EXITOSA
+                        paso = if (businessViewModel != null) PasoWizard.PASO_3_MEDIOS_COBRO else PasoWizard.CONEXION_EXITOSA
                     }.onFailure { err ->
                         FeedbackManager.showError(err)
                         procesando = false
@@ -97,19 +101,25 @@ fun CrearNegocioScreen(
             },
         )
 
+        PasoWizard.PASO_3_MEDIOS_COBRO -> PasoMediosCobro(
+            paleta = paleta,
+            existentes = metodosDelNegocio,
+            onVincular = { tipo, dato, titular -> businessViewModel?.crearMetodo(tipo, dato, titular) },
+            onContinuar = { paso = PasoWizard.CONEXION_EXITOSA },
+        )
+
         PasoWizard.CONEXION_EXITOSA -> PasoConexion(
             paleta = paleta,
             nombreNegocio = negocioCreado?.nombre ?: nombreComercial,
             onRecibirCobros = { onIrAMisQRs?.invoke() ?: onCreado() },
-            onMiNegocio = { paso = PasoWizard.PASO_3_FINALIZADO },
+            onMiNegocio = { paso = PasoWizard.PASO_4_FINALIZADO },
             onEntrar = onCreado,
         )
 
-        PasoWizard.PASO_3_FINALIZADO -> PasoFinal(
+        PasoWizard.PASO_4_FINALIZADO -> PasoFinal(
             paleta = paleta,
             nombreNegocio = negocioCreado?.nombre ?: nombreComercial,
             tipo = tipoSeleccionado,
-            onAtras = { paso = PasoWizard.CONEXION_EXITOSA },
             onEntrar = onCreado,
         )
     }
