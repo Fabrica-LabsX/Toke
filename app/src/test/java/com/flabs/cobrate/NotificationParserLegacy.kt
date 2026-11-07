@@ -19,7 +19,7 @@ internal object NotificationParserLegacy {
         "oferta", "promo", "promocion", "promociones", "descuento", "dscto",
         "%off", "% off", "hasta s/", "desde s/", "por solo s/", "solo por s/",
         "paga tu", "pagando tu", "pagar tu", "paga con", "pagando con", "solicita",
-        "prestamo", "credito", "preaprobado", "pre aprobado", "tarjeta de credito",
+        "prestamo", "credito personal", "credito vehicular", "credito hipotecario", "linea de credito", "preaprobado", "pre aprobado", "tarjeta de credito",
         "invita", "refiere", "no te lo pierdas", "ultimos dias", "soat",
         "recibo de luz", "recibo de agua", "vence", "vencimiento"
     )
@@ -41,9 +41,10 @@ internal object NotificationParserLegacy {
     // Lista de patrones regex para identificar pagos entrantes legítimos.
     private val patronesPagoEntrante = listOf(
         Regex("""\b(recibiste|has recibido|recibio)\b""", RegexOption.IGNORE_CASE),
-        Regex("""\bte (envio|yapeo|transfirio|deposito|abono|pago|mando)\b""", RegexOption.IGNORE_CASE),
-        Regex("""\bte (han|ha) (enviado|transferido|depositado|abonado|yapeado)\b""", RegexOption.IGNORE_CASE),
-        Regex("""\bte enviaron\b""", RegexOption.IGNORE_CASE),
+        Regex("""\bte (envio|yapeo|transfirio|deposito|abono|pago|mando|acredito)\b""", RegexOption.IGNORE_CASE),
+        Regex("""\bte (han|ha) (enviado|transferido|depositado|abonado|yapeado|pagado|mandado|acreditado)\b""", RegexOption.IGNORE_CASE),
+        Regex("""\bte (enviaron|transfirieron|depositaron|abonaron|pagaron|yapearon|mandaron|acreditaron)\b""", RegexOption.IGNORE_CASE),
+        Regex("""\bte (hicieron|hizo) una (transferencia|yapeo|deposito)\b""", RegexOption.IGNORE_CASE),
         Regex("""\b(pago|abono|transferencia|deposito|ingreso|yapeo) recibid[oa]\b""", RegexOption.IGNORE_CASE),
         Regex("""\bse (acredito|abono|deposito)\b""", RegexOption.IGNORE_CASE)
     )
@@ -98,8 +99,10 @@ internal object NotificationParserLegacy {
         }
 
         // Paso 4 — Monto
-        val matchMonto = regexMonto.find(contenido) ?: return ResultadoParseo.NoEsPago
-        val monto = convertirAMonto(matchMonto.groupValues[1]) ?: return ResultadoParseo.NoEsPago
+        val crudo = regexMonto.find(contenido)?.groupValues?.get(1)
+            ?: Regex("""\b(\d[\d,]*(?:\.\d+)?)\s*(?:soles|pen)\b""", RegexOption.IGNORE_CASE).find(contenido)?.groupValues?.get(1)
+            ?: return ResultadoParseo.NoEsPago
+        val monto = convertirAMonto(crudo) ?: return ResultadoParseo.NoEsPago
 
         // Paso 5 — PATRÓN DE PAGO ENTRANTE
         val esPagoEntrante = patronesPagoEntrante.any { it.containsMatchIn(contenido) }

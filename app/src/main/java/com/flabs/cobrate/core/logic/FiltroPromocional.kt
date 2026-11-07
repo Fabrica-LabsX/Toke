@@ -14,7 +14,7 @@ internal object FiltroPromocional {
         "oferta", "promo", "promocion", "promociones", "descuento", "dscto",
         "%off", "% off", "hasta s/", "desde s/", "por solo s/", "solo por s/",
         "paga tu", "pagando tu", "pagar tu", "paga con", "pagando con", "solicita",
-        "prestamo", "credito", "preaprobado", "pre aprobado", "tarjeta de credito",
+        "prestamo", "credito personal", "credito vehicular", "credito hipotecario", "linea de credito", "preaprobado", "pre aprobado", "tarjeta de credito",
         "invita", "refiere", "no te lo pierdas", "ultimos dias", "soat",
         "recibo de luz", "recibo de agua", "vence", "vencimiento"
     )

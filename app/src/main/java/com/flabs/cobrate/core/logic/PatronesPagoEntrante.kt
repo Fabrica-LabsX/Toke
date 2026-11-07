@@ -10,9 +10,10 @@ internal object PatronesPagoEntrante {
 
     private val patrones = listOf(
         Regex("""\b(recibiste|has recibido|recibio)\b""", RegexOption.IGNORE_CASE),
-        Regex("""\bte (envio|yapeo|transfirio|deposito|abono|pago|mando)\b""", RegexOption.IGNORE_CASE),
-        Regex("""\bte (han|ha) (enviado|transferido|depositado|abonado|yapeado)\b""", RegexOption.IGNORE_CASE),
-        Regex("""\bte enviaron\b""", RegexOption.IGNORE_CASE),
+        Regex("""\bte (envio|yapeo|transfirio|deposito|abono|pago|mando|acredito)\b""", RegexOption.IGNORE_CASE),
+        Regex("""\bte (han|ha) (enviado|transferido|depositado|abonado|yapeado|pagado|mandado|acreditado)\b""", RegexOption.IGNORE_CASE),
+        Regex("""\bte (enviaron|transfirieron|depositaron|abonaron|pagaron|yapearon|mandaron|acreditaron)\b""", RegexOption.IGNORE_CASE),
+        Regex("""\bte (hicieron|hizo) una (transferencia|yapeo|deposito)\b""", RegexOption.IGNORE_CASE),
         Regex("""\b(pago|abono|transferencia|deposito|ingreso|yapeo) recibid[oa]\b""", RegexOption.IGNORE_CASE),
         Regex("""\bse (acredito|abono|deposito)\b""", RegexOption.IGNORE_CASE)
     )

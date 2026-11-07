@@ -13,9 +13,14 @@ internal object ExtractorDeMonto {
 
     /** Devuelve el monto, o null si no hay un monto en soles válido. */
     fun extraer(contenido: String): Double? {
-        val matchMonto = regexMonto.find(contenido) ?: return null
-        return convertirAMonto(matchMonto.groupValues[1])
+        val crudo = regexMonto.find(contenido)?.groupValues?.get(1)
+            ?: regexSoles.find(contenido)?.groupValues?.get(1)
+            ?: return null
+        return convertirAMonto(crudo)
     }
+
+    // Algunas billeteras escriben "22.00 soles" o "22.00 PEN" en vez de "S/ 22.00".
+    private val regexSoles = Regex("""\b(\d[\d,]*(?:\.\d+)?)\s*(?:soles|pen)\b""", RegexOption.IGNORE_CASE)
 
     /**
      * Convierte la cadena numérica extraída (que puede incluir comas como
