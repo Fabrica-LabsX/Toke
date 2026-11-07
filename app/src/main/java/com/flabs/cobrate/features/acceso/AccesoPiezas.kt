@@ -4,6 +4,16 @@ import com.flabs.cobrate.ui.theme.rememberPulsacion
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.border
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -87,21 +97,41 @@ fun AccesoFondo(
     }
 }
 
-/** Logo oficial de TOKE!: el `ic_toke_logo` blanco y transparente sobre una loseta verde redondeada. */
+/**
+ * Logo oficial de TOKE!: el `ic_toke_logo` blanco y transparente sobre una loseta verde redondeada.
+ * Al abrirse (si [animar]) la loseta se llena de verde de abajo hacia arriba y el símbolo aparece:
+ * una animación corta (≈650 ms) que solo se dibuja en la capa gráfica, sin recomponer.
+ */
 @Composable
-fun LogoToke(paleta: TokePaleta, tamano: Int, descripcion: String, modifier: Modifier = Modifier) {
-    Surface(
-        shape = RoundedCornerShape((tamano * 0.3f).dp),
-        color = paleta.verde,
-        modifier = modifier.size(tamano.dp),
+fun LogoToke(paleta: TokePaleta, tamano: Int, descripcion: String, modifier: Modifier = Modifier, animar: Boolean = true) {
+    val progreso = remember { Animatable(if (animar) 0f else 1f) }
+    LaunchedEffect(animar) {
+        if (animar) progreso.animateTo(1f, tween(durationMillis = 650, easing = FastOutSlowInEasing))
+    }
+    val forma = RoundedCornerShape((tamano * 0.3f).dp)
+    Box(
+        modifier = modifier
+            .size(tamano.dp)
+            .clip(forma)
+            .background(paleta.verde.copy(alpha = 0.16f))
+            .drawBehind {
+                val p = progreso.value
+                drawRect(paleta.verde, topLeft = Offset(0f, size.height * (1f - p)), size = Size(size.width, size.height * p))
+            },
+        contentAlignment = Alignment.Center,
     ) {
-        Box(contentAlignment = Alignment.Center) {
-            Image(
-                painter = painterResource(id = R.drawable.ic_toke_logo),
-                contentDescription = descripcion,
-                modifier = Modifier.size((tamano * 1.35f).dp),
-            )
-        }
+        Image(
+            painter = painterResource(id = R.drawable.ic_toke_logo),
+            contentDescription = descripcion,
+            modifier = Modifier
+                .size((tamano * 1.35f).dp)
+                .graphicsLayer {
+                    val p = ((progreso.value - 0.35f) / 0.65f).coerceIn(0f, 1f)
+                    alpha = p
+                    scaleX = 0.85f + 0.15f * p
+                    scaleY = 0.85f + 0.15f * p
+                },
+        )
     }
 }
 
