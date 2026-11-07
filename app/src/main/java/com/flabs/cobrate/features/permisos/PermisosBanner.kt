@@ -55,9 +55,9 @@ fun PermisosBanner(
         EstadoServicio.DESACTIVADO -> DatosBanner(
             color = Rojo,
             icono = TokeIcons.Bloqueado,
-            titulo = "Sincronización desactivada",
-            mensaje = "TOKE no está funcionando correctamente por los siguientes problemas.",
-            etiqueta = "Detenido",
+            titulo = "Falta activar TOKE",
+            mensaje = "Activa los accesos de abajo para que TOKE pueda avisarte de cada cobro.",
+            etiqueta = "Pendiente",
         )
     }
 

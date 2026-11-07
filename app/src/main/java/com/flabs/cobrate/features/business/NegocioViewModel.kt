@@ -229,7 +229,10 @@ class NegocioViewModel : ViewModel() {
 
                 if (!actualEsElegible) {
                     if (elegibles.isNotEmpty()) {
-                        val preferido = elegibles.find { it.dueñoCuentaId == cuentaId } ?: elegibles.first()
+                        val ultimo = NegocioStore.ultimoGuardado(cuentaId)
+                        val preferido = elegibles.find { it.id == ultimo }
+                            ?: elegibles.find { it.dueñoCuentaId == cuentaId }
+                            ?: elegibles.first()
                         LogSeguro.d("NegocioViewModel", "[AUTO-SELECT] Seleccionando automáticamente negocio elegible ${preferido.id}")
                         seleccionarNegocio(preferido.id)
                     } else if (seleccionadoId != null) {

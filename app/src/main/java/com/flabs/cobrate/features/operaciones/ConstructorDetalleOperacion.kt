@@ -78,7 +78,7 @@ object ConstructorDetalleOperacion {
 
     /** El nombre del pagador sale del título de la notificación; sin título se usa un nombre genérico. */
     fun nombrePagador(tituloNotificacion: String?): String =
-        tituloNotificacion?.trim()?.takeIf { it.isNotBlank() } ?: "Cliente Toke"
+        tituloNotificacion?.trim()?.takeIf { it.isNotBlank() } ?: TextosCobro.PAGADOR_SIN_NOMBRE
 
     private fun formatearFecha(fecha: Date): String =
         SimpleDateFormat("dd 'de' MMMM 'de' yyyy", localePeru).format(fecha)

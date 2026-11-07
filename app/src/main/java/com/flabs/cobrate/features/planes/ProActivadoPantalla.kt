@@ -53,6 +53,17 @@ fun ProActivadoPantalla(proHasta: Long?, onEmpezar: () -> Unit) {
         onDismissRequest = onEmpezar,
         properties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false),
     ) {
+        // Iconos de la barra de estado legibles: oscuros sobre fondo claro, claros sobre fondo oscuro.
+        val ventana = (androidx.compose.ui.platform.LocalView.current.parent as? androidx.compose.ui.window.DialogWindowProvider)?.window
+        val esOscuro = com.flabs.cobrate.ui.theme.tokeEsOscuro()
+        androidx.compose.runtime.SideEffect {
+            ventana?.let {
+                androidx.core.view.WindowCompat.getInsetsController(it, it.decorView).apply {
+                    isAppearanceLightStatusBars = !esOscuro
+                    isAppearanceLightNavigationBars = !esOscuro
+                }
+            }
+        }
         Column(
             modifier = Modifier
                 .fillMaxSize()

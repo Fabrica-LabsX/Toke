@@ -36,6 +36,35 @@ object NegocioStore {
     /** Establece el negocio activo para toda la aplicación. */
     fun seleccionarNegocio(id: String?) {
         _negocioActivoId.value = id
+        recordarUltimo(id)
+    }
+
+    private var prefs: android.content.SharedPreferences? = null
+
+    private fun claveUltimo(uid: String) = "ultimo_negocio_$uid"
+
+    /** Guarda el negocio elegido para reabrir la app donde el usuario se quedó. */
+    private fun recordarUltimo(id: String?) {
+        val uid = currentSessionUid ?: return
+        val p = prefs ?: return
+        if (id == null) return
+        p.edit().putString(claveUltimo(uid), id).apply()
+    }
+
+    /** Devuelve el último negocio elegido si todavía existe en la lista de la cuenta. */
+    private fun ultimoValido(uid: String, existentes: List<Negocio>): String? {
+        val id = prefs?.getString(claveUltimo(uid), null) ?: return null
+        return id.takeIf { guardado -> existentes.any { it.id == guardado } }
+    }
+
+    /** Último negocio elegido por [uid], sin comprobar si sigue existiendo. */
+    fun ultimoGuardado(uid: String): String? = prefs?.getString(claveUltimo(uid), null)
+
+    /** Si todavía no hay negocio activo, vuelve al último que usó la persona. */
+    fun restaurarUltimoSiHaceFalta() {
+        if (_negocioActivoId.value != null) return
+        val uid = currentSessionUid ?: return
+        ultimoValido(uid, _negocios.value)?.let { _negocioActivoId.value = it }
     }
 
     // CAPA 8-SANEAMIENTO: Identidad de la sesión actual para aislamiento.
@@ -52,7 +81,8 @@ object NegocioStore {
         val appContext = context.applicationContext
         if (localStore == null) {
             localStore = NegocioLocalStore(appContext)
-            
+            prefs = appContext.getSharedPreferences("negocio_activo", Context.MODE_PRIVATE)
+
             // Observar cambios de sesión
             scope.launch {
                 CuentaStore.sesionActual.collect { cuenta ->
@@ -79,6 +109,7 @@ object NegocioStore {
     private suspend fun cargarDeDisco(uid: String) {
         val guardadas = localStore?.leerUnaVez(uid) ?: emptyList()
         _negocios.value = guardadas.map { it.aModelo() }
+        restaurarUltimoSiHaceFalta()
     }
 
     /**
@@ -132,6 +163,7 @@ object NegocioStore {
      */
     fun sincronizar(nuevosNegocios: List<Negocio>) {
         _negocios.value = nuevosNegocios
+        restaurarUltimoSiHaceFalta()
         scope.launch { persistir() }
     }
 

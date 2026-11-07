@@ -70,8 +70,8 @@ class ConstructorDetalleOperacionTest {
     @Test
     fun pagadorSaleDelTituloOUsaNombreGenerico() {
         assertEquals("Juan P.", ConstructorDetalleOperacion.nombrePagador("  Juan P.  "))
-        assertEquals("Cliente Toke", ConstructorDetalleOperacion.nombrePagador("   "))
-        assertEquals("Cliente Toke", ConstructorDetalleOperacion.nombrePagador(null))
+        assertEquals("No indicado", ConstructorDetalleOperacion.nombrePagador("   "))
+        assertEquals("No indicado", ConstructorDetalleOperacion.nombrePagador(null))
     }
 
     @Test

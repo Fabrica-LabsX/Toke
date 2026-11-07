@@ -109,13 +109,16 @@ fun QrCuadro(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center,
             ) {
-                Icon(
-                    painter = painterResource(id = TokeIcons.Camara),
-                    contentDescription = null,
-                    tint = TokePaletaClara.textoSecundario,
-                    modifier = Modifier.size(34.dp),
-                )
-                Spacer(modifier = Modifier.height(8.dp))
+                // La cámara invita a subir el QR: solo se muestra a quien puede cargarlo.
+                if (puedeCargar) {
+                    Icon(
+                        painter = painterResource(id = TokeIcons.Camara),
+                        contentDescription = null,
+                        tint = TokePaletaClara.textoSecundario,
+                        modifier = Modifier.size(34.dp),
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
                 Text(
                     text = if (puedeCargar) "Toca para cargar tu QR" else "El dueño aún no cargó el QR",
                     style = TextStyle(
