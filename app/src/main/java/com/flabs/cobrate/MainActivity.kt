@@ -152,6 +152,7 @@ import com.flabs.cobrate.features.business.OwnerHistoryScreen
 import com.flabs.cobrate.features.equipo.EquipoScreen
 import com.flabs.cobrate.features.cobros.MetodosDeCobroScreen
 import com.flabs.cobrate.features.permisos.DiagnosticoPermisosScreen
+import com.flabs.cobrate.ui.theme.composableToke
 import com.flabs.cobrate.features.settings.VoiceSettingsScreen
 import com.flabs.cobrate.features.operaciones.DetalleOperacionScreen
 import com.flabs.cobrate.features.shared.HomeScreen
@@ -622,7 +623,7 @@ fun CobrateApp() {
             }
 
             // ---- Flujo Trabajador ----
-            composable(Routes.OPERACIONES_TRABAJADOR) {
+            composableToke(Routes.OPERACIONES_TRABAJADOR) {
                 WorkerOperationsScreen(
                     workerViewModel = workerViewModel,
                     onEncontrarPedido = { navController.navigate(Routes.ENCUENTRA_PEDIDO) },
@@ -630,7 +631,7 @@ fun CobrateApp() {
                 )
             }
 
-            composable(Routes.ENCUENTRA_PEDIDO) {
+            composableToke(Routes.ENCUENTRA_PEDIDO) {
                 EncuentraMiPedidoScreen(
                     viewModel = workerViewModel,
                     onBack = { navController.popBackStack() }
@@ -638,7 +639,7 @@ fun CobrateApp() {
             }
 
             // ---- Sub-pantallas Dueño ----
-            composable(Routes.HISTORIAL_DUENO) {
+            composableToke(Routes.HISTORIAL_DUENO) {
                 OwnerHistoryScreen(
                     businessViewModel = businessViewModel,
                     onRefrescarTab = { onRefrescarTab(Routes.HISTORIAL_DUENO) },
@@ -646,14 +647,14 @@ fun CobrateApp() {
                 )
             }
 
-            composable(Routes.TRABAJADORES_DUENO) {
+            composableToke(Routes.TRABAJADORES_DUENO) {
                 EquipoScreen(
                     businessViewModel = businessViewModel,
                     soloLectura = (rolActivo == RolCuentaNegocio.TRABAJADOR && !esDuenoReal)
                 )
             }
 
-            composable(Routes.METODOS_COBRO_DUENO) {
+            composableToke(Routes.METODOS_COBRO_DUENO) {
                 val esTrabajador = (rolActivo == RolCuentaNegocio.TRABAJADOR && !esDuenoReal)
                 if (esTrabajador) {
                     MetodosDeCobroScreen(
@@ -692,11 +693,11 @@ fun CobrateApp() {
 
 
 
-            composable(Routes.ESTADISTICAS_DUENO) {
+            composableToke(Routes.ESTADISTICAS_DUENO) {
                 BusinessStatsScreen(businessViewModel)
             }
 
-            composable(Routes.ESTABLECIMIENTOS_DUENO) {
+            composableToke(Routes.ESTABLECIMIENTOS_DUENO) {
                 EstablishmentsScreen(
                     negocioViewModel = negocioViewModel,
                     onNuevoNegocio = {
@@ -711,7 +712,7 @@ fun CobrateApp() {
                 )
             }
 
-            composable(Routes.PLAN_FACTURACION_DUENO) {
+            composableToke(Routes.PLAN_FACTURACION_DUENO) {
                 BillingPlanScreen()
             }
 
@@ -729,7 +730,7 @@ fun CobrateApp() {
                 )
             }
 
-            composable(Routes.VOZ) {
+            composableToke(Routes.VOZ) {
                 VoiceSettingsScreen()
             }
 
