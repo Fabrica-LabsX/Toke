@@ -120,6 +120,8 @@ object InMemoryOperationStore {
             if (result.isSuccess) {
                 val creada = result.getOrThrow()
                 aplicarCambioRemotoRealtime(creada)
+                // El servidor ya contó este cobro en la cuota de la cuenta: se vuelve a leer el plan.
+                com.flabs.cobrate.features.planes.PlanStore.refrescar(creada.negocioId)
                 return Result.success(Unit)
             }
             

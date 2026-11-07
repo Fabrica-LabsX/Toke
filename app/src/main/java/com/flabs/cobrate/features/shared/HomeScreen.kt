@@ -234,7 +234,12 @@ private fun HomeScreenContent(
     }
     // Cuota del plan Free: solo la ve quien administra (el trabajador no ve la del negocio).
     val planEstado by com.flabs.cobrate.features.planes.PlanStore.estado.collectAsState()
-    val cuota = if (esTrabajador) null else com.flabs.cobrate.features.planes.cuotaDeHoy(planEstado, resumen.numeroDeOperaciones)
+    // La cuota es de la cuenta y se comparte entre todos sus negocios: solo vale lo que dice el servidor.
+    // Se vuelve a consultar cada vez que llega o cambia un cobro.
+    val cuota = if (esTrabajador) null else com.flabs.cobrate.features.planes.cuotaDeHoy(planEstado, 0)
+    LaunchedEffect(operaciones.size, negocio?.id) {
+        com.flabs.cobrate.features.planes.PlanStore.refrescar(negocio?.id)
+    }
     var avisoCuotaVisto by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf(false) }
     if (cuota != null && cuota.nivel == com.flabs.cobrate.features.planes.NivelCuota.AGOTADA && !avisoCuotaVisto) {
         com.flabs.cobrate.features.planes.CuotaAgotadaDialogo(onCerrar = { avisoCuotaVisto = true })
@@ -1312,7 +1317,7 @@ private fun HomeOperacionRow(
                             if (isWhitePlate) {
                                 com.flabs.cobrate.components.IconoMetodoPago(
                                     tipo = operacion.metodoPago,
-                                    tamano = 34.dp
+                                    tamano = 42.dp
                                 )
                             } else {
                                 com.flabs.cobrate.components.IconoMetodoPago(
@@ -1336,7 +1341,7 @@ private fun HomeOperacionRow(
                 Spacer(modifier = Modifier.width(12.dp))
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = asignadoPorNombre ?: "Desconocido",
+                        text = "Desconocido",
                         style = androidx.compose.ui.text.TextStyle(
                             fontFamily = PlusJakartaSans,
                             fontWeight = FontWeight.Bold,
@@ -1349,7 +1354,9 @@ private fun HomeOperacionRow(
                     Spacer(modifier = Modifier.height(4.dp))
                     val metodoTexto = operacion.metodoPago?.name?.lowercase()?.replaceFirstChar { it.uppercase() } ?: "Pago"
                     Text(
-                        text = "$metodoTexto · ${formatearHoraLocal(operacion.fechaHora)}",
+                        // Quien reclamó o recibió el cobro va junto a la hora, no como título.
+                        text = "$metodoTexto · ${formatearHoraLocal(operacion.fechaHora)}" +
+                            (asignadoPorNombre?.let { " · $it" } ?: ""),
                         style = androidx.compose.ui.text.TextStyle(
                             fontFamily = PlusJakartaSans,
                             fontWeight = FontWeight.Normal,
