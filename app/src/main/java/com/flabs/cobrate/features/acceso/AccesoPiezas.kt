@@ -99,7 +99,7 @@ fun LogoToke(paleta: TokePaleta, tamano: Int, descripcion: String, modifier: Mod
             Image(
                 painter = painterResource(id = R.drawable.ic_toke_logo),
                 contentDescription = descripcion,
-                modifier = Modifier.size((tamano * 0.66f).dp),
+                modifier = Modifier.size((tamano * 1.35f).dp),
             )
         }
     }

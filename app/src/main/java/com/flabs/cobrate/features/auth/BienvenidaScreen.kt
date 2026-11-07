@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -104,7 +105,7 @@ private fun ComposicionFlotante(paleta: TokePaleta) {
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .fillMaxWidth()
-                .height(72.dp)
+                .heightIn(min = 72.dp)
                 .rotate(1f)
                 .shadow(14.dp, RoundedCornerShape(22.dp)),
         ) {
