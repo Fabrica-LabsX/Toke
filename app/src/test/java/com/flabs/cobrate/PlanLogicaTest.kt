@@ -89,5 +89,9 @@ class PlanLogicaTest {
         assertFalse(PlanLogica.esActivacionNueva(Plan.PRO, Plan.PRO))
         assertFalse(PlanLogica.esActivacionNueva(Plan.PRO, Plan.FREE))
         assertTrue(PlanLogica.enlaceWhatsApp("+51 998360217").startsWith("https://wa.me/51998360217?text="))
+        assertEquals("TOKE-1A2B3C4D", PlanLogica.codigoDeCuenta("1a2b3c4d-0000-1111-2222-333344445555"))
+        val msg = PlanLogica.mensajeActivacion("ana@mail.com", "1a2b3c4d-0000-1111-2222-333344445555")
+        assertTrue(msg.contains("Correo: ana@mail.com") && msg.contains("Código: TOKE-1A2B3C4D"))
+        assertEquals("Hola, quiero activar el plan Pro de TOKE.", PlanLogica.mensajeActivacion(null, null))
     }
 }

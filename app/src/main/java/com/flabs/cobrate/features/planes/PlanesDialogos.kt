@@ -25,7 +25,13 @@ fun ActivarProDialogo(onCerrar: () -> Unit) {
         onConfirmar = {
             runCatching {
                 contexto.startActivity(
-                    Intent(Intent.ACTION_VIEW, Uri.parse(PlanLogica.enlaceWhatsApp(telefono)))
+                    Intent(Intent.ACTION_VIEW, Uri.parse(
+                        PlanLogica.enlaceWhatsApp(
+                            telefono,
+                            com.flabs.cobrate.core.data.CuentaStore.sesionActual.value?.correoVerificado,
+                            com.flabs.cobrate.core.data.CuentaStore.sesionActual.value?.id,
+                        )
+                    ))
                         .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 )
             }

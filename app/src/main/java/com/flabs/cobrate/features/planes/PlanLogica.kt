@@ -98,9 +98,20 @@ object PlanLogica {
             .format(java.util.Date(proHasta))
 
     /** Enlace de WhatsApp para pedir la activación: deja solo los dígitos del número. */
-    fun enlaceWhatsApp(telefono: String): String =
+    fun enlaceWhatsApp(telefono: String, correo: String? = null, cuentaId: String? = null): String =
         "https://wa.me/${telefono.filter { it.isDigit() }}?text=" +
-            java.net.URLEncoder.encode("Hola, quiero activar el plan Pro de TOKE", "UTF-8").replace("+", "%20")
+            java.net.URLEncoder.encode(mensajeActivacion(correo, cuentaId), "UTF-8").replace("+", "%20")
+
+    /** Código corto de la cuenta: "TOKE-" y los 8 primeros caracteres del id, en mayúsculas. */
+    fun codigoDeCuenta(cuentaId: String): String =
+        "TOKE-" + cuentaId.filter { it.isLetterOrDigit() }.take(8).uppercase()
+
+    /** Mensaje de WhatsApp con el que el dueño de TOKE reconoce la cuenta: correo y código. */
+    fun mensajeActivacion(correo: String?, cuentaId: String?): String = buildString {
+        append("Hola, quiero activar el plan Pro de TOKE.")
+        correo?.takeIf { it.isNotBlank() }?.let { append("\nCorreo: ").append(it.trim()) }
+        cuentaId?.takeIf { it.isNotBlank() }?.let { append("\nCódigo: ").append(codigoDeCuenta(it)) }
+    }
 
     /** Texto para el usuario cuando el servidor rechaza algo por el plan; null si el error no es de plan. */
     fun mensajeDeLimite(mensajeDeError: String?): String? = when {
