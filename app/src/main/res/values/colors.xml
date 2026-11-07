@@ -13,6 +13,6 @@
     <color name="toke_background">#FFF4F5F7</color>
 
     <!-- Splash Colors -->
-    <color name="splash_background_light">#FFFFFFFF</color>
+    <color name="splash_background_light">#FF059669</color>
     <color name="splash_background_dark">#FF000000</color>
 </resources>
