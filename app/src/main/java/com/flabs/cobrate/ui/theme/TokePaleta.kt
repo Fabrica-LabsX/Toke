@@ -38,6 +38,9 @@ data class TokePaleta(
     val rojo: Color,
     val rojoFondo: Color,
     val rojoBorde: Color,
+    /** Verde vivo de los indicadores de estado (wifi, sincronizado): el mismo en claro y en oscuro. */
+    val verdeVivo: Color,
+    val verdeVivoBorde: Color,
 )
 
 /** Rojo de error y de acciones que borran; el mismo en claro y oscuro. */
@@ -65,6 +68,8 @@ val TokePaletaClara = TokePaleta(
     rojo = TokeRojo,
     rojoFondo = Color(0xFFFEE2E2),
     rojoBorde = Color(0xFFFECACA),
+    verdeVivo = Color(0xFF00C853),
+    verdeVivoBorde = Color(0xFF00B44A),
 )
 
 val TokePaletaOscura = TokePaleta(
@@ -86,6 +91,8 @@ val TokePaletaOscura = TokePaleta(
     rojo = TokeRojo,
     rojoFondo = Color(0xFF2A1414),
     rojoBorde = Color(0xFF3D1E1E),
+    verdeVivo = Color(0xFF00C853),
+    verdeVivoBorde = Color(0xFF00B44A),
 )
 
 /** Paleta vigente según el aspecto elegido en la app. */

@@ -41,8 +41,13 @@ extensions.configure<ApplicationExtension> {
 
     buildTypes {
         release {
+            // Optimización (R8): recorta y compacta el código para que la app abra rápido en celulares bajos.
             optimization {
-                enable = false
+                enable = true
+            }
+            // Solo para probar la versión final en un teléfono propio: ./gradlew assembleRelease -PfirmarConDebug
+            if (project.hasProperty("firmarConDebug")) {
+                signingConfig = signingConfigs.getByName("debug")
             }
         }
     }
@@ -62,6 +67,7 @@ kotlin {
 
 dependencies {
     implementation(libs.androidx.appcompat)
+    implementation(libs.profileinstaller)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.core.splashscreen)
     implementation(libs.material)

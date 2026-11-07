@@ -28,8 +28,8 @@ fun BadgeConexionOnline(modifier: Modifier = Modifier) {
     Surface(
         modifier = modifier.size(36.dp),
         shape = RoundedCornerShape(10.dp),
-        color = paleta.verde,
-        border = BorderStroke(1.dp, paleta.verde),
+        color = paleta.verdeVivo,
+        border = BorderStroke(1.dp, paleta.verdeVivoBorde),
     ) {
         Box(contentAlignment = Alignment.Center) {
             Icon(

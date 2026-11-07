@@ -28,11 +28,11 @@ fun BadgeSincronizacion(
 ) {
     val paleta = tokePaleta()
     val fondo = when {
-        operativo -> paleta.verde
+        operativo -> paleta.verdeVivo
         else -> paleta.rojoFondo
     }
     val borde = when {
-        operativo -> paleta.verde
+        operativo -> paleta.verdeVivoBorde
         else -> paleta.rojoBorde
     }
 

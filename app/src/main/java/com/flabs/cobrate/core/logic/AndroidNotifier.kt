@@ -1,6 +1,5 @@
 package com.flabs.cobrate.core.logic
 
-import android.R
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -54,7 +53,7 @@ object AndroidNotifier {
         declararCanales(appContext)
 
         val notificacion = NotificationCompat.Builder(appContext, CHANNEL_EVENTOS_ID)
-            .setSmallIcon(R.drawable.stat_notify_more)
+            .setSmallIcon(com.flabs.cobrate.R.drawable.ic_stat_toke)
             .setContentTitle(titulo)
             .setContentText(texto)
             .setStyle(NotificationCompat.BigTextStyle().bigText(texto))
@@ -73,7 +72,7 @@ object AndroidNotifier {
         declararCanales(appContext)
 
         return NotificationCompat.Builder(appContext, CHANNEL_RUNNING_ID)
-            .setSmallIcon(R.drawable.stat_notify_sync)
+            .setSmallIcon(com.flabs.cobrate.R.drawable.ic_stat_toke)
             .setContentTitle("TOKE")
             .setContentText("Comprobando si puede funcionar…")
             .setOngoing(true)
@@ -105,7 +104,7 @@ object AndroidNotifier {
         )
 
         return NotificationCompat.Builder(appContext, CHANNEL_RUNNING_ID)
-            .setSmallIcon(R.drawable.stat_notify_sync)
+            .setSmallIcon(com.flabs.cobrate.R.drawable.ic_stat_toke)
             .setContentTitle("TOKE está operando")
             .setContentText(texto)
             .setOngoing(true)
@@ -153,7 +152,7 @@ object AndroidNotifier {
         )
 
         val notificacion = NotificationCompat.Builder(appContext, CHANNEL_EVENTOS_ID)
-            .setSmallIcon(R.drawable.stat_sys_warning)
+            .setSmallIcon(com.flabs.cobrate.R.drawable.ic_stat_toke)
             .setContentTitle(titulo)
             .setContentText(texto)
             .setAutoCancel(true)
@@ -199,7 +198,7 @@ object AndroidNotifier {
 
         val notifId = operacionId.hashCode()
         val builder = NotificationCompat.Builder(appContext, CHANNEL_OBSERVABILIDAD_ID)
-            .setSmallIcon(R.drawable.stat_notify_sync)
+            .setSmallIcon(com.flabs.cobrate.R.drawable.ic_stat_toke)
             .setContentTitle(titulo)
             .setContentText(texto)
             .setPriority(NotificationCompat.PRIORITY_LOW)
@@ -251,7 +250,7 @@ object AndroidNotifier {
         )
 
         val notificacion = NotificationCompat.Builder(appContext, CHANNEL_EVENTOS_ID)
-            .setSmallIcon(R.drawable.stat_notify_more)
+            .setSmallIcon(com.flabs.cobrate.R.drawable.ic_stat_toke)
             .setContentTitle(titulo)
             .setContentText(texto)
             .setStyle(NotificationCompat.BigTextStyle().bigText(texto))

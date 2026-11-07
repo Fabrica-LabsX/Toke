@@ -1,0 +1,4 @@
+# Perfil de arranque escrito a mano: le pide a Android compilar de antemano el código de TOKE
+# (pantallas, tiendas y modelos) para que la primera apertura no sea lenta.
+HSPLcom/flabs/cobrate/**;->**(**)**
+Lcom/flabs/cobrate/**;
