@@ -4,14 +4,14 @@ import androidx.annotation.DrawableRes
 import com.flabs.cobrate.components.TokeIcons
 import com.flabs.cobrate.core.model.TipoNegocio
 
-/** Icono del rubro de un negocio. Son los mismos iconos que se eligen al crear el negocio. */
+/** Icono del rubro de un negocio. Cada rubro tiene el suyo, y es el mismo al crear y al editar. */
 @DrawableRes
 fun iconoDeNegocio(tipo: TipoNegocio): Int = when (tipo) {
     TipoNegocio.RESTAURANTE -> TokeIcons.Hamburguesa
+    TipoNegocio.MARISQUERIA -> TokeIcons.Recibo
     TipoNegocio.ABARROTES -> TokeIcons.Canasta
-    TipoNegocio.SERVICIOS -> TokeIcons.Maletin
+    TipoNegocio.ROPA -> TokeIcons.Carrito
     TipoNegocio.ELECTRODOMESTICOS -> TokeIcons.Herramienta
-    TipoNegocio.MARISQUERIA,
-    TipoNegocio.ROPA,
+    TipoNegocio.SERVICIOS -> TokeIcons.Maletin
     TipoNegocio.OTRO -> TokeIcons.Tienda
 }

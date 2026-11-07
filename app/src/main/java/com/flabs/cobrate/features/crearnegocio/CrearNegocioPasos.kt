@@ -41,6 +41,7 @@ import androidx.compose.ui.unit.sp
 import com.flabs.cobrate.components.TokeIcons
 import com.flabs.cobrate.core.model.TipoNegocio
 import com.flabs.cobrate.features.acceso.AccesoFondo
+import com.flabs.cobrate.features.negocios.iconoDeNegocio
 import com.flabs.cobrate.features.acceso.AvisoAcceso
 import com.flabs.cobrate.features.acceso.BotonAcceso
 import com.flabs.cobrate.features.acceso.BotonAtras
@@ -55,15 +56,7 @@ import com.flabs.cobrate.ui.theme.TokePaleta
 fun colorDe(hex: String?): Color =
     Color(CrearNegocioLogica.argbDeHex(hex) ?: CrearNegocioLogica.argbDeHex(CrearNegocioLogica.COLOR_POR_DEFECTO)!!)
 
-fun iconoDeTipo(tipo: TipoNegocio): Int = when (tipo) {
-    TipoNegocio.ABARROTES -> TokeIcons.Canasta
-    TipoNegocio.RESTAURANTE -> TokeIcons.Recibo
-    TipoNegocio.MARISQUERIA -> TokeIcons.Efectivo
-    TipoNegocio.ROPA -> TokeIcons.Carrito
-    TipoNegocio.ELECTRODOMESTICOS -> TokeIcons.Herramienta
-    TipoNegocio.SERVICIOS -> TokeIcons.Maletin
-    TipoNegocio.OTRO -> TokeIcons.Mas
-}
+fun iconoDeTipo(tipo: TipoNegocio): Int = iconoDeNegocio(tipo)
 
 @Composable
 private fun CabeceraPaso(paleta: TokePaleta, paso: Int, onAtras: (() -> Unit)?) {

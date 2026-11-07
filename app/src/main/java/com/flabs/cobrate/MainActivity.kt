@@ -148,7 +148,6 @@ import com.flabs.cobrate.features.onboarding.IngresarCodigoScreen
 import com.flabs.cobrate.features.business.BillingPlanScreen
 import com.flabs.cobrate.features.business.BusinessStatsScreen
 import com.flabs.cobrate.features.business.BusinessViewModel
-import com.flabs.cobrate.features.business.EstablishmentsScreen
 import com.flabs.cobrate.features.negocios.MisNegociosScreen
 import com.flabs.cobrate.features.business.OwnerHistoryScreen
 import com.flabs.cobrate.features.equipo.EquipoScreen
@@ -706,25 +705,6 @@ fun CobrateApp() {
                 BusinessStatsScreen(businessViewModel)
             }
 
-            composableToke(Routes.ESTABLECIMIENTOS_DUENO) {
-                EstablishmentsScreen(
-                    negocioViewModel = negocioViewModel,
-                    onNuevoNegocio = {
-                        navController.navigate(Routes.CREAR_NEGOCIO)
-                    },
-                    onUnirmeNegocio = {
-                        navController.navigate(Routes.INGRESAR_CODIGO)
-                    },
-                    onBorrarNegocio = { id ->
-                        NegocioStore.seleccionarNegocio(id)
-                        mostrarConfirmarBorrar = true
-                    },
-                    onBack = {
-                        navController.popBackStack()
-                    }
-                )
-            }
-
             composableToke(Routes.PLAN_FACTURACION_DUENO) {
                 BillingPlanScreen()
             }
@@ -752,7 +732,11 @@ fun CobrateApp() {
                     negocioViewModel = negocioViewModel,
                     onVolver = { navController.popBackStack() },
                     onCrearNegocio = { navController.navigate(Routes.CREAR_NEGOCIO) },
-                    onUnirmeNegocio = { navController.navigate(Routes.INGRESAR_CODIGO) }
+                    onUnirmeNegocio = { navController.navigate(Routes.INGRESAR_CODIGO) },
+                    onBorrarNegocio = { id ->
+                        NegocioStore.seleccionarNegocio(id)
+                        mostrarConfirmarBorrar = true
+                    }
                 )
             }
 
@@ -806,9 +790,6 @@ fun CobrateApp() {
                 },
                 ItemMas(stringResource(R.string.nombre_mis_qr), TokeIcons.MisQrs) {
                     navController.irADetalle(Routes.METODOS_COBRO_DUENO)
-                },
-                ItemMas(stringResource(R.string.nombre_mis_locales), TokeIcons.Tienda) {
-                    navController.irADetalle(Routes.ESTABLECIMIENTOS_DUENO)
                 },
                 ItemMas(stringResource(R.string.nombre_aviso_voz), TokeIcons.VolumenAlto) {
                     navController.irADetalle(Routes.VOZ)
@@ -1038,7 +1019,6 @@ object Routes {
     const val TRABAJADORES_DUENO = "trabajadores_dueno"
     const val METODOS_COBRO_DUENO = "metodos_cobro_dueno"
     const val ESTADISTICAS_DUENO = "estadisticas_dueno"
-    const val ESTABLECIMIENTOS_DUENO = "establecimientos_dueno"
     const val PLAN_FACTURACION_DUENO = "plan_facturacion_dueno"
     const val PERMISOS_DUENO = "permisos_dueno"
     const val VOZ = "voz"

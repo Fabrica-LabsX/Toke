@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.sp
 import com.flabs.cobrate.components.PantallaAccesoPausado
 import com.flabs.cobrate.core.data.CuentaStore
 import com.flabs.cobrate.core.data.NegocioStore
+import com.flabs.cobrate.core.logic.FeedbackManager
 import com.flabs.cobrate.core.model.Negocio
 import com.flabs.cobrate.features.business.NegocioViewModel
 import com.flabs.cobrate.ui.theme.PlusJakartaSans
@@ -47,6 +48,7 @@ fun MisNegociosScreen(
     onVolver: () -> Unit,
     onCrearNegocio: () -> Unit,
     onUnirmeNegocio: () -> Unit,
+    onBorrarNegocio: (String) -> Unit = {},
 ) {
     val paleta = tokePaleta()
     val scope = rememberCoroutineScope()
@@ -59,6 +61,8 @@ fun MisNegociosScreen(
     val cuentaId = sesionActual?.id
 
     var negocioPausado by remember { mutableStateOf<Negocio?>(null) }
+    var editando by remember { mutableStateOf<Negocio?>(null) }
+    var maxInicial by remember { mutableStateOf<Int?>(null) }
 
     negocioPausado?.let { negocio ->
         PantallaAccesoPausado(
@@ -129,9 +133,41 @@ fun MisNegociosScreen(
                             NegociosAcciones.cancelarSolicitud(item.negocio.id, uid, negocioViewModel)
                         }
                     },
+                    onEditar = if (item.rol == RolEnNegocio.DUENO) {
+                        {
+                            editando = item.negocio
+                            maxInicial = null
+                            scope.launch { maxInicial = NegocioStore.maxTrabajadores(item.negocio.id) }
+                        }
+                    } else {
+                        null
+                    },
                 )
             }
         }
+    }
+    editando?.let { negocio ->
+        EditarNegocioHoja(
+            paleta = paleta,
+            negocio = negocio,
+            maxInicial = maxInicial,
+            onDismiss = { editando = null },
+            onBorrar = {
+                editando = null
+                onBorrarNegocio(negocio.id)
+            },
+            onGuardar = { nombre, tipo, color, max, limpiar ->
+                scope.launch {
+                    FeedbackManager.setLoading(true, "Guardando cambios...")
+                    val resultado = NegocioStore.editar(negocio.id, nombre, tipo, color, max, limpiar)
+                    FeedbackManager.setLoading(false)
+                    resultado.onSuccess {
+                        FeedbackManager.showSuccess("Cambios guardados.")
+                        editando = null
+                    }.onFailure { FeedbackManager.showError(it) }
+                }
+            },
+        )
     }
 }
 

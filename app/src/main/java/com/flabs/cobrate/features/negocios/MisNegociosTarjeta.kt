@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.sp
 import com.flabs.cobrate.components.TokeIcons
 import com.flabs.cobrate.ui.theme.PlusJakartaSans
 import com.flabs.cobrate.ui.theme.TokePaleta
+import com.flabs.cobrate.ui.theme.TokeMedidas
 
 private val RojoCancelar = TokeRojo
 private val AmbarAviso = TokeAmbarTexto
@@ -47,6 +48,7 @@ fun MisNegociosTarjeta(
     onEntrar: () -> Unit,
     onVerEstado: () -> Unit,
     onCancelarSolicitud: () -> Unit,
+    onEditar: (() -> Unit)? = null,
 ) {
     Surface(
         shape = RoundedCornerShape(20.dp),
@@ -87,6 +89,10 @@ fun MisNegociosTarjeta(
                     NegocioEtiqueta(paleta = paleta, item = item)
                 }
                 AccionPrincipal(paleta, item, onEntrar, onVerEstado)
+                if (onEditar != null) {
+                    Spacer(modifier = Modifier.width(8.dp))
+                    BotonEditarNegocio(paleta, onEditar)
+                }
             }
 
             when (item.estado) {
@@ -184,6 +190,27 @@ private fun PieDeEstado(
                 fondo = botonFondo,
                 colorTexto = Color.White,
                 onClick = onBoton,
+            )
+        }
+    }
+}
+
+/** Lápiz para editar el negocio (solo lo ve su dueño). */
+@Composable
+private fun BotonEditarNegocio(paleta: TokePaleta, onClick: () -> Unit) {
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(12.dp),
+        color = paleta.tileFondo,
+        border = BorderStroke(1.dp, paleta.bordeControl),
+        modifier = Modifier.size(TokeMedidas.BotonIcono),
+    ) {
+        Box(contentAlignment = Alignment.Center) {
+            Icon(
+                painter = painterResource(id = TokeIcons.Editar),
+                contentDescription = "Editar negocio",
+                tint = paleta.textoPrincipal,
+                modifier = Modifier.size(18.dp),
             )
         }
     }
