@@ -41,9 +41,9 @@ extensions.configure<ApplicationExtension> {
 
     buildTypes {
         release {
-            // Optimización (R8): recorta y compacta el código para que la app abra rápido en celulares bajos.
+            // shortcut: R8 apagado hasta probar la versión final en un teléfono (./gradlew assembleRelease -PfirmarConDebug); luego enable = true.
             optimization {
-                enable = true
+                enable = false
             }
             // Solo para probar la versión final en un teléfono propio: ./gradlew assembleRelease -PfirmarConDebug
             if (project.hasProperty("firmarConDebug")) {
