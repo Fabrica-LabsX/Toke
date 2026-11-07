@@ -130,6 +130,8 @@ fun HomeScreen(
     onRefrescarTab: (() -> Unit)? = null,
     onSeleccionarOperacion: ((String) -> Unit)? = null,
     onAbrirPermisos: () -> Unit = {},
+    onMisNegocios: () -> Unit = {},
+    onAbrirMas: () -> Unit = {},
 ) {
     HomeScreenContent(
         negocio = negocio,
@@ -147,6 +149,8 @@ fun HomeScreen(
         onRefrescarTab = onRefrescarTab,
         onSeleccionarOperacion = onSeleccionarOperacion,
         onAbrirPermisos = onAbrirPermisos,
+        onMisNegocios = onMisNegocios,
+        onAbrirMas = onAbrirMas,
     )
 }
 
@@ -168,6 +172,8 @@ private fun HomeScreenContent(
     onRefrescarTab: (() -> Unit)? = null,
     onSeleccionarOperacion: ((String) -> Unit)? = null,
     onAbrirPermisos: () -> Unit = {},
+    onMisNegocios: () -> Unit = {},
+    onAbrirMas: () -> Unit = {},
 ) {
     val operaciones by InMemoryOperationStore.operaciones.collectAsState()
     val alertas by AlertaStore.alertas.collectAsState()
@@ -233,6 +239,12 @@ private fun HomeScreenContent(
         com.flabs.cobrate.features.planes.CuotaAgotadaDialogo(onCerrar = { avisoCuotaVisto = true })
     }
     val hayPendientes = resumen.operacionesPendientes > 0
+    // Panel del trabajador: su último cobro (el que le asignaron o reclamó), sin importar el día.
+    val ultimoCobro = remember(operaciones, negocio, uid) {
+        operaciones
+            .filter { it.negocioId == negocio?.id && uid != null && it.trabajadorAsignadoId == uid }
+            .maxByOrNull { it.fechaHora }
+    }
 
     val pendientes = remember(operaciones, negocio) {
         if (negocio == null) emptyList()
@@ -281,7 +293,8 @@ private fun HomeScreenContent(
                     onCambiarNegocio = { mostrarSelectorNegocio = true },
                     mostrarBadgeOffline = mostrarOffline && !disponible,
                     mostrarBadgeOnline = disponible,
-                    onAbrirPermisos = onAbrirPermisos
+                    onAbrirPermisos = onAbrirPermisos,
+                    onAbrirMas = if (esTrabajador) onAbrirMas else null,
                 )
             }
         },
@@ -523,31 +536,48 @@ private fun HomeScreenContent(
                         contentPadding = PaddingValues(vertical = 12.dp),
                     ) {
                         // 1. Resumen Principal del Día (Hero Balance Card)
-                        item {
-                            ResumenCard(
-                                resumen = resumen,
-                                esTrabajador = esTrabajador,
-                                cuota = cuota,
-                            )
-                        }
-
-                        // 3. Acciones Rápidas (Grid 2 columnas: Mis QRs / Mi equipo)
-                        // "Mis QRs" y "Mi equipo" son herramientas del dueño: el trabajador no las ve.
-                        if (!esTrabajador) item {
-                            QuickActionsRow(
-                                onMisQRs = onMisQRs,
-                                onAnadirTrabajador = onAnadirTrabajador,
-                            )
-                        }
-
-                        // 4. Banner de Pagos Pendientes (si existen pendientes)
-                        if (hayPendientes) {
+                        if (esTrabajador) {
+                            // Panel del trabajador: último cobro, y dos fichas (Mis QRs + por reclamar o Mis Negocios).
                             item {
-                                BannerPagosPendientes(
-                                    cantidadPendientes = resumen.operacionesPendientes,
-                                    pendientes = pendientes,
-                                    onClick = onAccionReclamar,
+                                UltimoCobroCard(
+                                    ultimo = ultimoCobro,
+                                    nombreTrabajador = sesionActual?.username,
                                 )
+                            }
+                            item {
+                                FichasTrabajador(
+                                    pendientes = pendientes,
+                                    onMisQRs = onMisQRs,
+                                    onReclamar = onAccionReclamar,
+                                    onMisNegocios = onMisNegocios,
+                                )
+                            }
+                        } else {
+                            item {
+                                ResumenCard(
+                                    resumen = resumen,
+                                    esTrabajador = false,
+                                    cuota = cuota,
+                                )
+                            }
+
+                            // 3. Acciones Rápidas (Grid 2 columnas: Mis QRs / Mi equipo)
+                            item {
+                                QuickActionsRow(
+                                    onMisQRs = onMisQRs,
+                                    onAnadirTrabajador = onAnadirTrabajador,
+                                )
+                            }
+
+                            // 4. Banner de Pagos Pendientes (si existen pendientes)
+                            if (hayPendientes) {
+                                item {
+                                    BannerPagosPendientes(
+                                        cantidadPendientes = resumen.operacionesPendientes,
+                                        pendientes = pendientes,
+                                        onClick = onAccionReclamar,
+                                    )
+                                }
                             }
                         }
 
@@ -707,6 +737,7 @@ private fun HomeTopBarCard(
     mostrarBadgeOffline: Boolean = false,
     mostrarBadgeOnline: Boolean = false,
     onAbrirPermisos: () -> Unit = {},
+    onAbrirMas: (() -> Unit)? = null,
 ) {
     Row(
         modifier = Modifier
@@ -754,6 +785,10 @@ private fun HomeTopBarCard(
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
+        }
+        if (onAbrirMas != null) {
+            BotonMasOpciones(onClick = onAbrirMas)
+            Spacer(modifier = Modifier.width(8.dp))
         }
         com.flabs.cobrate.components.BadgeSincronizacion(
             operativo = com.flabs.cobrate.features.permisos.rememberEstadoServicio() ==

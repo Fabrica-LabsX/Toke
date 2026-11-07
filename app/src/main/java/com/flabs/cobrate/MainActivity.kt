@@ -471,7 +471,7 @@ fun CobrateApp() {
         ItemNav(Routes.HISTORIAL_DUENO, stringResource(R.string.nombre_mis_cobros), TokeIcons.NavOperaciones),
         ItemNav(Routes.TRABAJADORES_DUENO, stringResource(R.string.nombre_mi_equipo), TokeIcons.NavEquipo),
         ItemNav("MAS", stringResource(R.string.nombre_mas), TokeIcons.NavMas)
-    ).filter { !(esSoloTrabajador && it.id == Routes.TRABAJADORES_DUENO) }
+    ).filter { !(esSoloTrabajador && (it.id == Routes.TRABAJADORES_DUENO || it.id == "MAS")) }
 
     val cantidadSolicitudes by businessViewModel.cantidadSolicitudes.collectAsState()
     val refreshStates by TabRefreshManager.refreshStates.collectAsState()
@@ -577,7 +577,8 @@ fun CobrateApp() {
                     authViewModel = authViewModel,
                     navController = navController,
                     onSalirDelNegocio = { mostrarConfirmarSalir = true },
-                    onRefrescarTab = { onRefrescarTab(Routes.INICIO) }
+                    onRefrescarTab = { onRefrescarTab(Routes.INICIO) },
+                    onAbrirMas = { mostrarMas = true }
                 )
             }
 
@@ -965,7 +966,8 @@ private fun InicioScreen(
     authViewModel: AuthViewModel,
     navController: NavController,
     onSalirDelNegocio: () -> Unit = {},
-    onRefrescarTab: (() -> Unit)? = null
+    onRefrescarTab: (() -> Unit)? = null,
+    onAbrirMas: () -> Unit = {}
 ) {
     PedirPermisoNotificaciones()
     PedirExencionBateria()
@@ -994,7 +996,9 @@ private fun InicioScreen(
         onSalirDelNegocio = onSalirDelNegocio,
         onRefrescarTab = onRefrescarTab,
         onSeleccionarOperacion = { id -> navController.irADetalle("${Routes.DETALLE_OPERACION}/$id") },
-        onAbrirPermisos = { navController.irADetalle(Routes.PERMISOS_DUENO) }
+        onAbrirPermisos = { navController.irADetalle(Routes.PERMISOS_DUENO) },
+        onMisNegocios = { navController.irADetalle(Routes.MIS_NEGOCIOS) },
+        onAbrirMas = onAbrirMas
     )
 }
 
