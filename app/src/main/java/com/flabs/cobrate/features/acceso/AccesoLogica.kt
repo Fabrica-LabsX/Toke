@@ -12,4 +12,15 @@ object AccesoLogica {
         password != confirmacion -> "Las contraseñas no coinciden."
         else -> null
     }
+
+    /** Nombre del dueño que se muestra en la invitación: el visible, o el usuario sin el dominio. */
+    fun nombreDueno(visible: String?, usuario: String?): String {
+        val nombre = visible?.trim()
+        val user = usuario?.trim()
+        return when {
+            !nombre.isNullOrBlank() -> nombre
+            !user.isNullOrBlank() -> user.substringBefore("@")
+            else -> "El dueño"
+        }
+    }
 }

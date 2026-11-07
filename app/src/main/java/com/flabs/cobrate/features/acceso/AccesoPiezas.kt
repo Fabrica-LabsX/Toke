@@ -235,3 +235,32 @@ fun EnlaceAcceso(paleta: TokePaleta, texto: String, onClick: () -> Unit) {
 
 @Composable
 fun EspacioAcceso(alto: Int) = Spacer(modifier = Modifier.height(alto.dp))
+
+/** Aviso con título y texto corto, para explicar algo antes de que la persona siga. */
+@Composable
+fun AvisoAcceso(paleta: TokePaleta, titulo: String, texto: String) {
+    Surface(
+        shape = RoundedCornerShape(18.dp),
+        color = paleta.tarjeta,
+        border = BorderStroke(1.dp, paleta.borde),
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Column(modifier = Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Text(
+                text = titulo,
+                style = TextStyle(fontFamily = PlusJakartaSans, fontWeight = FontWeight.ExtraBold, fontSize = 15.sp),
+                color = paleta.textoPrincipal,
+            )
+            Text(
+                text = texto,
+                style = TextStyle(
+                    fontFamily = PlusJakartaSans,
+                    fontWeight = FontWeight.Medium,
+                    fontSize = 13.5.sp,
+                    lineHeight = 19.sp,
+                ),
+                color = paleta.textoSecundario,
+            )
+        }
+    }
+}

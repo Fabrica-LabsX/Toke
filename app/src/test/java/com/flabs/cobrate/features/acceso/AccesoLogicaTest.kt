@@ -20,4 +20,12 @@ class AccesoLogicaTest {
         assertEquals("Las contraseñas no coinciden.", AccesoLogica.errorPasswords("123456", "1234567"))
         assertNull(AccesoLogica.errorPasswords("123456", "123456"))
     }
+
+    @Test
+    fun nombreDuenoPrefiereElVisibleYQuitaElDominio() {
+        assertEquals("Ana", AccesoLogica.nombreDueno(" Ana ", "x@y.com"))
+        assertEquals("carlos", AccesoLogica.nombreDueno(null, "carlos@mail.com"))
+        assertEquals("carlos", AccesoLogica.nombreDueno("", "carlos"))
+        assertEquals("El dueño", AccesoLogica.nombreDueno(null, " "))
+    }
 }

@@ -23,6 +23,8 @@ import com.flabs.cobrate.features.acceso.EnlaceAcceso
 import com.flabs.cobrate.features.acceso.EspacioAcceso
 import com.flabs.cobrate.features.acceso.FormLogin
 import com.flabs.cobrate.features.acceso.FormPasswords
+import com.flabs.cobrate.features.acceso.FormRegistroClave
+import com.flabs.cobrate.features.acceso.FormRegistroDatos
 import com.flabs.cobrate.features.acceso.FormUnCampo
 import com.flabs.cobrate.features.acceso.LogoToke
 import com.flabs.cobrate.features.acceso.TituloAcceso
@@ -215,37 +217,24 @@ fun LoginScreen(
                 )
             }
 
-            // ---- MODO 5: REGISTRO EN PASOS ----
+            // ---- MODO 5: REGISTRO EN 2 PASOS ----
             ModoAuth.REGISTRO_PASOS -> {
-                TituloAcceso(paleta, "Crea tu cuenta", "Paso $pasoRegistro de 4")
-                when (pasoRegistro) {
-                    1 -> FormUnCampo(
+                TituloAcceso(
+                    paleta,
+                    "Crea tu cuenta",
+                    if (pasoRegistro <= 1) "Paso 1 de 2 · Tus datos" else "Paso 2 de 2 · Confirma tu correo",
+                )
+                if (pasoRegistro <= 1) {
+                    FormRegistroDatos(
                         paleta = paleta,
-                        etiqueta = "¿Cómo te llamas?",
-                        valor = nombreRegistro,
-                        placeholder = "Nombre o apodo",
-                        teclado = KeyboardType.Text,
-                        onCambia = { nombreRegistro = it },
-                        textoBoton = "Continuar",
-                        onAccion = {
+                        nombre = nombreRegistro,
+                        onNombre = { nombreRegistro = it },
+                        email = email,
+                        onEmail = { email = it },
+                        onContinuar = {
                             if (nombreRegistro.isBlank()) {
-                                FeedbackManager.showErrorMessage("Ingresa tu nombre.")
-                            } else {
-                                pasoRegistro = 2
-                            }
-                        },
-                    )
-
-                    2 -> FormUnCampo(
-                        paleta = paleta,
-                        etiqueta = "Tu correo electrónico",
-                        valor = email,
-                        placeholder = "tu@correo.com",
-                        teclado = KeyboardType.Email,
-                        onCambia = { email = it },
-                        textoBoton = "Enviar código",
-                        onAccion = {
-                            if (!AccesoLogica.correoValido(email)) {
+                                FeedbackManager.showErrorMessage("Ingresa tu nombre de usuario.")
+                            } else if (!AccesoLogica.correoValido(email)) {
                                 FeedbackManager.showErrorMessage("Ingresa un correo electrónico válido.")
                             } else {
                                 scope.launch {
@@ -254,54 +243,39 @@ fun LoginScreen(
                                     FeedbackManager.setLoading(false)
                                     res.onSuccess {
                                         FeedbackManager.showSuccess("Código enviado a $email")
-                                        pasoRegistro = 3
+                                        pasoRegistro = 2
                                     }.onFailure { err -> FeedbackManager.showError(err) }
                                 }
                             }
                         },
                     )
-
-                    3 -> FormUnCampo(
+                } else {
+                    FormRegistroClave(
                         paleta = paleta,
-                        etiqueta = "Código de confirmación",
-                        valor = otpTokenRegistro,
-                        placeholder = "Código enviado a $email",
-                        teclado = KeyboardType.Number,
-                        onCambia = { otpTokenRegistro = it },
-                        textoBoton = "Verificar",
-                        onAccion = {
-                            if (otpTokenRegistro.isBlank()) {
-                                FeedbackManager.showErrorMessage("Ingresa el código enviado a tu correo.")
-                            } else {
-                                scope.launch {
-                                    FeedbackManager.setLoading(true, "Verificando código...")
-                                    val res = authViewModel.verificarOtpRegistro(email, otpTokenRegistro)
-                                    FeedbackManager.setLoading(false)
-                                    res.onSuccess {
-                                        FeedbackManager.showSuccess("Correo verificado correctamente.")
-                                        pasoRegistro = 4
-                                    }.onFailure { err ->
-                                        FeedbackManager.showErrorMessage(err.message ?: "Código incorrecto o expirado.")
-                                    }
-                                }
-                            }
-                        },
-                    )
-
-                    4 -> FormPasswords(
-                        paleta = paleta,
-                        etiqueta = "Crea tu contraseña",
+                        email = email,
+                        codigo = otpTokenRegistro,
+                        onCodigo = { otpTokenRegistro = it },
                         password = passwordRegistro,
                         onPassword = { passwordRegistro = it },
                         confirmacion = confirmarPasswordRegistro,
                         onConfirmacion = { confirmarPasswordRegistro = it },
-                        textoBoton = "Completar registro",
-                        onAccion = {
+                        onCompletar = {
                             val error = AccesoLogica.errorPasswords(passwordRegistro, confirmarPasswordRegistro)
-                            if (error != null) {
+                            if (otpTokenRegistro.isBlank()) {
+                                FeedbackManager.showErrorMessage("Ingresa el código enviado a tu correo.")
+                            } else if (error != null) {
                                 FeedbackManager.showErrorMessage(error)
                             } else {
                                 scope.launch {
+                                    FeedbackManager.setLoading(true, "Verificando código...")
+                                    val verif = authViewModel.verificarOtpRegistro(email, otpTokenRegistro)
+                                    if (verif.isFailure) {
+                                        FeedbackManager.setLoading(false)
+                                        FeedbackManager.showErrorMessage(
+                                            verif.exceptionOrNull()?.message ?: "Código incorrecto o expirado."
+                                        )
+                                        return@launch
+                                    }
                                     FeedbackManager.setLoading(true, "Completando registro...")
                                     val res = authViewModel.completarRegistro(nombreRegistro, passwordRegistro)
                                     FeedbackManager.setLoading(false)
