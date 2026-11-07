@@ -1,5 +1,4 @@
 package com.flabs.cobrate.features.business
-import com.flabs.cobrate.ui.theme.TokeMedidas
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -10,36 +9,36 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.ErrorOutline
-import androidx.compose.material.icons.filled.QrCode
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.flabs.cobrate.components.TokeIcons
+import com.flabs.cobrate.features.acceso.BotonAcceso
+import com.flabs.cobrate.ui.theme.PlusJakartaSans
+import com.flabs.cobrate.ui.theme.TokeMedidas
+import com.flabs.cobrate.ui.theme.tokePaleta
 
-/**
- * Estados secuenciales del flujo honesto de subida/preparación de códigos QR.
- */
+/** Pasos de la subida del QR, en el orden en que ocurren. */
 enum class QrUploadStage(val message: String) {
     PREPARANDO("Preparando QR..."),
     SUBIENDO("Subiendo QR de forma segura..."),
     GUARDANDO("Guardando configuración..."),
     PREPARANDO_PREVIEW("Preparando vista previa..."),
-    LISTO("¡QR configurado exitosamente!")
+    LISTO("¡QR configurado!")
 }
 
+/** Progreso de la subida de un QR: el paso actual, o el error con "Reintentar" y "Volver". */
 @Composable
 fun QrUploadProgressScreen(
     currentStage: QrUploadStage,
@@ -47,85 +46,55 @@ fun QrUploadProgressScreen(
     onRetry: () -> Unit,
     onBack: () -> Unit
 ) {
+    val paleta = tokePaleta()
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-            .padding(24.dp),
+            .background(paleta.fondo)
+            .statusBarsPadding()
+            .padding(horizontal = TokeMedidas.MargenLateral, vertical = 24.dp),
         verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
+        val titulo = if (errorMessage != null) "No pudimos subir tu QR" else currentStage.message
+        Icon(
+            painter = painterResource(
+                id = when {
+                    errorMessage != null -> TokeIcons.Advertencia
+                    currentStage == QrUploadStage.LISTO -> TokeIcons.CheckVerde
+                    else -> TokeIcons.MisQrs
+                }
+            ),
+            contentDescription = null,
+            tint = if (errorMessage == null && currentStage != QrUploadStage.LISTO) paleta.textoPrincipal else Color.Unspecified,
+            modifier = Modifier.size(72.dp),
+        )
+        Spacer(modifier = Modifier.height(20.dp))
+        Text(
+            text = titulo,
+            style = TextStyle(fontFamily = PlusJakartaSans, fontWeight = FontWeight.ExtraBold, fontSize = 22.sp),
+            color = paleta.textoPrincipal,
+            textAlign = TextAlign.Center,
+        )
         if (errorMessage != null) {
-            // Estado de error explícito y controlado
-            Icon(
-                imageVector = Icons.Default.ErrorOutline,
-                contentDescription = "Error",
-                modifier = Modifier.size(64.dp),
-                tint = MaterialTheme.colorScheme.error
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-            Text(
-                text = "No pudimos subir tu QR",
-                style = MaterialTheme.typography.headlineSmall,
-                color = MaterialTheme.colorScheme.onBackground,
-                fontWeight = FontWeight.Bold
-            )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = errorMessage,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = TextAlign.Center
+                style = TextStyle(fontFamily = PlusJakartaSans, fontWeight = FontWeight.Medium, fontSize = 15.sp, lineHeight = 21.sp),
+                color = paleta.textoSecundario,
+                textAlign = TextAlign.Center,
             )
             Spacer(modifier = Modifier.height(24.dp))
-            Button(
-                onClick = onRetry,
-                modifier = Modifier.fillMaxWidth().height(TokeMedidas.BotonAltura),
-                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
-            ) {
-                Text("Reintentar", fontWeight = FontWeight.Bold)
-            }
-            Spacer(modifier = Modifier.height(12.dp))
-            Button(
-                onClick = onBack,
-                modifier = Modifier.fillMaxWidth().height(48.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
-            ) {
-                Text("Volver", color = MaterialTheme.colorScheme.onSurfaceVariant)
-            }
-        } else {
-            // Estado de Progreso secuencial honesto (indeterminado)
-            Icon(
-                imageVector = if (currentStage == QrUploadStage.LISTO) Icons.Default.CheckCircle else Icons.Default.QrCode,
-                contentDescription = null,
-                modifier = Modifier.size(72.dp),
-                tint = if (currentStage == QrUploadStage.LISTO) Color.Green else MaterialTheme.colorScheme.primary
-            )
-            Spacer(modifier = Modifier.height(24.dp))
-            Text(
-                text = currentStage.message,
-                style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.onBackground,
-                fontWeight = FontWeight.SemiBold,
-                textAlign = TextAlign.Center
-            )
+            BotonAcceso(paleta, "Reintentar", principal = true, onClick = onRetry)
+            Spacer(modifier = Modifier.height(10.dp))
+            BotonAcceso(paleta, "Volver", principal = false, onClick = onBack)
+        } else if (currentStage != QrUploadStage.LISTO) {
             Spacer(modifier = Modifier.height(20.dp))
-            
-            if (currentStage != QrUploadStage.LISTO) {
-                // Barra indeterminada honesta
-                LinearProgressIndicator(
-                    modifier = Modifier.fillMaxWidth(0.8f).height(6.dp),
-                    color = MaterialTheme.colorScheme.primary,
-                    trackColor = MaterialTheme.colorScheme.surfaceVariant
-                )
-            } else {
-                Spacer(modifier = Modifier.height(16.dp))
-                Text(
-                    text = "Cargando componentes de interfaz...",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
+            LinearProgressIndicator(
+                modifier = Modifier.fillMaxWidth(0.7f).height(6.dp),
+                color = paleta.verde,
+                trackColor = paleta.bordeControl,
+            )
         }
     }
 }

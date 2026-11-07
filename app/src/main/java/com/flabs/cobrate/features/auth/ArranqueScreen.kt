@@ -1,39 +1,24 @@
 package com.flabs.cobrate.features.auth
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
+import com.flabs.cobrate.R
+import com.flabs.cobrate.features.acceso.LogoTokeSuave
+import com.flabs.cobrate.ui.theme.tokePaleta
 
+/** Pantalla mientras la app decide si hay sesión: el símbolo de TOKE con su entrada suave. */
 @Composable
 fun ArranqueScreen() {
-    Surface(
-        modifier = Modifier.fillMaxSize(),
-        color = MaterialTheme.colorScheme.background
+    val paleta = tokePaleta()
+    Box(
+        modifier = Modifier.fillMaxSize().background(paleta.fondo),
+        contentAlignment = Alignment.Center,
     ) {
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            Text(
-                text = "TOKE",
-                style = MaterialTheme.typography.displayMedium,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary
-            )
-            Spacer(modifier = Modifier.height(24.dp))
-            CircularProgressIndicator()
-        }
+        LogoTokeSuave(paleta, tamano = 96, descripcion = stringResource(R.string.app_name))
     }
 }
