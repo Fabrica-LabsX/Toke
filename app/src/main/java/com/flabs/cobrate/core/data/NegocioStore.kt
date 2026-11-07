@@ -105,6 +105,21 @@ object NegocioStore {
         return Result.failure(result.exceptionOrNull() ?: Exception("Error desconocido en Supabase"))
     }
 
+    /** Tope de trabajadores del negocio (null = sin límite). */
+    suspend fun maxTrabajadores(negocioId: String): Int? =
+        repository.obtenerMaxTrabajadores(negocioId).getOrNull()
+
+    /** Edita nombre y tope de trabajadores en el servidor y, si sale bien, el nombre local. */
+    suspend fun editar(negocioId: String, nombre: String?, max: Int?, limpiarMax: Boolean): Result<Unit> {
+        val limpio = nombre?.trim()?.ifBlank { null }
+        val resultado = repository.actualizarNegocio(negocioId, limpio, max, limpiarMax)
+        if (resultado.isSuccess && limpio != null) {
+            _negocios.value = _negocios.value.map { if (it.id == negocioId) it.copy(nombre = limpio) else it }
+            persistir()
+        }
+        return resultado
+    }
+
     /** Busca un negocio por su id. Null si no existe. */
     fun buscarPorId(negocioId: String): Negocio? =
         _negocios.value.find { it.id == negocioId }

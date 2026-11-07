@@ -96,6 +96,27 @@ internal class NegocioRepository {
         respuesta
     }
 
+    /** Tope de trabajadores del negocio; null = sin límite (o si el servidor aún no tiene la columna). */
+    suspend fun obtenerMaxTrabajadores(negocioId: String): Result<Int?> = runCatching {
+        postgrest.from("negocios")
+            .select(Columns.list("max_trabajadores")) { filter { eq("id", negocioId) } }
+            .decodeSingleOrNull<MaxTrabajadoresDto>()?.maxTrabajadores
+    }
+
+    /** Edita el nombre y/o el tope de trabajadores (solo el dueño; lo valida el servidor). */
+    suspend fun actualizarNegocio(negocioId: String, nombre: String?, max: Int?, limpiarMax: Boolean): Result<Unit> = runCatching {
+        postgrest.rpc(
+            function = "actualizar_negocio",
+            parameters = buildJsonObject {
+                put("p_negocio_id", negocioId)
+                if (nombre != null) put("p_nombre", nombre)
+                if (max != null) put("p_max_trabajadores", max)
+                put("p_limpiar_max", limpiarMax)
+            }
+        )
+        Unit
+    }
+
     suspend fun obtenerNegociosDeCuenta(cuentaId: String): Result<List<Negocio>> = runCatching {
         // Negocios donde es dueño O donde existe una relación activa.
         // En Supabase, esto se puede hacer con un select con join o via RPC si es complejo.
@@ -144,6 +165,11 @@ internal class NegocioRepository {
         @SerialName("tipo") val tipo: TipoNegocio,
         @SerialName("dueno_cuenta_id") val duenoCuentaId: String,
         @SerialName("color_marca") val colorMarca: String? = null
+    )
+
+    @Serializable
+    internal data class MaxTrabajadoresDto(
+        @SerialName("max_trabajadores") val maxTrabajadores: Int? = null
     )
 
     @Serializable

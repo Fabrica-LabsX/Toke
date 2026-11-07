@@ -715,6 +715,10 @@ fun CobrateApp() {
                     onUnirmeNegocio = {
                         navController.navigate(Routes.INGRESAR_CODIGO)
                     },
+                    onBorrarNegocio = { id ->
+                        NegocioStore.seleccionarNegocio(id)
+                        mostrarConfirmarBorrar = true
+                    },
                     onBack = {
                         navController.popBackStack()
                     }

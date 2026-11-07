@@ -434,6 +434,11 @@ class BusinessViewModel : ViewModel() {
      * la lista de códigos activos y conciliando en segundo plano.
      */
     suspend fun crearInvitacion(negocioId: String, requiereAprobacion: Boolean = true): Result<InvitacionTrabajador> {
+        val max = NegocioStore.maxTrabajadores(negocioId)
+        val actuales = trabajadoresReales.value.size
+        if (!com.flabs.cobrate.features.negocios.NegocioEdicionLogica.puedeInvitar(max, actuales)) {
+            return Result.failure(Exception("Llegaste al máximo de $max trabajadores de tu negocio."))
+        }
         val result = InvitacionStore.crear(negocioId, requiereAprobacion)
         if (result.isSuccess) {
             val creada = result.getOrThrow()
