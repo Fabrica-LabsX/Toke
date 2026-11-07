@@ -47,17 +47,24 @@ object PlanStore {
         }.onSuccess {
             val nuevo = PlanLogica.aEstado(it)
             _estado.value = nuevo
-            registrarPlanVisto(nuevo.plan)
+            // La pantalla de "Pro activado" es solo para el plan de tu propia cuenta: un trabajador que abre un
+            // negocio cuyo dueño es Pro no activó nada.
+            val uid = com.flabs.cobrate.core.data.CuentaStore.sesionActual.value?.id
+            val esMiNegocio = uid != null && com.flabs.cobrate.core.data.NegocioStore.negocios.value
+                .find { n -> n.id == negocioId }?.dueñoCuentaId == uid
+            if (esMiNegocio) registrarPlanVisto(uid!!, nuevo.plan)
         }.onFailure {
             Log.w("PlanStore", "No se pudo consultar el plan: ${it.message}")
         }
     }
 
-    private fun registrarPlanVisto(nuevo: Plan) {
+    /** El último plan visto se guarda por cuenta, para que cambiar de cuenta no parezca una activación. */
+    private fun registrarPlanVisto(cuentaId: String, nuevo: Plan) {
         val prefs = contexto?.getSharedPreferences(PREFS, Context.MODE_PRIVATE) ?: return
-        val anterior = prefs.getString(CLAVE_PLAN_VISTO, null)?.let { runCatching { Plan.valueOf(it) }.getOrNull() }
+        val clave = "${CLAVE_PLAN_VISTO}_$cuentaId"
+        val anterior = prefs.getString(clave, null)?.let { runCatching { Plan.valueOf(it) }.getOrNull() }
         if (PlanLogica.esActivacionNueva(anterior, nuevo)) _activacionPendiente.value = true
-        prefs.edit().putString(CLAVE_PLAN_VISTO, nuevo.name).apply()
+        prefs.edit().putString(clave, nuevo.name).apply()
     }
 
     fun cerrarActivacion() {
@@ -74,6 +81,5 @@ object PlanStore {
     fun limpiar() {
         _estado.value = null
         _activacionPendiente.value = false
-        contexto?.getSharedPreferences(PREFS, Context.MODE_PRIVATE)?.edit()?.remove(CLAVE_PLAN_VISTO)?.apply()
     }
 }
