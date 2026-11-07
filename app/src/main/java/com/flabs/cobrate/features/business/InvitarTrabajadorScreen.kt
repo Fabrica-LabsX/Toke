@@ -3,9 +3,11 @@ package com.flabs.cobrate.features.business
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import android.content.Intent
 import android.widget.Toast
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -13,18 +15,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ContentCopy
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -37,11 +34,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.flabs.cobrate.R
+import androidx.compose.ui.unit.sp
+import com.flabs.cobrate.components.TokeIcons
 import com.flabs.cobrate.core.data.CuentaStore
 import com.flabs.cobrate.core.data.NegocioStore
 import com.flabs.cobrate.core.data.RelacionCuentaNegocioStore
@@ -49,17 +48,24 @@ import com.flabs.cobrate.core.logic.FeedbackManager
 import com.flabs.cobrate.core.model.EstadoRelacion
 import com.flabs.cobrate.core.model.InvitacionTrabajador
 import com.flabs.cobrate.core.model.RolCuentaNegocio
+import com.flabs.cobrate.features.acceso.BotonAcceso
+import com.flabs.cobrate.ui.theme.PlusJakartaSans
+import com.flabs.cobrate.ui.theme.TokePaleta
+import com.flabs.cobrate.ui.theme.TokeRojo
+import com.flabs.cobrate.ui.theme.tokePaleta
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 /**
- * Componente "Invitar trabajador" del lado del dueño (CAPA 4 & CAPA 35).
+ * Tarjeta "Invitar colaborador" del lado del dueño: genera un código, se copia o se comparte,
+ * muestra cuánto falta para que venza y permite revocarlo.
  */
 @Composable
 fun InvitarTrabajadorScreen(
     businessViewModel: BusinessViewModel,
     onCerrar: () -> Unit
 ) {
+    val paleta = tokePaleta()
     var invitacionActiva by remember { mutableStateOf<InvitacionTrabajador?>(null) }
     var tiempoRestanteMs by remember { mutableStateOf(0L) }
     var creandoInvitacion by remember { mutableStateOf(false) }
@@ -97,173 +103,231 @@ fun InvitarTrabajadorScreen(
         }
     }
 
-    Card(modifier = Modifier.fillMaxWidth()) {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            Text(
-                text = "Invitar trabajador",
-                style = MaterialTheme.typography.titleMedium
-            )
-
-            val negocio = negocioActual
-            if (negocio != null) {
-                Text(
-                    text = "Negocio: ${negocio.nombre}",
-                    style = MaterialTheme.typography.bodyMedium
-                )
-
-                // Casilla con aprobación previa
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable { requiereAprobacion = !requiereAprobacion }
-                        .padding(vertical = 2.dp)
-                ) {
-                    Checkbox(
-                        checked = requiereAprobacion,
-                        onCheckedChange = { requiereAprobacion = it }
+    Surface(
+        shape = RoundedCornerShape(24.dp),
+        color = paleta.tarjeta,
+        border = BorderStroke(1.dp, paleta.borde),
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = "Invitar colaborador",
+                        style = TextStyle(fontFamily = PlusJakartaSans, fontWeight = FontWeight.ExtraBold, fontSize = 19.sp),
+                        color = paleta.textoPrincipal,
                     )
-                    Column(modifier = Modifier.padding(start = 8.dp)) {
+                    if (negocioActual != null) {
                         Text(
-                            text = "Con aprobación previa",
-                            style = MaterialTheme.typography.bodyMedium,
-                            fontWeight = FontWeight.Bold
+                            text = negocioActual.nombre,
+                            style = TextStyle(fontFamily = PlusJakartaSans, fontWeight = FontWeight.Medium, fontSize = 13.sp),
+                            color = paleta.textoSecundario,
+                            maxLines = 1,
                         )
-                        if (requiereAprobacion) {
-                            Text(
-                                text = "Tendrás que aprobar a quien use este código.",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
                     }
                 }
-
-                Button(
-                    onClick = {
-                        if (creandoInvitacion) return@Button
-                        creandoInvitacion = true
-                        scope.launch {
-                            try {
-                                businessViewModel.crearInvitacion(negocio.id, requiereAprobacion).onSuccess {
-                                    invitacionActiva = it
-                                    if (requiereAprobacion) {
-                                        FeedbackManager.showSuccess("Código creado. Quien lo use deberá esperar tu aprobación.")
-                                    }
-                                }.onFailure { err ->
-                                    FeedbackManager.showErrorMessage(err.message ?: "Error al crear invitación")
-                                }
-                            } finally {
-                                creandoInvitacion = false
-                            }
-                        }
-                    },
-                    enabled = !creandoInvitacion,
-                    modifier = Modifier.fillMaxWidth()
+                Surface(
+                    onClick = onCerrar,
+                    shape = RoundedCornerShape(12.dp),
+                    color = paleta.tileFondo,
+                    border = BorderStroke(1.dp, paleta.bordeControl),
+                    modifier = Modifier.size(40.dp),
                 ) {
-                    if (creandoInvitacion) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(18.dp),
-                            color = MaterialTheme.colorScheme.onPrimary,
-                            strokeWidth = 2.dp
+                    Box(contentAlignment = Alignment.Center) {
+                        Icon(
+                            painter = painterResource(id = TokeIcons.Cerrar),
+                            contentDescription = "Cerrar",
+                            tint = paleta.textoPrincipal,
+                            modifier = Modifier.size(16.dp),
                         )
-                        Spacer(modifier = Modifier.padding(horizontal = 4.dp))
-                        Text(text = "Generando...")
-                    } else {
-                        Text(
-                            text = if (invitacionActiva == null) "Generar invitación"
-                            else "Generar otro código"
-                        )
+                    }
+                }
+            }
+
+            if (negocioActual != null) {
+                FilaAprobacion(paleta, requiereAprobacion) { requiereAprobacion = it }
+
+                BotonAcceso(
+                    paleta = paleta,
+                    texto = when {
+                        creandoInvitacion -> "Generando..."
+                        invitacionActiva == null -> "Generar código"
+                        else -> "Generar otro código"
+                    },
+                    principal = !creandoInvitacion,
+                ) {
+                    if (creandoInvitacion) return@BotonAcceso
+                    creandoInvitacion = true
+                    scope.launch {
+                        try {
+                            businessViewModel.crearInvitacion(negocioActual.id, requiereAprobacion).onSuccess {
+                                invitacionActiva = it
+                                if (requiereAprobacion) {
+                                    FeedbackManager.showSuccess("Código creado. Quien lo use deberá esperar tu aprobación.")
+                                }
+                            }.onFailure { err ->
+                                FeedbackManager.showErrorMessage(err.message ?: "Error al crear invitación")
+                            }
+                        } finally {
+                            creandoInvitacion = false
+                        }
                     }
                 }
 
                 invitacionActiva?.let { inv ->
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = "Comparte este código con tu trabajador:",
-                        style = MaterialTheme.typography.bodyMedium
+                    TarjetaCodigo(
+                        paleta = paleta,
+                        codigo = inv.codigo,
+                        restanteMs = tiempoRestanteMs,
+                        onCopiar = {
+                            val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                            clipboard.setPrimaryClip(ClipData.newPlainText("Código TOKE", inv.codigo))
+                            Toast.makeText(context, "Código copiado", Toast.LENGTH_SHORT).show()
+                        },
+                        onCompartir = {
+                            val envio = Intent(Intent.ACTION_SEND).apply {
+                                type = "text/plain"
+                                putExtra(Intent.EXTRA_TEXT, "Tu código para unirte a ${negocioActual.nombre} en TOKE: ${inv.codigo}")
+                            }
+                            context.startActivity(Intent.createChooser(envio, "Compartir código"))
+                        },
+                        onRevocar = {
+                            businessViewModel.revocarCodigo(inv.codigo)
+                            invitacionActiva = null
+                        },
                     )
-
-                    if (tiempoRestanteMs > 0) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            SelectionContainer {
-                                Text(
-                                    text = inv.codigo,
-                                    style = MaterialTheme.typography.displaySmall,
-                                    fontWeight = FontWeight.Bold,
-                                    textAlign = TextAlign.Center
-                                )
-                            }
-                            IconButton(onClick = {
-                                val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                                val clip = ClipData.newPlainText("Código TOKE", inv.codigo)
-                                clipboard.setPrimaryClip(clip)
-                                Toast.makeText(context, "Código copiado", Toast.LENGTH_SHORT).show()
-                            }) {
-                                Icon(
-                                    imageVector = Icons.Default.ContentCopy,
-                                    contentDescription = "Copiar código"
-                                )
-                            }
-                        }
-
-                        val minutos = (tiempoRestanteMs / 1000) / 60
-                        val segundos = (tiempoRestanteMs / 1000) % 60
-                        Text(
-                            text = "${stringResource(R.string.invitar_vence)} (%02d:%02d)".format(minutos, segundos),
-                            style = MaterialTheme.typography.bodySmall
-                        )
-
-                        Spacer(modifier = Modifier.height(8.dp))
-                        OutlinedButton(
-                            onClick = {
-                                businessViewModel.revocarCodigo(inv.codigo)
-                                invitacionActiva = null
-                            },
-                            modifier = Modifier.fillMaxWidth(),
-                            colors = ButtonDefaults.outlinedButtonColors(
-                                contentColor = MaterialTheme.colorScheme.error
-                            )
-                        ) {
-                            Text("Revocar código")
-                        }
-                    } else {
-                        Text(
-                            text = inv.codigo,
-                            style = MaterialTheme.typography.displaySmall.copy(color = MaterialTheme.colorScheme.outline),
-                            fontWeight = FontWeight.Bold,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                        Text(
-                            text = stringResource(R.string.invitar_vencido),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.error
-                        )
-                    }
                 }
             } else {
                 Text(
                     text = "No se encontró un negocio activo que administres.",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.error
+                    style = TextStyle(fontFamily = PlusJakartaSans, fontWeight = FontWeight.Medium, fontSize = 14.sp),
+                    color = TokeRojo,
                 )
             }
+        }
+    }
+}
 
-            Spacer(modifier = Modifier.height(4.dp))
-            OutlinedButton(
-                onClick = onCerrar,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(text = "Cerrar")
+@Composable
+private fun FilaAprobacion(paleta: TokePaleta, activo: Boolean, onCambia: (Boolean) -> Unit) {
+    Surface(
+        onClick = { onCambia(!activo) },
+        shape = RoundedCornerShape(16.dp),
+        color = paleta.tileFondo,
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Row(modifier = Modifier.padding(14.dp), verticalAlignment = Alignment.CenterVertically) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = "Aprobar antes de entrar",
+                    style = TextStyle(fontFamily = PlusJakartaSans, fontWeight = FontWeight.Bold, fontSize = 15.sp),
+                    color = paleta.textoPrincipal,
+                )
+                Text(
+                    text = "Quien use el código esperará a que lo aceptes.",
+                    style = TextStyle(fontFamily = PlusJakartaSans, fontWeight = FontWeight.Medium, fontSize = 13.sp),
+                    color = paleta.textoSecundario,
+                )
             }
+            Spacer(modifier = Modifier.width(12.dp))
+            Switch(
+                checked = activo,
+                onCheckedChange = onCambia,
+                colors = SwitchDefaults.colors(
+                    checkedTrackColor = paleta.verde,
+                    checkedThumbColor = paleta.verdeTexto,
+                    uncheckedTrackColor = paleta.bordeControl,
+                    uncheckedBorderColor = paleta.bordeControl,
+                    uncheckedThumbColor = paleta.tarjeta,
+                ),
+            )
+        }
+    }
+}
+
+@Composable
+private fun TarjetaCodigo(
+    paleta: TokePaleta,
+    codigo: String,
+    restanteMs: Long,
+    onCopiar: () -> Unit,
+    onCompartir: () -> Unit,
+    onRevocar: () -> Unit,
+) {
+    val vigente = restanteMs > 0
+    Surface(shape = RoundedCornerShape(18.dp), color = paleta.tileFondo, modifier = Modifier.fillMaxWidth()) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            Text(
+                text = if (vigente) "Comparte este código con tu colaborador" else "Código vencido. Genera uno nuevo.",
+                style = TextStyle(fontFamily = PlusJakartaSans, fontWeight = FontWeight.Medium, fontSize = 13.sp),
+                color = if (vigente) paleta.textoSecundario else TokeRojo,
+                textAlign = TextAlign.Center,
+            )
+            SelectionContainer {
+                Text(
+                    text = codigo,
+                    style = TextStyle(fontFamily = PlusJakartaSans, fontWeight = FontWeight.ExtraBold, fontSize = 34.sp, letterSpacing = 2.sp),
+                    color = if (vigente) paleta.textoPrincipal else paleta.textoSecundario,
+                )
+            }
+            if (vigente) {
+                val minutos = (restanteMs / 1000) / 60
+                val segundos = (restanteMs / 1000) % 60
+                Text(
+                    text = "Vence en %02d:%02d".format(minutos, segundos),
+                    style = TextStyle(fontFamily = PlusJakartaSans, fontWeight = FontWeight.Bold, fontSize = 13.sp),
+                    color = paleta.textoSecundario,
+                )
+                Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.fillMaxWidth()) {
+                    AccionCompacta(paleta, "Copiar", TokeIcons.Copiar, Modifier.weight(1f), onCopiar)
+                    AccionCompacta(paleta, "Compartir", TokeIcons.Compartir, Modifier.weight(1f), onCompartir)
+                }
+                Surface(
+                    onClick = onRevocar,
+                    shape = RoundedCornerShape(9999.dp),
+                    color = paleta.rojoFondo,
+                    border = BorderStroke(1.dp, paleta.rojoBorde),
+                    modifier = Modifier.fillMaxWidth().height(40.dp),
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Text(
+                            text = "Revocar código",
+                            style = TextStyle(fontFamily = PlusJakartaSans, fontWeight = FontWeight.Bold, fontSize = 14.sp),
+                            color = TokeRojo,
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun AccionCompacta(paleta: TokePaleta, texto: String, icono: Int, modifier: Modifier, onClick: () -> Unit) {
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(9999.dp),
+        color = paleta.tarjeta,
+        border = BorderStroke(1.dp, paleta.bordeControl),
+        modifier = modifier.height(40.dp),
+    ) {
+        Row(horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
+            Icon(
+                painter = painterResource(id = icono),
+                contentDescription = null,
+                tint = paleta.textoPrincipal,
+                modifier = Modifier.size(16.dp),
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(
+                text = texto,
+                style = TextStyle(fontFamily = PlusJakartaSans, fontWeight = FontWeight.Bold, fontSize = 14.sp),
+                color = paleta.textoPrincipal,
+            )
         }
     }
 }

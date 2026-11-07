@@ -69,6 +69,9 @@ class FiltroEquipoTest {
 
     @Test
     fun pausarYReanudarAlternanElEstado() {
+        assertEquals(EstadoRelacion.EXPULSADA, FiltroEquipo.estadoAlPausarOReanudar(EstadoRelacion.EXPULSADA))
+        assertEquals(false, FiltroEquipo.apareceEnEquipo(EstadoRelacion.EXPULSADA))
+        assertEquals(true, FiltroEquipo.apareceEnEquipo(EstadoRelacion.PAUSADA))
         assertEquals(EstadoRelacion.PAUSADA, FiltroEquipo.estadoAlPausarOReanudar(EstadoRelacion.ACTIVA))
         assertEquals(EstadoRelacion.ACTIVA, FiltroEquipo.estadoAlPausarOReanudar(EstadoRelacion.PAUSADA))
     }

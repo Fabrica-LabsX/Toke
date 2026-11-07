@@ -182,8 +182,7 @@ class BusinessViewModel : ViewModel() {
         val relacionesTrabajador = todasLasRelaciones.filter {
             it.negocioId == negocioId &&
             it.rol == RolCuentaNegocio.TRABAJADOR &&
-            it.estado != EstadoRelacion.SOLICITADA &&
-            it.estado != EstadoRelacion.RECHAZADA
+            com.flabs.cobrate.features.equipo.FiltroEquipo.apareceEnEquipo(it.estado)
         }
 
         // Identificar qué cuentas no están en el caché local
@@ -283,7 +282,7 @@ class BusinessViewModel : ViewModel() {
                         it.copy(estado = nuevoEstado)
                     } else it
                 }
-                RelacionCuentaNegocioStore.sincronizar(cuentaId, nuevasRelaciones)
+                RelacionCuentaNegocioStore.sincronizarNegocio(negocioId, nuevasRelaciones.filter { it.negocioId == negocioId })
                 cargarEquipoDelNegocio()
                 FeedbackManager.setLoading(false)
                 FeedbackManager.showSuccess("Trabajador actualizado correctamente.")

@@ -83,7 +83,9 @@ fun EquipoTrabajadorFila(
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
-                EstadoChip(paleta = paleta, estado = info.estado)
+                if (info.estado == EstadoRelacion.PAUSADA) {
+                    EstadoChip(paleta = paleta, estado = info.estado)
+                }
             }
             if (puedeAdministrar) {
                 Spacer(modifier = Modifier.width(10.dp))
@@ -120,7 +122,6 @@ private fun Iniciales(paleta: TokePaleta, nombre: String) {
 @Composable
 private fun EstadoChip(paleta: TokePaleta, estado: EstadoRelacion) {
     val (fondo, colorTexto, texto) = when (estado) {
-        EstadoRelacion.ACTIVA -> Triple(paleta.activo, Color.White, "Activo")
         EstadoRelacion.PAUSADA -> Triple(paleta.ambar, paleta.ambarTexto, "En pausa")
         else -> Triple(paleta.tileFondo, paleta.textoSecundario, estado.name)
     }
@@ -135,13 +136,6 @@ private fun EstadoChip(paleta: TokePaleta, estado: EstadoRelacion) {
                     contentDescription = null,
                     tint = colorTexto,
                     modifier = Modifier.size(11.dp),
-                )
-            } else if (estado == EstadoRelacion.ACTIVA) {
-                Box(
-                    modifier = Modifier
-                        .size(6.dp)
-                        .clip(CircleShape)
-                        .background(colorTexto),
                 )
             }
             Spacer(modifier = Modifier.width(6.dp))

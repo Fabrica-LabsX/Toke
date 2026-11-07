@@ -40,7 +40,16 @@ object FiltroEquipo {
     fun pestanaTrasCambioDeSolicitudes(actual: PestanaEquipo, cantidadSolicitudes: Int): PestanaEquipo =
         if (cantidadSolicitudes == 0 && actual == PestanaEquipo.SOLICITUDES) PestanaEquipo.MI_EQUIPO else actual
 
-    /** Pausar a un trabajador activo; cualquier otro estado lo reactiva. */
-    fun estadoAlPausarOReanudar(estado: EstadoRelacion): EstadoRelacion =
-        if (estado == EstadoRelacion.ACTIVA) EstadoRelacion.PAUSADA else EstadoRelacion.ACTIVA
+    /** Pausar a un trabajador activo y reanudar a uno en pausa; un expulsado no cambia. */
+    fun estadoAlPausarOReanudar(estado: EstadoRelacion): EstadoRelacion = when (estado) {
+        EstadoRelacion.ACTIVA -> EstadoRelacion.PAUSADA
+        EstadoRelacion.PAUSADA -> EstadoRelacion.ACTIVA
+        else -> estado
+    }
+
+    /** Quién aparece en Mi Equipo: ni solicitudes, ni rechazados, ni expulsados (esos desaparecen). */
+    fun apareceEnEquipo(estado: EstadoRelacion): Boolean = when (estado) {
+        EstadoRelacion.SOLICITADA, EstadoRelacion.RECHAZADA, EstadoRelacion.EXPULSADA -> false
+        else -> true
+    }
 }
