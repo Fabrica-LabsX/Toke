@@ -28,9 +28,16 @@ import com.flabs.cobrate.features.acceso.FormRegistroDatos
 import com.flabs.cobrate.features.acceso.FormUnCampo
 import com.flabs.cobrate.features.acceso.LogoToke
 import com.flabs.cobrate.features.acceso.TituloAcceso
-import com.flabs.cobrate.ui.theme.tokeEsOscuro
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import com.flabs.cobrate.ui.theme.tokePaleta
 import kotlinx.coroutines.launch
+
+@Composable
+private fun Titulo(paleta: com.flabs.cobrate.ui.theme.TokePaleta, titulo: String, subtitulo: String? = null) =
+    TituloAcceso(paleta, titulo, subtitulo, centrado = true)
 
 private enum class ModoAuth {
     LOGIN,
@@ -75,7 +82,6 @@ fun LoginScreen(
 
     val scope = rememberCoroutineScope()
     val paleta = tokePaleta()
-    val esOscuro = tokeEsOscuro()
 
     val handleVolver = {
         when (modoAuth) {
@@ -97,12 +103,14 @@ fun LoginScreen(
 
     AccesoFondo(paleta = paleta) {
         BotonAtras(paleta, handleVolver)
-        LogoToke(esOscuro, tamano = 72, descripcion = stringResource(R.string.app_name))
+        Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+            LogoToke(paleta, tamano = 52, descripcion = stringResource(R.string.app_name))
+        }
 
         when (modoAuth) {
             // ---- MODO 1: LOGIN NORMAL ----
             ModoAuth.LOGIN -> {
-                TituloAcceso(paleta, "Ingresa a tu cuenta", "¡Bienvenido de vuelta!")
+                Titulo(paleta, "Ingresa a tu cuenta", "¡Bienvenido de vuelta!")
                 FormLogin(
                     paleta = paleta,
                     email = email,
@@ -133,7 +141,7 @@ fun LoginScreen(
 
             // ---- MODO 2: RECUPERACIÓN - EMAIL ----
             ModoAuth.RECUPERACION_EMAIL -> {
-                TituloAcceso(paleta, "Recuperar acceso", "Ingresa tu correo para recibir las instrucciones y tu código de verificación.")
+                Titulo(paleta, "Recuperar acceso", "Ingresa tu correo para recibir las instrucciones y tu código de verificación.")
                 FormUnCampo(
                     paleta = paleta,
                     etiqueta = "Correo electrónico",
@@ -164,7 +172,7 @@ fun LoginScreen(
 
             // ---- MODO 3: RECUPERACIÓN - OTP ----
             ModoAuth.RECUPERACION_OTP -> {
-                TituloAcceso(paleta, "Verifica tu código", "Revisa tu bandeja de entrada e ingresa el código enviado a $email")
+                Titulo(paleta, "Verifica tu código", "Revisa tu bandeja de entrada e ingresa el código enviado a $email")
                 FormUnCampo(
                     paleta = paleta,
                     etiqueta = "Código de verificación",
@@ -197,7 +205,7 @@ fun LoginScreen(
 
             // ---- MODO 4: RECUPERACIÓN - NUEVA CONTRASEÑA ----
             ModoAuth.RECUPERACION_PASSWORD -> {
-                TituloAcceso(paleta, "Nueva contraseña", "Establece tu nueva contraseña para acceder a TOKE!.")
+                Titulo(paleta, "Nueva contraseña", "Establece tu nueva contraseña para acceder a TOKE!.")
                 FormPasswords(
                     paleta = paleta,
                     etiqueta = "Nueva contraseña",
@@ -221,7 +229,7 @@ fun LoginScreen(
 
             // ---- MODO 5: REGISTRO EN 2 PASOS ----
             ModoAuth.REGISTRO_PASOS -> {
-                TituloAcceso(
+                Titulo(
                     paleta,
                     "Crea tu cuenta",
                     if (pasoRegistro <= 1) "Paso 1 de 2 · Tus datos" else "Paso 2 de 2 · Confirma tu correo",
@@ -296,9 +304,9 @@ fun LoginScreen(
                         },
                     )
                 }
-                EnlaceAcceso(paleta, "¿Ya tienes cuenta? Inicia sesión") {
+                EnlaceAcceso(paleta, "¿Ya tienes cuenta? Inicia sesión", onClick = {
                     modoAuth = ModoAuth.LOGIN
-                }
+                })
             }
         }
         EspacioAcceso(8)

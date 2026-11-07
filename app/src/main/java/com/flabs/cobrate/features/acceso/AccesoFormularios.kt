@@ -1,6 +1,8 @@
 package com.flabs.cobrate.features.acceso
 
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.ui.Modifier
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -29,7 +31,7 @@ fun ColumnScope.FormUnCampo(
     onEnlace: () -> Unit = {},
 ) {
     CampoAcceso(paleta, etiqueta, valor, placeholder, onCambia, teclado)
-    EspacioAcceso(4)
+    Spacer(modifier = Modifier.weight(1f))
     BotonAcceso(paleta, textoBoton, principal = true, onClick = onAccion)
     if (textoEnlace != null) EnlaceAcceso(paleta, textoEnlace, onEnlace)
 }
@@ -57,7 +59,7 @@ fun ColumnScope.FormPasswords(
         paleta, "Confirmar contraseña", confirmacion, "Repite la contraseña", onConfirmacion,
         esPassword = true, visible = visible, onAlternarVisible = { visible = !visible },
     )
-    EspacioAcceso(4)
+    Spacer(modifier = Modifier.weight(1f))
     BotonAcceso(paleta, textoBoton, principal = true, onClick = onAccion)
     if (textoEnlace != null) EnlaceAcceso(paleta, textoEnlace, onEnlace)
 }
@@ -81,7 +83,8 @@ fun ColumnScope.FormLogin(
         paleta, "Contraseña", password, "Tu contraseña", onPassword,
         esPassword = true, visible = passwordVisible, onAlternarVisible = onAlternarVisible,
     )
-    EnlaceAcceso(paleta, "¿Olvidaste tu contraseña?", onOlvide)
+    EnlaceAcceso(paleta, "¿Olvidaste tu contraseña?", onOlvide, sobrio = true)
+    Spacer(modifier = Modifier.weight(1f))
     BotonAcceso(paleta, "Entrar a mi cuenta", principal = true, onClick = onEntrar)
     BotonAcceso(paleta, "Crear una cuenta nueva", principal = false, onClick = onCrear)
 }
@@ -104,7 +107,7 @@ fun ColumnScope.FormRegistroDatos(
             "trabajador le aparecerá «Carlos te invitó». Para entrar a la app usarás tu correo.",
     )
     CampoAcceso(paleta, "Correo electrónico", email, "tu@correo.com", onEmail, KeyboardType.Email)
-    EspacioAcceso(4)
+    Spacer(modifier = Modifier.weight(1f))
     BotonAcceso(paleta, "Enviar código a mi correo", principal = true, onClick = onContinuar)
 }
 
@@ -136,6 +139,6 @@ fun ColumnScope.FormRegistroClave(
         paleta, "Confirmar contraseña", confirmacion, "Repite la contraseña", onConfirmacion,
         esPassword = true, visible = visible, onAlternarVisible = { visible = !visible },
     )
-    EspacioAcceso(4)
+    Spacer(modifier = Modifier.weight(1f))
     BotonAcceso(paleta, "Crear mi cuenta", principal = true, onClick = onCompletar)
 }

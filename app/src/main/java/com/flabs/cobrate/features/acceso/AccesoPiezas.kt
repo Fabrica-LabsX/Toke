@@ -5,29 +5,38 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -44,35 +53,54 @@ import com.flabs.cobrate.ui.theme.TokePaleta
 
 /** Piezas comunes de las pantallas de acceso. Colores sólidos, paleta global de la app. */
 
-/** Fondo de pantalla completa con desplazamiento y márgenes de las barras del sistema. */
+/**
+ * Fondo de pantalla completa con desplazamiento. Si el contenido es corto, ocupa toda la altura:
+ * un `Spacer(Modifier.weight(1f))` dentro de [contenido] manda lo que va debajo al pie de la pantalla.
+ */
 @Composable
 fun AccesoFondo(
     paleta: TokePaleta,
     horizontal: Alignment.Horizontal = Alignment.Start,
     contenido: @Composable ColumnScope.() -> Unit,
 ) {
-    Column(
+    BoxWithConstraints(
         modifier = Modifier
             .fillMaxSize()
             .background(paleta.fondo)
             .statusBarsPadding()
             .navigationBarsPadding()
-            .verticalScroll(rememberScrollState())
-            .padding(horizontal = 24.dp, vertical = 16.dp),
-        horizontalAlignment = horizontal,
-        verticalArrangement = Arrangement.spacedBy(14.dp),
-        content = contenido,
-    )
+            .imePadding(),
+    ) {
+        Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .defaultMinSize(minHeight = this@BoxWithConstraints.maxHeight)
+                    .padding(horizontal = 20.dp, vertical = 16.dp),
+                horizontalAlignment = horizontal,
+                verticalArrangement = Arrangement.spacedBy(14.dp),
+                content = contenido,
+            )
+        }
+    }
 }
 
-/** Logo oficial de TOKE!: la versión verde en claro y la blanca en oscuro. */
+/** Logo oficial de TOKE!: el `ic_toke_logo` blanco y transparente sobre una loseta verde redondeada. */
 @Composable
-fun LogoToke(esOscuro: Boolean, tamano: Int, descripcion: String) {
-    Image(
-        painter = painterResource(id = if (esOscuro) R.drawable.ic_toke_logo else R.drawable.ic_toke_logo_green),
-        contentDescription = descripcion,
-        modifier = Modifier.size(tamano.dp),
-    )
+fun LogoToke(paleta: TokePaleta, tamano: Int, descripcion: String, modifier: Modifier = Modifier) {
+    Surface(
+        shape = RoundedCornerShape((tamano * 0.3f).dp),
+        color = paleta.verde,
+        modifier = modifier.size(tamano.dp),
+    ) {
+        Box(contentAlignment = Alignment.Center) {
+            Image(
+                painter = painterResource(id = R.drawable.ic_toke_logo),
+                contentDescription = descripcion,
+                modifier = Modifier.size((tamano * 0.66f).dp),
+            )
+        }
+    }
 }
 
 @Composable
@@ -135,7 +163,7 @@ fun TituloAcceso(
     }
 }
 
-/** Campo con la etiqueta arriba. Si [esPassword], lleva el enlace "Mostrar / Ocultar". */
+/** Campo con la etiqueta arriba. Si [esPassword], lleva la píldora "Mostrar / Ocultar". */
 @Composable
 fun CampoAcceso(
     paleta: TokePaleta,
@@ -148,58 +176,84 @@ fun CampoAcceso(
     visible: Boolean = false,
     onAlternarVisible: () -> Unit = {},
 ) {
+    var enfocado by remember { mutableStateOf(false) }
     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
         Text(
             text = etiqueta,
-            style = TextStyle(fontFamily = PlusJakartaSans, fontWeight = FontWeight.Bold, fontSize = 14.sp),
-            color = paleta.textoPrincipal,
+            style = TextStyle(fontFamily = PlusJakartaSans, fontWeight = FontWeight.SemiBold, fontSize = 13.sp),
+            color = paleta.textoSecundario,
         )
-        OutlinedTextField(
-            value = valor,
-            onValueChange = onCambia,
-            placeholder = {
-                Text(
-                    text = placeholder,
-                    style = TextStyle(fontFamily = PlusJakartaSans, fontSize = 16.sp),
-                    color = paleta.textoSecundario,
+        Surface(
+            shape = RoundedCornerShape(12.dp),
+            color = paleta.tarjeta,
+            border = BorderStroke(if (enfocado) 2.dp else 1.dp, if (enfocado) paleta.verde else paleta.bordeControl),
+            modifier = Modifier.fillMaxWidth().height(51.dp),
+        ) {
+            Row14(paleta = paleta, esPassword = esPassword, visible = visible, onAlternarVisible = onAlternarVisible) {
+                BasicTextField(
+                    value = valor,
+                    onValueChange = onCambia,
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = if (esPassword) KeyboardType.Password else teclado),
+                    visualTransformation = if (esPassword && !visible) PasswordVisualTransformation() else VisualTransformation.None,
+                    textStyle = TextStyle(
+                        fontFamily = PlusJakartaSans,
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 16.sp,
+                        color = paleta.textoPrincipal,
+                    ),
+                    cursorBrush = SolidColor(paleta.verde),
+                    modifier = Modifier.fillMaxWidth().onFocusChanged { enfocado = it.isFocused },
+                    decorationBox = { campo ->
+                        if (valor.isEmpty()) {
+                            Text(
+                                text = placeholder,
+                                style = TextStyle(fontFamily = PlusJakartaSans, fontSize = 16.sp),
+                                color = paleta.textoSecundario.copy(alpha = 0.75f),
+                                maxLines = 1,
+                            )
+                        }
+                        campo()
+                    },
                 )
-            },
-            singleLine = true,
-            keyboardOptions = KeyboardOptions(keyboardType = if (esPassword) KeyboardType.Password else teclado),
-            visualTransformation = if (esPassword && !visible) PasswordVisualTransformation() else VisualTransformation.None,
-            trailingIcon = if (esPassword) {
-                {
-                    TextButton(onClick = onAlternarVisible) {
-                        Text(
-                            text = if (visible) "Ocultar" else "Mostrar",
-                            style = TextStyle(fontFamily = PlusJakartaSans, fontWeight = FontWeight.Bold, fontSize = 13.sp),
-                            color = paleta.enlaceVerde,
-                        )
-                    }
-                }
-            } else {
-                null
-            },
-            shape = RoundedCornerShape(16.dp),
-            textStyle = TextStyle(
-                fontFamily = PlusJakartaSans,
-                fontWeight = FontWeight.SemiBold,
-                fontSize = 17.sp,
-                color = paleta.textoPrincipal,
-            ),
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = paleta.activo,
-                unfocusedBorderColor = paleta.bordeControl,
-                focusedContainerColor = paleta.tarjeta,
-                unfocusedContainerColor = paleta.tarjeta,
-                cursorColor = paleta.activo,
-            ),
-            modifier = Modifier.fillMaxWidth(),
-        )
+            }
+        }
     }
 }
 
-/** Botón en píldora: [principal] va en verde; si no, con borde. */
+/** Fila interior del campo: el texto a la izquierda y, en contraseñas, la píldora a la derecha. */
+@Composable
+private fun Row14(
+    paleta: TokePaleta,
+    esPassword: Boolean,
+    visible: Boolean,
+    onAlternarVisible: () -> Unit,
+    campo: @Composable () -> Unit,
+) {
+    Row(
+        modifier = Modifier.fillMaxSize().padding(start = 14.dp, end = 10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Box(modifier = Modifier.weight(1f)) { campo() }
+        if (esPassword) {
+            Surface(
+                onClick = onAlternarVisible,
+                shape = RoundedCornerShape(9999.dp),
+                color = paleta.tileFondo,
+                border = BorderStroke(1.dp, paleta.borde),
+            ) {
+                Text(
+                    text = if (visible) "Ocultar" else "Mostrar",
+                    style = TextStyle(fontFamily = PlusJakartaSans, fontWeight = FontWeight.Bold, fontSize = 12.sp),
+                    color = paleta.textoPrincipal,
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 5.dp),
+                )
+            }
+        }
+    }
+}
+
+/** Botón en píldora: [principal] va en verde; si no, blanco con borde. */
 @Composable
 fun BotonAcceso(paleta: TokePaleta, texto: String, principal: Boolean, onClick: () -> Unit) {
     Surface(
@@ -209,12 +263,12 @@ fun BotonAcceso(paleta: TokePaleta, texto: String, principal: Boolean, onClick: 
         border = if (principal) null else BorderStroke(1.dp, paleta.bordeControl),
         modifier = Modifier
             .fillMaxWidth()
-            .height(56.dp),
+            .height(50.dp),
     ) {
         Box(contentAlignment = Alignment.Center) {
             Text(
                 text = texto,
-                style = TextStyle(fontFamily = PlusJakartaSans, fontWeight = FontWeight.Bold, fontSize = 17.sp),
+                style = TextStyle(fontFamily = PlusJakartaSans, fontWeight = FontWeight.Bold, fontSize = 16.sp),
                 color = if (principal) paleta.verdeTexto else paleta.textoPrincipal,
                 maxLines = 1,
             )
@@ -222,13 +276,14 @@ fun BotonAcceso(paleta: TokePaleta, texto: String, principal: Boolean, onClick: 
     }
 }
 
+/** Enlace de texto. [sobrio] lo pinta en el color del texto (como "¿Olvidaste tu contraseña?"). */
 @Composable
-fun EnlaceAcceso(paleta: TokePaleta, texto: String, onClick: () -> Unit) {
+fun EnlaceAcceso(paleta: TokePaleta, texto: String, onClick: () -> Unit, sobrio: Boolean = false) {
     TextButton(onClick = onClick, modifier = Modifier.fillMaxWidth()) {
         Text(
             text = texto,
             style = TextStyle(fontFamily = PlusJakartaSans, fontWeight = FontWeight.Bold, fontSize = 14.sp),
-            color = paleta.enlaceVerde,
+            color = if (sobrio) paleta.textoPrincipal else paleta.enlaceVerde,
         )
     }
 }
