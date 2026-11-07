@@ -4,10 +4,6 @@ import android.Manifest
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -41,36 +37,22 @@ fun PedirPermisoNotificaciones() {
     }
 
     if (mostrarDialogoExplicativo && !estaConcedido) {
-        AlertDialog(
-            onDismissRequest = {
+        DialogoPermiso(
+            titulo = "Activa los avisos",
+            texto = "Para avisarte de cada cobro, Toke necesita permiso para mostrar notificaciones.",
+            textoConfirmar = "Activar",
+            textoCancelar = "Ahora no",
+            onConfirmar = {
+                yaMostradoEnEstaSesion = true
+                mostrarDialogoExplicativo = false
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                }
+            },
+            onCancelar = {
                 yaMostradoEnEstaSesion = true
                 mostrarDialogoExplicativo = false
             },
-            title = { Text("Activa los avisos") },
-            text = { Text("Para avisarte de cada cobro, Toke necesita permiso para mostrar notificaciones.") },
-            confirmButton = {
-                Button(
-                    onClick = {
-                        yaMostradoEnEstaSesion = true
-                        mostrarDialogoExplicativo = false
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                            permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-                        }
-                    }
-                ) {
-                    Text("Activar")
-                }
-            },
-            dismissButton = {
-                OutlinedButton(
-                    onClick = {
-                        yaMostradoEnEstaSesion = true
-                        mostrarDialogoExplicativo = false
-                    }
-                ) {
-                    Text("Ahora no")
-                }
-            }
         )
     }
 }

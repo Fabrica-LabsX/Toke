@@ -2,10 +2,6 @@ package com.flabs.cobrate.components
 
 import android.content.Intent
 import android.provider.Settings
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -48,33 +44,18 @@ fun PedirExencionBateria() {
     val sinRestricciones = PermisosChecker.segundoPlanoSinRestricciones(context)
     if (sinRestricciones) return
 
-    AlertDialog(
-        onDismissRequest = {
+    DialogoPermiso(
+        titulo = "Para no perder cobros",
+        texto = "Permite que Toke funcione sin restricciones de batería. Si no, el celular puede dormir la app y los avisos llegarán tarde.",
+        textoConfirmar = "Permitir",
+        textoCancelar = "Ahora no",
+        onConfirmar = {
             PreferenciasAppStore.marcarAvisoBateriaMostrado()
-        },
-        title = { Text("Para no perder cobros") },
-        text = { Text("Permite que Toke funcione sin restricciones de batería. Si no, el celular puede dormir la app y los avisos llegarán tarde.") },
-        confirmButton = {
-            Button(
-                onClick = {
-                    PreferenciasAppStore.marcarAvisoBateriaMostrado()
-                    val intent = Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS).apply {
-                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                    }
-                    context.startActivity(intent)
-                }
-            ) {
-                Text("Permitir")
+            val intent = Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             }
+            context.startActivity(intent)
         },
-        dismissButton = {
-            OutlinedButton(
-                onClick = {
-                    PreferenciasAppStore.marcarAvisoBateriaMostrado()
-                }
-            ) {
-                Text("Ahora no")
-            }
-        }
+        onCancelar = { PreferenciasAppStore.marcarAvisoBateriaMostrado() },
     )
 }
