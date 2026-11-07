@@ -457,11 +457,10 @@ fun CobrateApp() {
         }
     }
 
-    val rutasConBarra = setOf(
-        Routes.INICIO,
-        Routes.HISTORIAL_DUENO,
-        Routes.TRABAJADORES_DUENO
-    )
+    // El trabajador no administra el equipo: su barra es Inicio, Operaciones y Más.
+    val esSoloTrabajador = rolActivo == RolCuentaNegocio.TRABAJADOR && !esDuenoReal
+    val rutasConBarra = if (esSoloTrabajador) setOf(Routes.INICIO, Routes.HISTORIAL_DUENO)
+    else setOf(Routes.INICIO, Routes.HISTORIAL_DUENO, Routes.TRABAJADORES_DUENO)
     val mostrarBarra = estadoAcceso == AccesoNegocio.EstadoAcceso.NORMAL &&
             (rolActivo == RolCuentaNegocio.ADMINISTRADOR || rolActivo == RolCuentaNegocio.TRABAJADOR || esDuenoReal) &&
             negocioSeleccionadoId != null &&
@@ -472,7 +471,7 @@ fun CobrateApp() {
         ItemNav(Routes.HISTORIAL_DUENO, stringResource(R.string.nombre_mis_cobros), TokeIcons.NavOperaciones),
         ItemNav(Routes.TRABAJADORES_DUENO, stringResource(R.string.nombre_mi_equipo), TokeIcons.NavEquipo),
         ItemNav("MAS", stringResource(R.string.nombre_mas), TokeIcons.NavMas)
-    )
+    ).filter { !(esSoloTrabajador && it.id == Routes.TRABAJADORES_DUENO) }
 
     val cantidadSolicitudes by businessViewModel.cantidadSolicitudes.collectAsState()
     val refreshStates by TabRefreshManager.refreshStates.collectAsState()

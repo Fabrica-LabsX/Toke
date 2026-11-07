@@ -169,7 +169,6 @@ private fun HomeScreenContent(
     onSeleccionarOperacion: ((String) -> Unit)? = null,
     onAbrirPermisos: () -> Unit = {},
 ) {
-    val resumen by businessViewModel.resumenDelDia.collectAsState()
     val operaciones by InMemoryOperationStore.operaciones.collectAsState()
     val alertas by AlertaStore.alertas.collectAsState()
     val sesionActual by CuentaStore.sesionActual.collectAsState()
@@ -219,6 +218,13 @@ private fun HomeScreenContent(
     }
 
     val esTrabajador = rolActivo == RolCuentaNegocio.TRABAJADOR && negocio?.dueñoCuentaId != uid
+    // Solo cobros de hoy: el dueño ve los del negocio y el trabajador los que le asignaron a él.
+    val resumen = remember(operaciones, negocio, esTrabajador, uid) {
+        val delNegocio = operaciones.filter { it.negocioId == negocio?.id }
+        val ahora = System.currentTimeMillis()
+        if (esTrabajador) com.flabs.cobrate.features.worker.ResumenHoy.delTrabajador(delNegocio, uid, ahora)
+        else com.flabs.cobrate.features.worker.ResumenHoy.delNegocio(delNegocio, ahora)
+    }
     val hayPendientes = resumen.operacionesPendientes > 0
 
     val pendientes = remember(operaciones, negocio) {
@@ -518,7 +524,8 @@ private fun HomeScreenContent(
                         }
 
                         // 3. Acciones Rápidas (Grid 2 columnas: Mis QRs / Mi equipo)
-                        item {
+                        // "Mis QRs" y "Mi equipo" son herramientas del dueño: el trabajador no las ve.
+                        if (!esTrabajador) item {
                             QuickActionsRow(
                                 onMisQRs = onMisQRs,
                                 onAnadirTrabajador = onAnadirTrabajador,
@@ -771,7 +778,6 @@ private fun HomeTopBarCard(
 
 @Composable
 private fun ResumenCard(resumen: ResumenDelDia, esTrabajador: Boolean) {
-    if (esTrabajador) return
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
@@ -781,7 +787,7 @@ private fun ResumenCard(resumen: ResumenDelDia, esTrabajador: Boolean) {
     ) {
         Column(modifier = Modifier.padding(17.dp)) {
             Text(
-                text = stringResource(R.string.home_cobros_hoy),
+                text = if (esTrabajador) "Mis cobros de hoy" else stringResource(R.string.home_cobros_hoy),
                 style = androidx.compose.ui.text.TextStyle(
                     fontFamily = PlusJakartaSans,
                     fontWeight = FontWeight.Bold,
