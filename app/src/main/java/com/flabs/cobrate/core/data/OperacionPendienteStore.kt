@@ -369,6 +369,7 @@ private fun Operacion.aDto(ownerId: String?, estadoSincronizacion: EstadoSincron
     origen = origen.aTag(),
     fechaHora = fechaHora,
     historial = historial.map { it.aDto() },
+    pagador = pagador,
     ownerId = ownerId,
     estadoSincronizacion = estadoSincronizacion.name
 )
@@ -394,7 +395,8 @@ private fun OperacionLocalDto.aModeloConElementoPendiente(): ElementoPendiente? 
         estado = estado,
         origen = origenParsed,
         fechaHora = fechaHora,
-        historial = historial.map { it.aModelo() }
+        historial = historial.map { it.aModelo() },
+        pagador = pagador
     )
     val estadoSinc = runCatching { EstadoSincronizacion.valueOf(estadoSincronizacion) }
         .getOrDefault(EstadoSincronizacion.ESPERANDO_RED)

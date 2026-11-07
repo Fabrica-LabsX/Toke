@@ -39,11 +39,15 @@ fun NegocioTile(
     modifier: Modifier = Modifier,
 ) {
     val esActual = item.esActual
-    val fondo = if (esActual) paleta.activo else paleta.tileFondo
+    // El color de marca que eligió el dueño: fondo del negocio actual e icono de los demás.
+    val colorMarca = item.negocio.colorMarca?.let {
+        com.flabs.cobrate.features.crearnegocio.CrearNegocioLogica.argbDeHex(it)?.let { argb -> androidx.compose.ui.graphics.Color(argb) }
+    }
+    val fondo = if (esActual) (colorMarca ?: paleta.activo) else paleta.tileFondo
     val colorIcono = when {
-        esActual -> paleta.verdeTexto
+        esActual -> if (colorMarca != null) androidx.compose.ui.graphics.Color.White else paleta.verdeTexto
         item.estado == EstadoEnNegocio.PENDIENTE -> TokeAmbarTexto
-        else -> paleta.textoPrincipal
+        else -> colorMarca ?: paleta.textoPrincipal
     }
     Surface(
         shape = RoundedCornerShape(14.dp),

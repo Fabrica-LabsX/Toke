@@ -172,7 +172,9 @@ internal open class OperacionRepository : OperacionRepositoryContract {
         @SerialName("origen_tipo") val origenTipo: String,
         @SerialName("origen_evento_id") val origenEventoId: String?,
         @SerialName("fecha_hora") val fechaHora: Long,
-        @SerialName("fecha_creacion") val fechaCreacion: Long? = null
+        @SerialName("fecha_creacion") val fechaCreacion: Long? = null,
+        // Columna existente: guarda el nombre del pagador que mostró la billetera.
+        @SerialName("notif_snapshot_titulo") val pagador: String? = null
     )
 
     @Serializable
@@ -210,7 +212,8 @@ private fun Operacion.toDto(fechaCreacion: Long? = null) = OperacionRepository.O
     origenTipo = "DETECTADA",
     origenEventoId = (origen as? OrigenOperacion.Detectada)?.eventoId,
     fechaHora = fechaHora,
-    fechaCreacion = fechaCreacion
+    fechaCreacion = fechaCreacion,
+    pagador = pagador
 )
 
 private fun CambioDeEstado.toDto(operacionId: String) = OperacionRepository.CambioDeEstadoDto(
@@ -229,7 +232,8 @@ private fun OperacionRepository.OperacionDto.toDomain(historial: List<OperacionR
     estado = estado,
     origen = OrigenOperacion.Detectada(origenEventoId ?: ""),
     fechaHora = fechaHora,
-    historial = historial.map { it.toDomain() }.sortedBy { it.timestamp }
+    historial = historial.map { it.toDomain() }.sortedBy { it.timestamp },
+    pagador = pagador
 )
 
 private fun OperacionRepository.CambioDeEstadoDto.toDomain() = CambioDeEstado(

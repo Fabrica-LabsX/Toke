@@ -54,6 +54,7 @@ data class OperacionLocalDto(
     val origen: String,
     val fechaHora: Long,
     val historial: List<CambioDeEstadoLocalDto> = emptyList(),
+    val pagador: String? = null,
     val ownerId: String? = null, // Solo usado por OperacionPendienteStore
     val estadoSincronizacion: String = "ESPERANDO_RED" // Usado por OperacionPendienteStore
 )

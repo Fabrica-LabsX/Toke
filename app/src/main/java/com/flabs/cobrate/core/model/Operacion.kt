@@ -21,7 +21,9 @@ data class Operacion(
     val estado: EstadoOperacion,
     val origen: OrigenOperacion,
     val fechaHora: Long,
-    val historial: List<CambioDeEstado> = emptyList()
+    val historial: List<CambioDeEstado> = emptyList(),
+    // Nombre de quien pagó, tal como lo muestra la billetera (puede venir censurado: "Juan P*").
+    val pagador: String? = null
 )
 
 /** Estados posibles de una operación de cobro. */

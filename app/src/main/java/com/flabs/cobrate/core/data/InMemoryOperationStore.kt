@@ -182,7 +182,9 @@ object InMemoryOperationStore {
 
         val idsRemotos = nuevasOperaciones.map { it.id }.toSet()
         val soloLocalesDelNegocio = operacionLocales.filter { 
-            it.negocioId == negocioIdSincronizado && it.id !in idsRemotos 
+            // Solo sobreviven los cobros que aún no llegaron al servidor; los demás ya no existen allá.
+            it.negocioId == negocioIdSincronizado && it.id !in idsRemotos &&
+                (it.id in idsOffline || it.id in idsEnVuelo)
         }
 
         _operaciones.value = deOtrosNegocios + resultadoMerge + soloLocalesDelNegocio
@@ -223,16 +225,19 @@ object InMemoryOperationStore {
         val remotas = result.getOrNull() ?: return
         
         // Filtrar remotas pertenecientes al contexto Mirror
-        val remotasMirror = remotas.filter {
-            it.negocioId == negocioId && (it.estado == EstadoOperacion.SIN_ASIGNAR || it.trabajadorAsignadoId == sessionUidInicio)
-        }
+        // El dueño ve todo el negocio; el trabajador solo lo suyo y lo que está por asignar.
+        val esDueno = NegocioStore.buscarPorId(negocioId)?.dueñoCuentaId == sessionUidInicio
+        fun enMirror(op: Operacion) =
+            op.negocioId == negocioId &&
+                (esDueno || op.estado == EstadoOperacion.SIN_ASIGNAR || op.trabajadorAsignadoId == sessionUidInicio)
+        val remotasMirror = remotas.filter { enMirror(it) }
 
         val candidateIdsParaVerificar = _operaciones.value.filter { op ->
             op.negocioId == negocioId &&
                     op.id !in idsEnVuelo &&
                     op.id !in OperacionPendienteStore.operacionesPendientes.value.map { it.id } &&
                     op.origen is OrigenOperacion.Detectada &&
-                    (op.estado == EstadoOperacion.SIN_ASIGNAR || op.trabajadorAsignadoId == sessionUidInicio) &&
+                    enMirror(op) &&
                     remotasMirror.none { it.id == op.id }
         }.map { it.id }
 
@@ -244,7 +249,7 @@ object InMemoryOperationStore {
             singleResult.onSuccess { remoteOp ->
                 if (remoteOp == null) {
                     idsParaEliminar.add(candId)
-                } else if (remoteOp.negocioId == negocioId && (remoteOp.estado == EstadoOperacion.SIN_ASIGNAR || remoteOp.trabajadorAsignadoId == sessionUidInicio)) {
+                } else if (enMirror(remoteOp)) {
                     operacionesParaActualizar.add(remoteOp)
                 } else {
                     idsParaEliminar.add(candId)

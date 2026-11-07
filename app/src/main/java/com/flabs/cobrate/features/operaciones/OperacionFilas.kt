@@ -153,7 +153,7 @@ private fun IdentidadOperacion(
         )
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = TextosCobro.TITULO,
+                text = TextosCobro.titulo(operacion.pagador),
                 style = TextStyle(
                     fontFamily = PlusJakartaSans,
                     fontWeight = FontWeight.Bold,

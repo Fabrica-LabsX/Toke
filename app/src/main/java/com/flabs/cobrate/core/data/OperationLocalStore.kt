@@ -69,7 +69,8 @@ private fun Operacion.aDto(): OperacionLocalDto =
         estado = estado,
         origen = origen.aTag(),
         fechaHora = fechaHora,
-        historial = historial.map { it.aDto() }
+        historial = historial.map { it.aDto() },
+        pagador = pagador
     )
 
 /** Representa el [OrigenOperacion] como un tag para persistencia. */
@@ -95,7 +96,8 @@ private fun OperacionLocalDto.aModelo(): Operacion? {
         estado = estado,
         origen = origenParsed,
         fechaHora = fechaHora,
-        historial = historial.map { it.aModelo() }
+        historial = historial.map { it.aModelo() },
+        pagador = pagador
     )
 }
 

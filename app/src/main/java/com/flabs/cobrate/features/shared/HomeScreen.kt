@@ -1341,7 +1341,7 @@ private fun HomeOperacionRow(
                 Spacer(modifier = Modifier.width(12.dp))
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = com.flabs.cobrate.features.operaciones.TextosCobro.TITULO,
+                        text = com.flabs.cobrate.features.operaciones.TextosCobro.titulo(operacion.pagador),
                         style = androidx.compose.ui.text.TextStyle(
                             fontFamily = PlusJakartaSans,
                             fontWeight = FontWeight.Bold,

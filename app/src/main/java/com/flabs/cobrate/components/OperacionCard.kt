@@ -73,7 +73,7 @@ fun OperacionCard(
                     Column(modifier = Modifier.weight(1f)) {
                         val nombreMostrar = when {
                             !asignadoPorNombre.isNullOrBlank() -> asignadoPorNombre
-                            else -> com.flabs.cobrate.features.operaciones.TextosCobro.TITULO
+                            else -> com.flabs.cobrate.features.operaciones.TextosCobro.titulo(operacion.pagador)
                         }
 
                         Text(

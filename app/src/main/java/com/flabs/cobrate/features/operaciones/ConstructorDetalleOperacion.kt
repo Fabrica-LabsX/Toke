@@ -51,7 +51,7 @@ object ConstructorDetalleOperacion {
             }
             add(FilaDetalle(IconoFila.FECHA, "Fecha", formatearFecha(fecha)))
             add(FilaDetalle(IconoFila.HORA, "Hora", formatearHora(fecha)))
-            add(FilaDetalle(IconoFila.PAGADOR, "Pagador", nombrePagador(tituloNotificacion)))
+            add(FilaDetalle(IconoFila.PAGADOR, "Pagador", nombrePagador(operacion.pagador ?: tituloNotificacion)))
             // Solo se muestra el trabajador si la operación tiene uno asignado y el negocio
             // tiene más de un trabajador activo.
             if (operacion.trabajadorAsignadoId != null && trabajadoresActivos > 1) {

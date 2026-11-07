@@ -324,7 +324,8 @@ class TokeNotificationListenerService : NotificationListenerService() {
             estado = EstadoOperacion.SIN_ASIGNAR,
             origen = OrigenOperacion.Detectada(evento.id),
             fechaHora = System.currentTimeMillis(),
-            historial = listOf(CambioDeEstado(System.currentTimeMillis(), EstadoOperacion.SIN_ASIGNAR))
+            historial = listOf(CambioDeEstado(System.currentTimeMillis(), EstadoOperacion.SIN_ASIGNAR)),
+            pagador = com.flabs.cobrate.core.logic.PagadorExtractor.extraer(evento.titulo, evento.texto)
         )
 
         val trabajadoresActivos = RelacionCuentaNegocioStore.relaciones

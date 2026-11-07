@@ -72,6 +72,7 @@ class PagoDePruebaReceiver : BroadcastReceiver() {
             origen = OrigenOperacion.Detectada("debug-$ahora"),
             fechaHora = ahora,
             historial = listOf(CambioDeEstado(ahora, EstadoOperacion.SIN_ASIGNAR)),
+            pagador = com.flabs.cobrate.core.logic.PagadorExtractor.extraer(titulo, texto),
         )
         val trabajadores = RelacionCuentaNegocioStore.relaciones.value.filter {
             it.negocioId == negocioId && it.rol == RolCuentaNegocio.TRABAJADOR && it.estado == EstadoRelacion.ACTIVA
