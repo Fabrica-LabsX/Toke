@@ -2,40 +2,39 @@ package com.flabs.cobrate.components
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.ExitToApp
-import androidx.compose.material.icons.automirrored.filled.Logout
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.material.icons.filled.PauseCircle
-import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.Storefront
-import androidx.compose.material.icons.filled.SwapHoriz
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.flabs.cobrate.R
-import com.flabs.cobrate.core.data.PreferenciasAppStore
-import com.flabs.cobrate.ui.theme.ThemeMode
+import com.flabs.cobrate.ui.theme.PlusJakartaSans
+import com.flabs.cobrate.ui.theme.tokePaleta
 
 /**
- * Pantalla "Acceso Pausado" conforme al diseño oficial de Figma (Nodo 14:410).
- *
- * Se muestra cuando la relación de la cuenta con el negocio activo está en estado PAUSADA.
+ * Pantalla "Acceso pausado por el dueño": se muestra cuando la relación de la cuenta con el
+ * negocio está pausada. Solo arma las piezas (AccesoPausado*); cada acción aparece únicamente
+ * si quien la usa entrega el manejador correspondiente.
  */
 @Composable
 fun PantallaAccesoPausado(
@@ -45,389 +44,111 @@ fun PantallaAccesoPausado(
     onCambiarNegocio: (() -> Unit)? = null,
     onCerrarSesion: (() -> Unit)? = null,
     onSalirDelNegocio: (() -> Unit)? = null,
-    onVolver: (() -> Unit)? = null
+    onVolver: (() -> Unit)? = null,
 ) {
-    val themeMode by PreferenciasAppStore.themeMode.collectAsState()
-    val isDark = when (themeMode) {
-        ThemeMode.DARK -> true
-        ThemeMode.LIGHT -> false
-    }
+    val paleta = tokePaleta()
 
-    val bgScreen = if (isDark) Color(0xFF0D1117) else Color(0xFFF4FBF6)
-    val cardBg = if (isDark) Color(0xFF1A1F26) else Color.White
-    val cardBorder = if (isDark) Color(0xFF2D333B) else Color(0xFFE2E8F0)
-    val titleColor = if (isDark) Color.White else Color(0xFF0F172A)
-    val subtitleColor = if (isDark) Color(0xFF94A3B8) else Color(0xFF64748B)
-
-    Box(
+    Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(bgScreen)
+            .background(paleta.fondo)
+            .statusBarsPadding()
+            .navigationBarsPadding(),
     ) {
-        FondoPanelBorroso()
-
         Column(
             modifier = Modifier
-                .fillMaxSize()
-                .statusBarsPadding()
-                .navigationBarsPadding()
+                .weight(1f)
+                .fillMaxWidth()
                 .verticalScroll(rememberScrollState())
-                .padding(16.dp),
-            verticalArrangement = Arrangement.SpaceBetween,
-            horizontalAlignment = Alignment.CenterHorizontally
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                // ---- Header: NEGOCIO ACTUAL ----
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(10.dp)
-                ) {
-                    if (onVolver != null) {
-                        Surface(
-                            onClick = onVolver,
-                            shape = RoundedCornerShape(12.dp),
-                            color = cardBg,
-                            border = BorderStroke(1.dp, cardBorder),
-                            modifier = Modifier.size(36.dp)
-                        ) {
-                            Box(contentAlignment = Alignment.Center) {
-                                Icon(
-                                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                    contentDescription = "Volver",
-                                    tint = titleColor,
-                                    modifier = Modifier.size(18.dp)
-                                )
-                            }
-                        }
-                    }
-
+            if (onVolver != null) {
+                Box(modifier = Modifier.fillMaxWidth()) {
                     Surface(
+                        onClick = onVolver,
                         shape = RoundedCornerShape(12.dp),
-                        color = if (isDark) Color(0x1A00C853) else Color(0x1A006B32),
-                        modifier = Modifier.size(36.dp)
+                        color = paleta.tarjeta,
+                        border = BorderStroke(1.dp, paleta.borde),
+                        modifier = Modifier.size(44.dp),
                     ) {
                         Box(contentAlignment = Alignment.Center) {
                             Icon(
-                                imageVector = Icons.Default.Storefront,
-                                contentDescription = null,
-                                tint = if (isDark) Color(0xFF00C853) else Color(0xFF00A651),
-                                modifier = Modifier.size(18.dp)
-                            )
-                        }
-                    }
-
-                    Column {
-                        Text(
-                            text = "NEGOCIO PAUSADO",
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = subtitleColor,
-                            letterSpacing = 0.55.sp
-                        )
-                        Text(
-                            text = negocioNombre,
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = titleColor
-                        )
-                    }
-                }
-
-                // ---- Tarjeta Central de Acceso Pausado ----
-                Surface(
-                    shape = RoundedCornerShape(28.dp),
-                    color = cardBg,
-                    border = BorderStroke(1.dp, cardBorder),
-                    shadowElevation = if (isDark) 0.dp else 4.dp,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(21.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
-                        // Ícono prominente y badge de pausa
-                        Box(contentAlignment = Alignment.BottomEnd) {
-                            Surface(
-                                shape = RoundedCornerShape(20.dp),
-                                color = if (isDark) Color(0x26F59E0B) else Color(0xFFFFFBEB),
-                                border = BorderStroke(1.dp, if (isDark) Color(0x66F59E0B) else Color(0xFFFDE68A)),
-                                modifier = Modifier.size(64.dp)
-                            ) {
-                                Box(contentAlignment = Alignment.Center) {
-                                    Icon(
-                                        imageVector = Icons.Default.PauseCircle,
-                                        contentDescription = null,
-                                        tint = Color(0xFFF59E0B),
-                                        modifier = Modifier.size(28.dp)
-                                    )
-                                }
-                            }
-                        }
-
-                        Text(
-                            text = stringResource(R.string.pausado_titulo),
-                            fontSize = 20.sp,
-                            fontWeight = FontWeight.ExtraBold,
-                            color = titleColor,
-                            textAlign = TextAlign.Center,
-                            letterSpacing = (-0.5).sp
-                        )
-
-                        Text(
-                            text = stringResource(R.string.pausado_texto, negocioNombre),
-                            fontSize = 13.5.sp,
-                            fontWeight = FontWeight.Medium,
-                            color = subtitleColor,
-                            textAlign = TextAlign.Center,
-                            lineHeight = 22.sp
-                        )
-
-                        // Botón Primario: Verificar si ya me reactivó
-                        if (onVerificarEstado != null) {
-                            Surface(
-                                onClick = onVerificarEstado,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(48.dp),
-                                shape = RoundedCornerShape(12.dp),
-                                color = if (isDark) Color(0xFF00C853) else Color(0xFF00A651),
-                                shadowElevation = 2.dp
-                            ) {
-                                Row(
-                                    modifier = Modifier.fillMaxSize(),
-                                    horizontalArrangement = Arrangement.Center,
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.Refresh,
-                                        contentDescription = null,
-                                        tint = if (isDark) Color.Black else Color.White,
-                                        modifier = Modifier.size(16.dp)
-                                    )
-                                    Spacer(modifier = Modifier.width(8.dp))
-                                    Text(
-                                        text = stringResource(R.string.pausado_verificar),
-                                        fontSize = 15.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        color = if (isDark) Color.Black else Color.White
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
-
-                // ---- Opciones Alternativas ----
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(10.dp)
-                ) {
-                    Text(
-                        text = stringResource(R.string.pausado_opciones_alternativas),
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = subtitleColor,
-                        letterSpacing = 0.6.sp,
-                        modifier = Modifier.padding(horizontal = 4.dp)
-                    )
-
-                    // Opción 1: Crear mi propio negocio
-                    if (onCrearNegocio != null) {
-                        Surface(
-                            onClick = onCrearNegocio,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(48.dp),
-                            shape = RoundedCornerShape(20.dp),
-                            color = cardBg,
-                            border = BorderStroke(1.dp, cardBorder)
-                        ) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .padding(horizontal = 17.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                                ) {
-                                    Surface(
-                                        shape = RoundedCornerShape(8.dp),
-                                        color = if (isDark) Color(0x1A00C853) else Color(0xFFE8F8EE),
-                                        modifier = Modifier.size(32.dp)
-                                    ) {
-                                        Box(contentAlignment = Alignment.Center) {
-                                            Icon(
-                                                imageVector = Icons.Default.Add,
-                                                contentDescription = null,
-                                                tint = Color(0xFF00A651),
-                                                modifier = Modifier.size(18.dp)
-                                            )
-                                        }
-                                    }
-                                    Text(
-                                        text = stringResource(R.string.pausado_crear_propio),
-                                        fontSize = 14.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        color = titleColor
-                                    )
-                                }
-                                Icon(
-                                    imageVector = Icons.Default.ChevronRight,
-                                    contentDescription = null,
-                                    tint = subtitleColor,
-                                    modifier = Modifier.size(16.dp)
-                                )
-                            }
-                        }
-                    }
-
-                    // Opción 2: Cambiar o unirme a otro negocio
-                    if (onCambiarNegocio != null) {
-                        Surface(
-                            onClick = onCambiarNegocio,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(48.dp),
-                            shape = RoundedCornerShape(20.dp),
-                            color = cardBg,
-                            border = BorderStroke(1.dp, cardBorder)
-                        ) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .padding(horizontal = 17.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                                ) {
-                                    Surface(
-                                        shape = RoundedCornerShape(8.dp),
-                                        color = if (isDark) Color(0x1A00C853) else Color(0xFFE4F1E7),
-                                        modifier = Modifier.size(32.dp)
-                                    ) {
-                                        Box(contentAlignment = Alignment.Center) {
-                                            Icon(
-                                                imageVector = Icons.Default.SwapHoriz,
-                                                contentDescription = null,
-                                                tint = Color(0xFF00A651),
-                                                modifier = Modifier.size(18.dp)
-                                            )
-                                        }
-                                    }
-                                    Text(
-                                        text = stringResource(R.string.pausado_cambiar_unirme),
-                                        fontSize = 14.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        color = titleColor
-                                    )
-                                }
-                                Icon(
-                                    imageVector = Icons.Default.ChevronRight,
-                                    contentDescription = null,
-                                    tint = subtitleColor,
-                                    modifier = Modifier.size(16.dp)
-                                )
-                            }
-                        }
-                    }
-
-                    // Opción opcional: Salir del negocio
-                    if (onSalirDelNegocio != null) {
-                        Surface(
-                            onClick = onSalirDelNegocio,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(44.dp),
-                            shape = RoundedCornerShape(20.dp),
-                            color = cardBg,
-                            border = BorderStroke(1.dp, cardBorder)
-                        ) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .padding(horizontal = 17.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.AutoMirrored.Filled.ExitToApp,
-                                        contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.error,
-                                        modifier = Modifier.size(18.dp)
-                                    )
-                                    Text(
-                                        text = stringResource(R.string.accion_salir_negocio),
-                                        fontSize = 14.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        color = MaterialTheme.colorScheme.error
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
-
-                // ---- Botón de Cerrar Sesión ----
-                if (onCerrarSesion != null) {
-                    Surface(
-                        onClick = onCerrarSesion,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(48.dp),
-                        shape = RoundedCornerShape(20.dp),
-                        color = if (isDark) Color(0x33DC2626) else Color(0xFFFEF2F2),
-                        border = BorderStroke(1.dp, if (isDark) Color(0x66DC2626) else Color(0xFFFECACA))
-                    ) {
-                        Row(
-                            modifier = Modifier.fillMaxSize(),
-                            horizontalArrangement = Arrangement.Center,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.Logout,
-                                contentDescription = null,
-                                tint = Color(0xFFDC2626),
-                                modifier = Modifier.size(16.dp)
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(
-                                text = stringResource(R.string.dialogo_cerrar_confirmar),
-                                fontSize = 15.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = Color(0xFFDC2626)
+                                painter = painterResource(id = TokeIcons.FlechaAtras),
+                                contentDescription = "Volver",
+                                tint = paleta.textoPrincipal,
+                                modifier = Modifier.size(20.dp),
                             )
                         }
                     }
                 }
             }
-
-            // Nota de Ayuda al pie
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(20.dp))
+            AccesoPausadoIcono(paleta = paleta)
+            Spacer(modifier = Modifier.height(20.dp))
             Text(
-                text = stringResource(R.string.pausado_nota_ayuda),
-                fontSize = 12.sp,
-                fontWeight = FontWeight.Medium,
-                color = subtitleColor,
-                textAlign = TextAlign.Center
+                text = "Acceso pausado por el dueño",
+                style = TextStyle(
+                    fontFamily = PlusJakartaSans,
+                    fontWeight = FontWeight.ExtraBold,
+                    fontSize = 24.sp,
+                    letterSpacing = (-0.5).sp,
+                    textAlign = TextAlign.Center,
+                ),
+                color = paleta.textoPrincipal,
             )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = "El dueño ha pausado temporalmente tu rol en este comercio. " +
+                    "No escucharás cobros hasta que reactive tu acceso.",
+                style = TextStyle(
+                    fontFamily = PlusJakartaSans,
+                    fontWeight = FontWeight.Medium,
+                    fontSize = 15.sp,
+                    lineHeight = 22.sp,
+                    textAlign = TextAlign.Center,
+                ),
+                color = paleta.textoSecundario,
+                modifier = Modifier.padding(horizontal = 8.dp),
+            )
+            Spacer(modifier = Modifier.height(24.dp))
+            AccesoPausadoEstado(paleta = paleta, negocioNombre = negocioNombre)
+        }
+
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            if (onVerificarEstado != null) {
+                AccesoPausadoBoton(
+                    paleta = paleta,
+                    texto = "VERIFICAR SI YA ME REACTIVÓ",
+                    icono = TokeIcons.Sincronizar,
+                    relleno = true,
+                    onClick = onVerificarEstado,
+                )
+            }
+            if (onCambiarNegocio != null) {
+                AccesoPausadoBoton(
+                    paleta = paleta,
+                    texto = "Cambiar o unirme a otro negocio",
+                    icono = TokeIcons.Intercambiar,
+                    relleno = false,
+                    onClick = onCambiarNegocio,
+                )
+            }
+            if (onCrearNegocio != null) {
+                AccesoPausadoEnlace(paleta, "Crear mi propio negocio", null, onCrearNegocio)
+            }
+            if (onSalirDelNegocio != null) {
+                AccesoPausadoEnlace(paleta, "Salir del negocio", null, onSalirDelNegocio)
+            }
+            if (onCerrarSesion != null) {
+                AccesoPausadoEnlace(paleta, "Cerrar sesión", TokeIcons.CerrarSesion, onCerrarSesion)
+            }
         }
     }
 }
