@@ -169,6 +169,11 @@ object AndroidNotifier {
      * Canal exclusivo: toke_observabilidad_envio (IMPORTANCE_LOW, silencioso).
      * ID Estable por operación: operacionId.hashCode() para actualizar/reemplazar transiciones.
      */
+    /** Quita el aviso "esperando red" de un cobro cuando ya llegó al equipo. */
+    fun cancelarObservabilidadEnvio(context: Context, operacionId: String) {
+        androidx.core.app.NotificationManagerCompat.from(context.applicationContext).cancel(operacionId.hashCode())
+    }
+
     fun mostrarObservabilidadEnvio(
         context: Context,
         operacionId: String,
@@ -179,14 +184,15 @@ object AndroidNotifier {
         val appContext = context.applicationContext
         declararCanales(appContext)
 
+        val prefijo = if (estado == EstadoObservabilidadEnvio.ESPERANDO_RED) "¡Cobro detectado!" else "Cobro"
         val titulo = if (!metodoNombre.isNullOrBlank()) {
-            "Cobro $metodoNombre · S/ ${"%.2f".format(monto)}"
+            "$prefijo $metodoNombre · S/ ${"%.2f".format(monto)}"
         } else {
-            "Cobro · S/ ${"%.2f".format(monto)}"
+            "$prefijo · S/ ${"%.2f".format(monto)}"
         }
 
         val texto = when (estado) {
-            EstadoObservabilidadEnvio.ESPERANDO_RED -> "Esperando red..."
+            EstadoObservabilidadEnvio.ESPERANDO_RED -> "Esperando red. Se enviará a tu equipo al reconectar."
             EstadoObservabilidadEnvio.ERROR -> "Hubo un error al enviar el cobro."
             EstadoObservabilidadEnvio.ENVIADO -> "Cobro enviado a trabajadores."
         }

@@ -1,20 +1,31 @@
 package com.flabs.cobrate.components
-import com.flabs.cobrate.ui.theme.TokeRojo
-import com.flabs.cobrate.ui.theme.TokeAmbarTexto
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Logout
-import androidx.compose.material.icons.filled.DarkMode
-import androidx.compose.material.icons.filled.LightMode
-import androidx.compose.material.icons.filled.PowerSettingsNew
-import androidx.compose.material3.*
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.SheetValue
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
+import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -24,33 +35,38 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.flabs.cobrate.core.data.CuentaStore
 import com.flabs.cobrate.core.data.NegocioStore
 import com.flabs.cobrate.core.data.PreferenciasAppStore
 import com.flabs.cobrate.core.data.RelacionCuentaNegocioStore
 import com.flabs.cobrate.core.model.EstadoRelacion
 import com.flabs.cobrate.core.model.RolCuentaNegocio
+import com.flabs.cobrate.ui.theme.PlusJakartaSans
 import com.flabs.cobrate.ui.theme.ThemeMode
+import com.flabs.cobrate.ui.theme.TokeMedidas
+import com.flabs.cobrate.ui.theme.TokePaleta
+import com.flabs.cobrate.ui.theme.rememberPulsacion
 import com.flabs.cobrate.ui.theme.tokePaleta
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.launch
 
+/** Una opción del menú Más. [destructivo] la pinta en rojo (salir de un negocio, borrarlo). */
 data class ItemMas(
     val label: String,
-    val icono: ImageVector,
-    val onClick: () -> Unit
+    @androidx.annotation.DrawableRes val icono: Int,
+    val destructivo: Boolean = false,
+    val onClick: () -> Unit,
 )
 
 /**
- * Menú inferior desplegable para opciones adicionales.
- * Separación clara entre destinos secundarios desplazables y pie fijo con acciones inmediatas.
+ * Menú inferior "Más": aspecto de la app, aviso sin conexión (solo administradores), la lista de
+ * destinos y, siempre visibles al pie, Cerrar sesión y Apagar TOKE con su texto completo.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -90,12 +106,10 @@ fun MasSheet(
             }
         },
         sheetState = sheetState,
-        containerColor = paleta.fondo
+        containerColor = paleta.fondo,
+        shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
     ) {
-        Column(
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            // ---- Zona Central Desplazable ----
+        Column(modifier = Modifier.fillMaxWidth()) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -104,213 +118,151 @@ fun MasSheet(
                         state = rememberScrollState(),
                         enabled = sheetState.currentValue == SheetValue.Expanded
                     )
-                    .padding(bottom = 8.dp)
+                    .padding(horizontal = TokeMedidas.MargenLateral),
+                verticalArrangement = Arrangement.spacedBy(TokeMedidas.EntreGrupos),
             ) {
-                // Selector de Tema
-                val currentTheme by PreferenciasAppStore.themeMode.collectAsState()
-
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 24.dp, vertical = 8.dp)
-                ) {
-                    Text(
-                        text = "Aspecto",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = paleta.textoSecundario,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Spacer(modifier = Modifier.height(12.dp))
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(48.dp)
-                            .clip(RoundedCornerShape(24.dp))
-                            .background(paleta.tileFondo),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        ThemeOption(
-                            label = "Claro",
-                            icon = Icons.Default.LightMode,
-                            selected = currentTheme == ThemeMode.LIGHT,
-                            onClick = { PreferenciasAppStore.setThemeMode(ThemeMode.LIGHT) },
-                            modifier = Modifier.weight(1f)
-                        )
-                        ThemeOption(
-                            label = "Oscuro",
-                            icon = Icons.Default.DarkMode,
-                            selected = currentTheme == ThemeMode.DARK,
-                            onClick = { PreferenciasAppStore.setThemeMode(ThemeMode.DARK) },
-                            modifier = Modifier.weight(1f)
-                        )
-                    }
-                }
-
-                // Opción Notificaciones del Dueño
-                val sesionActual by CuentaStore.sesionActual.collectAsState()
-                val negocioActivoId by NegocioStore.negocioActivoId.collectAsState()
-                val relaciones by RelacionCuentaNegocioStore.relaciones.collectAsState()
-
-                val esAdminActivo = remember(sesionActual?.id, negocioActivoId, relaciones) {
-                    val uid = sesionActual?.id ?: return@remember false
-                    val negId = negocioActivoId ?: return@remember false
-                    relaciones.any {
-                        it.cuentaId == uid &&
-                                it.negocioId == negId &&
-                                it.rol == RolCuentaNegocio.ADMINISTRADOR &&
-                                it.estado == EstadoRelacion.ACTIVA
-                    }
-                }
-
-                if (esAdminActivo) {
-                    val avisarCobroEnviado by PreferenciasAppStore.avisarCobroEnviado.collectAsState()
-
-                    Spacer(modifier = Modifier.height(12.dp))
-                    HorizontalDivider(
-                        modifier = Modifier.padding(horizontal = 24.dp),
-                        thickness = 0.5.dp,
-                        color = paleta.borde
-                    )
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 24.dp, vertical = 4.dp)
-                    ) {
-                        Text(
-                            text = "Notificaciones del Dueño",
-                            style = MaterialTheme.typography.labelMedium,
-                            color = paleta.textoSecundario,
-                            fontWeight = FontWeight.Bold
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Column(modifier = Modifier.weight(1f).padding(end = 12.dp)) {
-                                Text(
-                                    text = "Avisar cuando un cobro se envía a trabajadores",
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    fontWeight = FontWeight.SemiBold,
-                                    color = paleta.textoPrincipal
-                                )
-                                Spacer(modifier = Modifier.height(2.dp))
-                                Text(
-                                    text = "Te informa cuando TOKE logra enviar el cobro para que quede disponible para los trabajadores.",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = paleta.textoSecundario
-                                )
-                            }
-                            Switch(
-                                checked = avisarCobroEnviado,
-                                onCheckedChange = { enabled ->
-                                    PreferenciasAppStore.setAvisarCobroEnviado(enabled)
-                                }
-                            )
-                        }
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-                HorizontalDivider(
-                    modifier = Modifier.padding(horizontal = 24.dp),
-                    thickness = 0.5.dp,
-                    color = paleta.borde
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // Rejilla de Destinos Secundarios
-                val filas = remember(items) { items.chunked(3) }
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    filas.forEach { fila ->
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(12.dp)
-                        ) {
-                            fila.forEach { item ->
-                                Box(modifier = Modifier.weight(1f)) {
-                                    GridActionCard(
-                                        item = item,
-                                        onItemClick = { ejecutarConCierre { item.onClick() } }
-                                    )
-                                }
-                            }
-                            // Rellenar espacio para mantener ancho consistente si la última fila tiene < 3 elementos
-                            repeat(3 - fila.size) {
-                                Spacer(modifier = Modifier.weight(1f))
-                            }
-                        }
-                    }
-                }
+                SelectorAspecto(paleta)
+                AvisoSinConexion(paleta)
+                ListaDestinos(paleta, items) { item -> ejecutarConCierre(item.onClick) }
+                Spacer(modifier = Modifier.height(4.dp))
             }
 
-            // ---- Pie Fijo y Siempre Visible ----
-            HorizontalDivider(
-                modifier = Modifier.fillMaxWidth(),
-                thickness = 0.5.dp,
-                color = paleta.borde
-            )
-
-            Row(
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 12.dp)
+                    .padding(horizontal = TokeMedidas.MargenLateral, vertical = 12.dp)
                     .navigationBarsPadding(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                verticalAlignment = Alignment.CenterVertically
+                verticalArrangement = Arrangement.spacedBy(10.dp),
             ) {
-                OutlinedButton(
-                    onClick = { ejecutarConCierre { onCerrarSesion() } },
-                    enabled = !cerrando,
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(44.dp),
-                    shape = RoundedCornerShape(12.dp),
-                    border = BorderStroke(1.dp, paleta.bordeControl),
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = paleta.textoPrincipal)
-                ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.Logout,
-                        contentDescription = null,
-                        modifier = Modifier.size(18.dp)
-                    )
-                    Spacer(modifier = Modifier.width(6.dp))
-                    Text(
-                        text = "Cerrar",
-                        fontWeight = FontWeight.Bold
-                    )
-                }
+                BotonPie(paleta, "Cerrar sesión", rojo = false, habilitado = !cerrando) { ejecutarConCierre(onCerrarSesion) }
+                BotonPie(paleta, "Apagar TOKE", rojo = true, habilitado = !cerrando) { ejecutarConCierre(onApagarToke) }
+            }
+        }
+    }
+}
 
-                Button(
-                    onClick = { ejecutarConCierre { onApagarToke() } },
-                    enabled = !cerrando,
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(44.dp),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = TokeRojo,
-                        contentColor = Color.White
-                    )
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.PowerSettingsNew,
-                        contentDescription = null,
-                        modifier = Modifier.size(18.dp)
-                    )
-                    Spacer(modifier = Modifier.width(6.dp))
-                    Text(
-                        text = "Apagar TOKE",
-                        fontWeight = FontWeight.Bold
-                    )
+@Composable
+private fun TituloSeccion(paleta: TokePaleta, texto: String) {
+    Text(
+        text = texto.uppercase(),
+        style = TextStyle(fontFamily = PlusJakartaSans, fontWeight = FontWeight.Bold, fontSize = 12.sp, letterSpacing = 0.8.sp),
+        color = paleta.textoSecundario,
+        modifier = Modifier.padding(start = 4.dp),
+    )
+}
+
+@Composable
+private fun SelectorAspecto(paleta: TokePaleta) {
+    val actual by PreferenciasAppStore.themeMode.collectAsState()
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        TituloSeccion(paleta, "Aspecto")
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(TokeMedidas.BotonAltura)
+                .background(paleta.tileFondo, RoundedCornerShape(9999.dp))
+                .padding(4.dp),
+        ) {
+            OpcionAspecto(paleta, "Claro", actual == ThemeMode.LIGHT, Modifier.weight(1f)) {
+                PreferenciasAppStore.setThemeMode(ThemeMode.LIGHT)
+            }
+            OpcionAspecto(paleta, "Oscuro", actual == ThemeMode.DARK, Modifier.weight(1f)) {
+                PreferenciasAppStore.setThemeMode(ThemeMode.DARK)
+            }
+        }
+    }
+}
+
+@Composable
+private fun OpcionAspecto(paleta: TokePaleta, texto: String, elegido: Boolean, modifier: Modifier, onClick: () -> Unit) {
+    val pulso = rememberPulsacion()
+    Surface(
+        onClick = onClick,
+        interactionSource = pulso.fuente,
+        shape = RoundedCornerShape(9999.dp),
+        color = if (elegido) paleta.seleccionFondo else androidx.compose.ui.graphics.Color.Transparent,
+        modifier = modifier.height(TokeMedidas.BotonAltura - 8.dp).then(pulso.modificador),
+    ) {
+        Box(contentAlignment = Alignment.Center) {
+            Text(
+                text = texto,
+                style = TextStyle(fontFamily = PlusJakartaSans, fontWeight = if (elegido) FontWeight.Bold else FontWeight.Medium, fontSize = 15.sp),
+                color = if (elegido) paleta.seleccionTexto else paleta.textoSecundario,
+            )
+        }
+    }
+}
+
+
+/** Interruptor del dueño: avisar cuando un cobro detectado no pudo llegar al equipo por falta de internet. */
+@Composable
+private fun AvisoSinConexion(paleta: TokePaleta) {
+    val sesionActual by CuentaStore.sesionActual.collectAsState()
+    val negocioActivoId by NegocioStore.negocioActivoId.collectAsState()
+    val relaciones by RelacionCuentaNegocioStore.relaciones.collectAsState()
+
+    val esAdminActivo = remember(sesionActual?.id, negocioActivoId, relaciones) {
+        val uid = sesionActual?.id ?: return@remember false
+        val negId = negocioActivoId ?: return@remember false
+        relaciones.any {
+            it.cuentaId == uid &&
+                it.negocioId == negId &&
+                it.rol == RolCuentaNegocio.ADMINISTRADOR &&
+                it.estado == EstadoRelacion.ACTIVA
+        }
+    }
+    if (!esAdminActivo) return
+
+    val activo by PreferenciasAppStore.avisarCobroEnviado.collectAsState()
+    Surface(
+        onClick = { PreferenciasAppStore.setAvisarCobroEnviado(!activo) },
+        shape = RoundedCornerShape(18.dp),
+        color = paleta.tarjeta,
+        border = BorderStroke(1.dp, paleta.borde),
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Row(modifier = Modifier.padding(14.dp), verticalAlignment = Alignment.CenterVertically) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = "Avisar si no hay conexión",
+                    style = TextStyle(fontFamily = PlusJakartaSans, fontWeight = FontWeight.Bold, fontSize = 15.sp),
+                    color = paleta.textoPrincipal,
+                )
+                Text(
+                    text = "Si detectas un cobro sin internet, verás “Cobro detectado, esperando red” hasta que llegue a tu equipo.",
+                    style = TextStyle(fontFamily = PlusJakartaSans, fontWeight = FontWeight.Medium, fontSize = 13.sp, lineHeight = 18.sp),
+                    color = paleta.textoSecundario,
+                )
+            }
+            Spacer(modifier = Modifier.width(12.dp))
+            Switch(
+                checked = activo,
+                onCheckedChange = { PreferenciasAppStore.setAvisarCobroEnviado(it) },
+                colors = SwitchDefaults.colors(
+                    checkedTrackColor = paleta.verde,
+                    checkedThumbColor = paleta.verdeTexto,
+                    uncheckedTrackColor = paleta.bordeControl,
+                    uncheckedBorderColor = paleta.bordeControl,
+                    uncheckedThumbColor = paleta.tarjeta,
+                ),
+            )
+        }
+    }
+}
+
+@Composable
+private fun ListaDestinos(paleta: TokePaleta, items: List<ItemMas>, onItem: (ItemMas) -> Unit) {
+    Surface(
+        shape = RoundedCornerShape(20.dp),
+        color = paleta.tarjeta,
+        border = BorderStroke(1.dp, paleta.borde),
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Column {
+            items.forEachIndexed { indice, item ->
+                FilaDestino(paleta, item) { onItem(item) }
+                if (indice < items.lastIndex) {
+                    HorizontalDivider(modifier = Modifier.padding(start = 68.dp), thickness = 1.dp, color = paleta.borde)
                 }
             }
         }
@@ -318,76 +270,63 @@ fun MasSheet(
 }
 
 @Composable
-private fun ThemeOption(
-    label: String,
-    icon: ImageVector,
-    selected: Boolean,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    val paleta = tokePaleta()
-    val bgColor = if (selected) paleta.seleccionFondo else Color.Transparent
-    val contentColor = if (selected) paleta.seleccionTexto else paleta.textoSecundario
-
-    Box(
-        modifier = modifier
-            .fillMaxHeight()
-            .clip(RoundedCornerShape(24.dp))
-            .background(bgColor)
-            .clickable { onClick() },
-        contentAlignment = Alignment.Center
-    ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                modifier = Modifier.size(18.dp),
-                tint = contentColor
-            )
-            Spacer(modifier = Modifier.width(8.dp))
+private fun FilaDestino(paleta: TokePaleta, item: ItemMas, onClick: () -> Unit) {
+    val color = if (item.destructivo) paleta.rojo else paleta.textoPrincipal
+    Surface(onClick = onClick, color = androidx.compose.ui.graphics.Color.Transparent, modifier = Modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier.height(58.dp).padding(horizontal = 14.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Surface(
+                shape = RoundedCornerShape(12.dp),
+                color = if (item.destructivo) paleta.rojoFondo else paleta.tileFondo,
+                modifier = Modifier.size(40.dp),
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(
+                        painter = painterResource(id = item.icono),
+                        contentDescription = null,
+                        tint = color,
+                        modifier = Modifier.size(22.dp),
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.width(14.dp))
             Text(
-                text = label,
-                style = MaterialTheme.typography.labelLarge,
-                color = contentColor,
-                fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium
+                text = item.label,
+                style = TextStyle(fontFamily = PlusJakartaSans, fontWeight = FontWeight.Bold, fontSize = 16.sp),
+                color = color,
+                modifier = Modifier.weight(1f),
+                maxLines = 1,
+            )
+            Icon(
+                painter = painterResource(id = TokeIcons.ChevronDerecha),
+                contentDescription = null,
+                tint = paleta.textoSecundario,
+                modifier = Modifier.size(16.dp),
             )
         }
     }
 }
 
 @Composable
-private fun GridActionCard(
-    item: ItemMas,
-    onItemClick: () -> Unit
-) {
-    val paleta = tokePaleta()
+private fun BotonPie(paleta: TokePaleta, texto: String, rojo: Boolean, habilitado: Boolean, onClick: () -> Unit) {
+    val pulso = rememberPulsacion()
     Surface(
-        modifier = Modifier
-            .aspectRatio(1f)
-            .clip(RoundedCornerShape(16.dp))
-            .clickable { onItemClick() },
-        shape = RoundedCornerShape(16.dp),
-        color = paleta.tarjeta,
-        border = BorderStroke(1.dp, paleta.borde)
+        onClick = onClick,
+        enabled = habilitado,
+        interactionSource = pulso.fuente,
+        shape = RoundedCornerShape(9999.dp),
+        color = if (rojo) paleta.rojo else paleta.tarjeta,
+        border = if (rojo) null else BorderStroke(1.dp, paleta.bordeControl),
+        modifier = Modifier.fillMaxWidth().height(TokeMedidas.BotonAltura).then(pulso.modificador),
     ) {
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            Icon(
-                imageVector = item.icono,
-                contentDescription = null,
-                modifier = Modifier.size(28.dp),
-                tint = paleta.textoPrincipal
-            )
-            Spacer(modifier = Modifier.height(8.dp))
+        Box(contentAlignment = Alignment.Center) {
             Text(
-                text = item.label,
-                style = MaterialTheme.typography.labelLarge,
-                color = paleta.textoPrincipal,
-                textAlign = TextAlign.Center,
-                maxLines = 1
+                text = texto,
+                style = TextStyle(fontFamily = PlusJakartaSans, fontWeight = FontWeight.Bold, fontSize = 16.sp),
+                color = if (rojo) androidx.compose.ui.graphics.Color.White else paleta.textoPrincipal,
+                maxLines = 1,
             )
         }
     }

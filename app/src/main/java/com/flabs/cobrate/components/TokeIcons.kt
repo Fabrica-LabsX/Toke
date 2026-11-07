@@ -94,4 +94,6 @@ object TokeIcons {
 
     // Borrar un método de cobro.
     @DrawableRes val Papelera = R.drawable.ic_papelera
+    @DrawableRes val Reportes = R.drawable.ic_reportes
+    @DrawableRes val MisQrs = R.drawable.ic_mis_qrs
 }

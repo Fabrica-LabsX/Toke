@@ -264,9 +264,14 @@ object OperacionPendienteStore {
 
     /**
      * Valida que la cuenta actual sea Dueño o ADMINISTRADOR en estado ACTIVA del negocio activo y
-     * tenga activado el toggle 'avisarCobroEnviado' antes de emitir la notificación.
+     * tenga activado el aviso sin conexión (avisarCobroEnviado) antes de avisar de un cobro que espera red o falló.
      */
     fun notificarSiCorresponde(context: Context, operacion: Operacion, estadoEnvio: EstadoObservabilidadEnvio) {
+        // Ya no se avisa de cobros enviados: solo se retira el aviso de "esperando red" si había uno.
+        if (estadoEnvio == EstadoObservabilidadEnvio.ENVIADO) {
+            AndroidNotifier.cancelarObservabilidadEnvio(context, operacion.id)
+            return
+        }
         val cuentaId = CuentaStore.sesionActual.value?.id ?: return
         val negocioIdActivo = NegocioStore.negocioActivoId.value ?: return
 

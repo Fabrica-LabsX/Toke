@@ -771,19 +771,19 @@ fun CobrateApp() {
         val esTrabajador = (rolActivo == RolCuentaNegocio.TRABAJADOR && !esDuenoReal)
         val itemsMas = if (esTrabajador) {
             val baseItems = mutableListOf(
-                ItemMas(stringResource(R.string.nombre_mis_negocios), Icons.Default.Storefront) {
+                ItemMas(stringResource(R.string.nombre_mis_negocios), TokeIcons.Maletin) {
                     navController.irADetalle(Routes.MIS_NEGOCIOS)
                 },
-                ItemMas(stringResource(R.string.nombre_aviso_voz), Icons.AutoMirrored.Filled.VolumeUp) {
+                ItemMas(stringResource(R.string.nombre_aviso_voz), TokeIcons.VolumenAlto) {
                     navController.irADetalle(Routes.VOZ)
                 },
-                ItemMas(stringResource(R.string.nombre_permisos), Icons.Default.Shield) {
+                ItemMas(stringResource(R.string.nombre_permisos), TokeIcons.EscudoCandado) {
                     navController.irADetalle(Routes.PERMISOS_DUENO)
                 }
             )
             if (negocioSeleccionadoId != null) {
                 baseItems.add(
-                    ItemMas(stringResource(R.string.accion_salir_negocio), Icons.AutoMirrored.Filled.ExitToApp) {
+                    ItemMas(stringResource(R.string.accion_salir_negocio), TokeIcons.CerrarSesion, destructivo = true) {
                         mostrarConfirmarSalir = true
                     }
                 )
@@ -791,34 +791,34 @@ fun CobrateApp() {
             baseItems
         } else {
             val baseItems = mutableListOf(
-                ItemMas(stringResource(R.string.nombre_mis_negocios), Icons.Default.Storefront) {
+                ItemMas(stringResource(R.string.nombre_mis_negocios), TokeIcons.Maletin) {
                     navController.irADetalle(Routes.MIS_NEGOCIOS)
                 },
-                ItemMas(stringResource(R.string.nombre_mi_equipo), Icons.Default.Groups) {
+                ItemMas(stringResource(R.string.nombre_mi_equipo), TokeIcons.NavEquipo) {
                     navController.irAPestana(Routes.TRABAJADORES_DUENO)
                 },
-                ItemMas(stringResource(R.string.nombre_reportes), Icons.Default.BarChart) {
+                ItemMas(stringResource(R.string.nombre_reportes), TokeIcons.Reportes) {
                     navController.irADetalle(Routes.ESTADISTICAS_DUENO)
                 },
-                ItemMas(stringResource(R.string.nombre_mis_qr), Icons.Default.Payments) {
+                ItemMas(stringResource(R.string.nombre_mis_qr), TokeIcons.MisQrs) {
                     navController.irADetalle(Routes.METODOS_COBRO_DUENO)
                 },
-                ItemMas(stringResource(R.string.nombre_mis_locales), Icons.Default.Store) {
+                ItemMas(stringResource(R.string.nombre_mis_locales), TokeIcons.Tienda) {
                     navController.irADetalle(Routes.ESTABLECIMIENTOS_DUENO)
                 },
-                ItemMas(stringResource(R.string.nombre_aviso_voz), Icons.AutoMirrored.Filled.VolumeUp) {
+                ItemMas(stringResource(R.string.nombre_aviso_voz), TokeIcons.VolumenAlto) {
                     navController.irADetalle(Routes.VOZ)
                 },
-                ItemMas(stringResource(R.string.nombre_permisos), Icons.Default.Shield) {
+                ItemMas(stringResource(R.string.nombre_permisos), TokeIcons.EscudoCandado) {
                     navController.irADetalle(Routes.PERMISOS_DUENO)
                 },
-                ItemMas(stringResource(R.string.nombre_mi_plan), Icons.AutoMirrored.Filled.ReceiptLong) {
+                ItemMas(stringResource(R.string.nombre_mi_plan), TokeIcons.Recibo) {
                     navController.irADetalle(Routes.PLAN_FACTURACION_DUENO)
                 }
             )
             if (esDuenoReal) {
                 baseItems.add(
-                    ItemMas(stringResource(R.string.accion_borrar_negocio), Icons.Default.DeleteForever) {
+                    ItemMas(stringResource(R.string.accion_borrar_negocio), TokeIcons.Papelera, destructivo = true) {
                         mostrarConfirmarBorrar = true
                     }
                 )
