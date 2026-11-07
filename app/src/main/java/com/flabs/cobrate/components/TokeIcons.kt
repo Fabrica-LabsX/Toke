@@ -87,4 +87,8 @@ object TokeIcons {
     @DrawableRes val VerificadoContorno = R.drawable.ic_verificado_contorno
     @DrawableRes val VolumenAlto = R.drawable.ic_volumen_alto
     @DrawableRes val WifiActivo = R.drawable.ic_wifi_activo
+
+    // Estado del servicio de TOKE (junto al icono de conexión): con check verde / rojo sin check.
+    @DrawableRes val SyncOk = R.drawable.ic_sync_ok
+    @DrawableRes val SyncError = R.drawable.ic_sync_error
 }

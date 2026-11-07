@@ -999,7 +999,8 @@ private fun InicioScreen(
         onUnirmeNegocio = { navController.navigate(Routes.INGRESAR_CODIGO) },
         onSalirDelNegocio = onSalirDelNegocio,
         onRefrescarTab = onRefrescarTab,
-        onSeleccionarOperacion = { id -> navController.irADetalle("${Routes.DETALLE_OPERACION}/$id") }
+        onSeleccionarOperacion = { id -> navController.irADetalle("${Routes.DETALLE_OPERACION}/$id") },
+        onAbrirPermisos = { navController.irADetalle(Routes.PERMISOS_DUENO) }
     )
 }
 

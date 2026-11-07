@@ -151,6 +151,7 @@ fun HomeScreen(
     onSalirDelNegocio: (() -> Unit)? = null,
     onRefrescarTab: (() -> Unit)? = null,
     onSeleccionarOperacion: ((String) -> Unit)? = null,
+    onAbrirPermisos: () -> Unit = {},
 ) {
     HomeScreenContent(
         negocio = negocio,
@@ -167,6 +168,7 @@ fun HomeScreen(
         onSalirDelNegocio = onSalirDelNegocio,
         onRefrescarTab = onRefrescarTab,
         onSeleccionarOperacion = onSeleccionarOperacion,
+        onAbrirPermisos = onAbrirPermisos,
     )
 }
 
@@ -187,6 +189,7 @@ private fun HomeScreenContent(
     onSalirDelNegocio: (() -> Unit)? = null,
     onRefrescarTab: (() -> Unit)? = null,
     onSeleccionarOperacion: ((String) -> Unit)? = null,
+    onAbrirPermisos: () -> Unit = {},
 ) {
     val resumen by businessViewModel.resumenDelDia.collectAsState()
     val operaciones by InMemoryOperationStore.operaciones.collectAsState()
@@ -289,7 +292,8 @@ private fun HomeScreenContent(
                     negocio = negocio,
                     onCambiarNegocio = { mostrarSelectorNegocio = true },
                     mostrarBadgeOffline = mostrarOffline && !disponible,
-                    mostrarBadgeOnline = disponible
+                    mostrarBadgeOnline = disponible,
+                    onAbrirPermisos = onAbrirPermisos
                 )
             }
         },
@@ -717,6 +721,7 @@ private fun HomeTopBarCard(
     onCambiarNegocio: () -> Unit,
     mostrarBadgeOffline: Boolean = false,
     mostrarBadgeOnline: Boolean = false,
+    onAbrirPermisos: () -> Unit = {},
 ) {
     Row(
         modifier = Modifier
@@ -765,6 +770,12 @@ private fun HomeTopBarCard(
                 overflow = TextOverflow.Ellipsis,
             )
         }
+        com.flabs.cobrate.components.BadgeSincronizacion(
+            operativo = com.flabs.cobrate.features.permisos.rememberEstadoServicio() ==
+                com.flabs.cobrate.features.permisos.EstadoServicio.OPERATIVO,
+            onClick = onAbrirPermisos,
+        )
+        Spacer(modifier = Modifier.width(8.dp))
         if (mostrarBadgeOnline && !mostrarBadgeOffline) {
             com.flabs.cobrate.components.BadgeConexionOnline()
         }
