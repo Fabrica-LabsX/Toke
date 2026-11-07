@@ -46,7 +46,6 @@ fun CobrosTarjeta(
     onAmpliarQr: () -> Unit,
     onCopiar: (String) -> Unit,
     onEditar: (() -> Unit)?,
-    onEliminar: (() -> Unit)?,
     onCargarQr: (() -> Unit)?,
 ) {
     Surface(
@@ -75,10 +74,6 @@ fun CobrosTarjeta(
                 if (onEditar != null) {
                     Spacer(modifier = Modifier.width(8.dp))
                     ChipAccion(paleta = paleta, texto = "Editar", icono = TokeIcons.Editar, onClick = onEditar)
-                }
-                if (onEliminar != null) {
-                    Spacer(modifier = Modifier.width(8.dp))
-                    BotonPapelera(paleta = paleta, onClick = onEliminar)
                 }
             }
 
@@ -183,27 +178,6 @@ private fun ChipAccion(paleta: TokePaleta, texto: String, icono: Int, onClick: (
                     fontSize = 14.sp,
                 ),
                 color = paleta.textoPrincipal,
-            )
-        }
-    }
-}
-
-/** Botón cuadrado con la papelera, junto a "Editar". Abre la confirmación para borrar el método. */
-@Composable
-private fun BotonPapelera(paleta: TokePaleta, onClick: () -> Unit) {
-    Surface(
-        onClick = onClick,
-        shape = RoundedCornerShape(12.dp),
-        color = paleta.tileFondo,
-        border = BorderStroke(1.dp, paleta.bordeControl),
-        modifier = Modifier.size(40.dp),
-    ) {
-        Box(contentAlignment = Alignment.Center) {
-            Icon(
-                painter = painterResource(id = TokeIcons.Papelera),
-                contentDescription = "Eliminar método de cobro",
-                tint = androidx.compose.ui.graphics.Color.Unspecified,
-                modifier = Modifier.size(20.dp),
             )
         }
     }

@@ -148,7 +148,6 @@ fun MetodosDeCobroScreen(
                             onAmpliarQr = { qrAmpliado = true },
                             onCopiar = { CobrosAcciones.copiarNumero(context, it) },
                             onEditar = if (puedeEditar) ({ metodoEnEdicion = seleccionado }) else null,
-                            onEliminar = if (puedeEditar) ({ metodoAEliminar = seleccionado }) else null,
                             onCargarQr = if (puedeEditar) {
                                 {
                                     metodoEnSubida = seleccionado.id
@@ -225,10 +224,14 @@ fun MetodosDeCobroScreen(
 
     metodoEnEdicion?.let { metodo ->
         if (puedeEditar) {
-            EditarMetodoDialogo(
+            EditarMetodoHoja(
                 paleta = paleta,
                 metodo = metodo,
                 onDismiss = { metodoEnEdicion = null },
+                onEliminar = {
+                    metodoAEliminar = metodo
+                    metodoEnEdicion = null
+                },
                 onConfirm = { id, dato, titular, oculto ->
                     businessViewModel.actualizarMetodo(id, dato, titular, oculto = oculto)
                     metodoEnEdicion = null

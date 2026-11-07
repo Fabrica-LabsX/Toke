@@ -256,7 +256,7 @@ private fun Encabezado(
 }
 
 @Composable
-private fun BotonCuadrado(paleta: TokePaleta, icono: Int, descripcion: String, onClick: () -> Unit) {
+internal fun BotonCuadrado(paleta: TokePaleta, icono: Int, descripcion: String, onClick: () -> Unit) {
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(12.dp),

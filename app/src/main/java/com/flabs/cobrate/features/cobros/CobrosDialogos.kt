@@ -1,7 +1,6 @@
 package com.flabs.cobrate.features.cobros
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -10,19 +9,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.CheckboxDefaults
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -32,43 +22,6 @@ import androidx.compose.ui.window.Dialog
 import com.flabs.cobrate.core.model.MetodoDeCobro
 import com.flabs.cobrate.ui.theme.PlusJakartaSans
 import com.flabs.cobrate.ui.theme.TokePaleta
-
-/** Ventana para editar el dato de cobro y el titular de un método, o para ocultarlo. */
-@Composable
-fun EditarMetodoDialogo(
-    paleta: TokePaleta,
-    metodo: MetodoDeCobro,
-    onDismiss: () -> Unit,
-    onConfirm: (id: String, dato: String, titular: String, oculto: Boolean) -> Unit,
-) {
-    var dato by remember { mutableStateOf(metodo.datoDeCobro) }
-    var titular by remember { mutableStateOf(metodo.nombreDestinatario ?: "") }
-    var oculto by remember { mutableStateOf(metodo.oculto) }
-
-    Dialogo(paleta = paleta, titulo = "Editar método", onDismiss = onDismiss) {
-        Campo(paleta, dato, "Dato de cobro") { dato = it }
-        Campo(paleta, titular, "Titular") { titular = it }
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable { oculto = !oculto },
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Checkbox(
-                checked = oculto,
-                onCheckedChange = { oculto = it },
-                colors = CheckboxDefaults.colors(checkedColor = paleta.activo),
-            )
-            Text(text = "Ocultar método", style = textoDialogo(), color = paleta.textoPrincipal)
-        }
-        Botones(
-            paleta = paleta,
-            textoConfirmar = "Guardar",
-            onCancelar = onDismiss,
-            onConfirmar = { onConfirm(metodo.id, dato, titular, oculto) },
-        )
-    }
-}
 
 @Composable
 private fun Dialogo(
@@ -101,47 +54,6 @@ private fun Dialogo(
                 )
                 contenido()
             }
-        }
-    }
-}
-
-@Composable
-private fun Campo(paleta: TokePaleta, valor: String, etiqueta: String, onCambia: (String) -> Unit) {
-    OutlinedTextField(
-        value = valor,
-        onValueChange = onCambia,
-        label = { Text(etiqueta, style = textoDialogo()) },
-        singleLine = true,
-        shape = RoundedCornerShape(14.dp),
-        textStyle = textoDialogo().copy(color = paleta.textoPrincipal),
-        colors = OutlinedTextFieldDefaults.colors(
-            focusedBorderColor = paleta.activo,
-            unfocusedBorderColor = paleta.bordeControl,
-            focusedLabelColor = paleta.activo,
-            unfocusedLabelColor = paleta.textoSecundario,
-            cursorColor = paleta.activo,
-        ),
-        modifier = Modifier.fillMaxWidth(),
-    )
-}
-
-@Composable
-private fun Botones(
-    paleta: TokePaleta,
-    textoConfirmar: String,
-    onCancelar: () -> Unit,
-    onConfirmar: () -> Unit,
-) {
-    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-        TextButton(onClick = onCancelar) {
-            Text("Cancelar", style = textoDialogo().copy(fontWeight = FontWeight.Bold), color = paleta.textoSecundario)
-        }
-        TextButton(onClick = onConfirmar) {
-            Text(
-                text = textoConfirmar,
-                style = textoDialogo().copy(fontWeight = FontWeight.Bold),
-                color = paleta.activo,
-            )
         }
     }
 }
