@@ -35,6 +35,7 @@ import com.flabs.cobrate.core.data.RelacionCuentaNegocioStore
 import com.flabs.cobrate.core.model.EstadoRelacion
 import com.flabs.cobrate.core.model.RolCuentaNegocio
 import com.flabs.cobrate.ui.theme.ThemeMode
+import com.flabs.cobrate.ui.theme.tokePaleta
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.launch
@@ -57,6 +58,7 @@ fun MasSheet(
     onCerrarSesion: () -> Unit,
     onApagarToke: () -> Unit
 ) {
+    val paleta = tokePaleta()
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
     val scope = rememberCoroutineScope()
     var cerrando by remember { mutableStateOf(false) }
@@ -86,7 +88,7 @@ fun MasSheet(
             }
         },
         sheetState = sheetState,
-        containerColor = MaterialTheme.colorScheme.surface
+        containerColor = paleta.fondo
     ) {
         Column(
             modifier = Modifier.fillMaxWidth()
@@ -113,7 +115,7 @@ fun MasSheet(
                     Text(
                         text = "Aspecto",
                         style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.primary,
+                        color = paleta.textoSecundario,
                         fontWeight = FontWeight.Bold
                     )
                     Spacer(modifier = Modifier.height(12.dp))
@@ -122,7 +124,7 @@ fun MasSheet(
                             .fillMaxWidth()
                             .height(48.dp)
                             .clip(RoundedCornerShape(24.dp))
-                            .background(MaterialTheme.colorScheme.surfaceVariant),
+                            .background(paleta.tileFondo),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         ThemeOption(
@@ -165,7 +167,7 @@ fun MasSheet(
                     HorizontalDivider(
                         modifier = Modifier.padding(horizontal = 24.dp),
                         thickness = 0.5.dp,
-                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)
+                        color = paleta.borde
                     )
                     Spacer(modifier = Modifier.height(12.dp))
 
@@ -177,7 +179,7 @@ fun MasSheet(
                         Text(
                             text = "Notificaciones del Dueño",
                             style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.primary,
+                            color = paleta.textoSecundario,
                             fontWeight = FontWeight.Bold
                         )
                         Spacer(modifier = Modifier.height(8.dp))
@@ -190,13 +192,14 @@ fun MasSheet(
                                 Text(
                                     text = "Avisar cuando un cobro se envía a trabajadores",
                                     style = MaterialTheme.typography.bodyMedium,
-                                    fontWeight = FontWeight.SemiBold
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = paleta.textoPrincipal
                                 )
                                 Spacer(modifier = Modifier.height(2.dp))
                                 Text(
                                     text = "Te informa cuando TOKE logra enviar el cobro para que quede disponible para los trabajadores.",
                                     style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    color = paleta.textoSecundario
                                 )
                             }
                             Switch(
@@ -213,7 +216,7 @@ fun MasSheet(
                 HorizontalDivider(
                     modifier = Modifier.padding(horizontal = 24.dp),
                     thickness = 0.5.dp,
-                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)
+                    color = paleta.borde
                 )
                 Spacer(modifier = Modifier.height(16.dp))
 
@@ -251,7 +254,7 @@ fun MasSheet(
             HorizontalDivider(
                 modifier = Modifier.fillMaxWidth(),
                 thickness = 0.5.dp,
-                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
+                color = paleta.borde
             )
 
             Row(
@@ -269,7 +272,8 @@ fun MasSheet(
                         .weight(1f)
                         .height(44.dp),
                     shape = RoundedCornerShape(12.dp),
-                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.4f))
+                    border = BorderStroke(1.dp, paleta.bordeControl),
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = paleta.textoPrincipal)
                 ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.Logout,
@@ -291,8 +295,8 @@ fun MasSheet(
                         .height(44.dp),
                     shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.error,
-                        contentColor = MaterialTheme.colorScheme.onError
+                        containerColor = Color(0xFFDC2626),
+                        contentColor = Color.White
                     )
                 ) {
                     Icon(
@@ -319,8 +323,9 @@ private fun ThemeOption(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val bgColor = if (selected) MaterialTheme.colorScheme.primary else Color.Transparent
-    val contentColor = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
+    val paleta = tokePaleta()
+    val bgColor = if (selected) paleta.seleccionFondo else Color.Transparent
+    val contentColor = if (selected) paleta.seleccionTexto else paleta.textoSecundario
 
     Box(
         modifier = modifier
@@ -353,14 +358,15 @@ private fun GridActionCard(
     item: ItemMas,
     onItemClick: () -> Unit
 ) {
+    val paleta = tokePaleta()
     Surface(
         modifier = Modifier
             .aspectRatio(1f)
             .clip(RoundedCornerShape(16.dp))
             .clickable { onItemClick() },
         shape = RoundedCornerShape(16.dp),
-        color = MaterialTheme.colorScheme.surface,
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
+        color = paleta.tarjeta,
+        border = BorderStroke(1.dp, paleta.borde)
     ) {
         Column(
             modifier = Modifier.fillMaxSize(),
@@ -371,13 +377,13 @@ private fun GridActionCard(
                 imageVector = item.icono,
                 contentDescription = null,
                 modifier = Modifier.size(28.dp),
-                tint = MaterialTheme.colorScheme.secondary
+                tint = paleta.textoPrincipal
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = item.label,
                 style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.onSurface,
+                color = paleta.textoPrincipal,
                 textAlign = TextAlign.Center,
                 maxLines = 1
             )
