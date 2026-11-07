@@ -16,13 +16,13 @@ object NotificacionesInternas {
 
     /** Contenido para "pago asignado" a un trabajador. */
     fun notificacionPagoAsignado(monto: Double, modoCauteloso: Boolean): ContenidoNotificacion {
-        val texto = if (modoCauteloso) "Pago confirmado" else "Pago confirmado: S/ $monto"
+        val texto = if (modoCauteloso) "Pago confirmado" else "Pago confirmado: S/ ${String.format(java.util.Locale.US, "%.2f", monto)}"
         return ContenidoNotificacion(titulo = "Nuevo pago asignado", texto = texto)
     }
 
     /** Contenido para "pago sin asignar" (0 o 2+ trabajadores). */
     fun notificacionPagoSinAsignar(monto: Double, modoCauteloso: Boolean): ContenidoNotificacion {
-        val texto = if (modoCauteloso) "Pago confirmado" else "Pago confirmado: S/ $monto"
+        val texto = if (modoCauteloso) "Pago confirmado" else "Pago confirmado: S/ ${String.format(java.util.Locale.US, "%.2f", monto)}"
         return ContenidoNotificacion(titulo = "Pago sin asignar", texto = texto)
     }
 

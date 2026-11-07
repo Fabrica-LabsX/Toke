@@ -22,6 +22,13 @@ class PlanLogicaTest {
         assertEquals(NivelCuota.ROJO, PlanLogica.nivel(1))
         assertEquals(NivelCuota.AGOTADA, PlanLogica.nivel(0))
         assertNull(PlanLogica.nivel(null))
+        // Con cuota de 20: amarillo desde 8 restantes, rojo desde 6.
+        assertEquals(NivelCuota.NORMAL, PlanLogica.nivel(20, 20))
+        assertEquals(NivelCuota.NORMAL, PlanLogica.nivel(9, 20))
+        assertEquals(NivelCuota.AMARILLO, PlanLogica.nivel(8, 20))
+        assertEquals(NivelCuota.AMARILLO, PlanLogica.nivel(7, 20))
+        assertEquals(NivelCuota.ROJO, PlanLogica.nivel(6, 20))
+        assertEquals(NivelCuota.AGOTADA, PlanLogica.nivel(0, 20))
     }
 
     @Test
@@ -75,5 +82,12 @@ class PlanLogicaTest {
         assertTrue(PlanLogica.mensajeDeLimite("LIMITE_NEGOCIOS: el plan Free permite 1 negocio(s)")!!.contains("1 negocio"))
         assertTrue(PlanLogica.mensajeDeLimite("x LIMITE_COLABORADORES x")!!.contains("2 colaboradores"))
         assertNull(PlanLogica.mensajeDeLimite("otro error"))
+        assertEquals("Sin fecha de vencimiento", PlanLogica.textoVigencia(null))
+        assertTrue(PlanLogica.textoVigencia(1_800_000_000_000L).startsWith("Activo hasta "))
+        assertTrue(PlanLogica.esActivacionNueva(Plan.FREE, Plan.PRO))
+        assertFalse(PlanLogica.esActivacionNueva(null, Plan.PRO))
+        assertFalse(PlanLogica.esActivacionNueva(Plan.PRO, Plan.PRO))
+        assertFalse(PlanLogica.esActivacionNueva(Plan.PRO, Plan.FREE))
+        assertTrue(PlanLogica.enlaceWhatsApp("+51 998360217").startsWith("https://wa.me/51998360217?text="))
     }
 }

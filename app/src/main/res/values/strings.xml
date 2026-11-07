@@ -127,5 +127,5 @@
     <string name="home_sin_operaciones">No hay operaciones registradas hoy.</string>
     <string name="nav_equipo">Equipo</string>
     <!-- Número para activar el plan Pro. Pendiente: reemplazar por el número real. -->
-    <string name="plan_telefono_activacion">+51 ...</string>
+    <string name="plan_telefono_activacion">+51 998360217</string>
 </resources>

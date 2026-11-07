@@ -1,6 +1,9 @@
 package com.flabs.cobrate.features.planes
 
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -12,12 +15,22 @@ import com.flabs.cobrate.components.DialogoToke
 /** Cómo activar el plan Pro: llamar al número de contacto. */
 @Composable
 fun ActivarProDialogo(onCerrar: () -> Unit) {
+    val contexto = LocalContext.current
+    val telefono = stringResource(R.string.plan_telefono_activacion)
     DialogoToke(
         titulo = "Activa tu plan Pro",
-        texto = "Comunícate a este número para activar tu plan: ${stringResource(R.string.plan_telefono_activacion)}",
-        textoConfirmar = "Entendido",
+        texto = "Comunícate por WhatsApp a este número para activar tu plan: $telefono",
+        textoConfirmar = "Abrir WhatsApp",
         textoCancelar = "Cerrar",
-        onConfirmar = onCerrar,
+        onConfirmar = {
+            runCatching {
+                contexto.startActivity(
+                    Intent(Intent.ACTION_VIEW, Uri.parse(PlanLogica.enlaceWhatsApp(telefono)))
+                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                )
+            }
+            onCerrar()
+        },
         onCancelar = onCerrar,
     )
 }

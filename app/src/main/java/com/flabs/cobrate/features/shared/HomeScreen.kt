@@ -877,7 +877,7 @@ private fun ResumenCard(resumen: ResumenDelDia, esTrabajador: Boolean, cuota: co
                         )
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
-                            text = "${resumen.numeroDeOperaciones} cobros",
+                            text = if (resumen.numeroDeOperaciones == 1) "1 cobro" else "${resumen.numeroDeOperaciones} cobros",
                             style = androidx.compose.ui.text.TextStyle(
                                 fontFamily = PlusJakartaSans,
                                 fontWeight = FontWeight.Bold,
@@ -905,7 +905,7 @@ private fun ResumenCard(resumen: ResumenDelDia, esTrabajador: Boolean, cuota: co
                         )
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
-                            text = "${resumen.operacionesPendientes} pendientes",
+                            text = if (resumen.operacionesPendientes == 1) "1 pendiente" else "${resumen.operacionesPendientes} pendientes",
                             style = androidx.compose.ui.text.TextStyle(
                                 fontFamily = PlusJakartaSans,
                                 fontWeight = FontWeight.SemiBold,

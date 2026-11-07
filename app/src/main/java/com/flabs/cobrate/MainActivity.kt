@@ -197,6 +197,7 @@ class MainActivity : ComponentActivity() {
         ConfiguracionDeVozStore.init(applicationContext)
         // Carga las preferencias de la app (C8 - Tema)
         PreferenciasAppStore.init(applicationContext)
+        com.flabs.cobrate.features.planes.PlanStore.init(applicationContext)
         // Carga el estado operativo global (CAPA 57)
         EstadoOperativoStore.init(applicationContext)
         // Rate Limiter para Auth
@@ -362,6 +363,13 @@ fun CobrateApp() {
                     }
                 } else {
                     LogSeguro.d("MainActivity", "[ON_RESUME] Omitido por TOKE apagado o sin sesión.")
+                }
+
+                // El plan puede haber cambiado desde Supabase (activación manual): se vuelve a consultar.
+                if (uid != null) {
+                    scopeLifecycle.launch {
+                        com.flabs.cobrate.features.planes.PlanStore.refrescar(NegocioStore.negocioActivoId.value)
+                    }
                 }
 
                 // Re-evaluar servicio operativo al volver a primer plano (p.ej. tras otorgar/revocar permisos)
@@ -753,6 +761,15 @@ fun CobrateApp() {
                 )
             }
         }
+    }
+
+    val planActivado by com.flabs.cobrate.features.planes.PlanStore.activacionPendiente.collectAsState()
+    val estadoDelPlan by com.flabs.cobrate.features.planes.PlanStore.estado.collectAsState()
+    if (planActivado) {
+        com.flabs.cobrate.features.planes.ProActivadoPantalla(
+            proHasta = estadoDelPlan?.proHasta,
+            onEmpezar = { com.flabs.cobrate.features.planes.PlanStore.cerrarActivacion() },
+        )
     }
 
     if (mostrarMas) {

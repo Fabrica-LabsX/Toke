@@ -18,7 +18,7 @@ create policy planes_select_propio on public.planes_cuenta
 create table if not exists public.config_planes (
   id integer primary key default 1 check (id = 1),
   pro_para_todos_hasta timestamptz,
-  cuota_diaria_free integer not null default 50 check (cuota_diaria_free >= 0),
+  cuota_diaria_free integer not null default 20 check (cuota_diaria_free >= 0),
   max_negocios_free integer not null default 1 check (max_negocios_free >= 1),
   max_colaboradores_free integer not null default 2 check (max_colaboradores_free >= 0)
 );

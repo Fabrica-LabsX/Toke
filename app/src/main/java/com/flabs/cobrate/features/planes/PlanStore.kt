@@ -1,5 +1,6 @@
 package com.flabs.cobrate.features.planes
 
+import android.content.Context
 import android.util.Log
 import com.flabs.cobrate.core.data.SupabaseClientProvider
 import io.github.jan.supabase.postgrest.postgrest
@@ -14,8 +15,21 @@ import kotlinx.serialization.json.put
  * en Supabase, la app solo la muestra.
  */
 object PlanStore {
+    private const val PREFS = "plan_store"
+    private const val CLAVE_PLAN_VISTO = "plan_visto"
+
     private val _estado = MutableStateFlow<EstadoPlan?>(null)
     val estado: StateFlow<EstadoPlan?> = _estado
+
+    /** Se enciende cuando se detecta que el plan pasó de Free a Pro; la pantalla de éxito lo apaga. */
+    private val _activacionPendiente = MutableStateFlow(false)
+    val activacionPendiente: StateFlow<Boolean> = _activacionPendiente
+
+    private var contexto: Context? = null
+
+    fun init(context: Context) {
+        contexto = context.applicationContext
+    }
 
     /** Plan conocido, o null si todavía no se sabe. */
     val plan: Plan? get() = _estado.value?.plan
@@ -31,10 +45,23 @@ object PlanStore {
                 parameters = buildJsonObject { put("p_negocio_id", negocioId) },
             ).decodeAs<EstadoPlanDto>()
         }.onSuccess {
-            _estado.value = PlanLogica.aEstado(it)
+            val nuevo = PlanLogica.aEstado(it)
+            _estado.value = nuevo
+            registrarPlanVisto(nuevo.plan)
         }.onFailure {
             Log.w("PlanStore", "No se pudo consultar el plan: ${it.message}")
         }
+    }
+
+    private fun registrarPlanVisto(nuevo: Plan) {
+        val prefs = contexto?.getSharedPreferences(PREFS, Context.MODE_PRIVATE) ?: return
+        val anterior = prefs.getString(CLAVE_PLAN_VISTO, null)?.let { runCatching { Plan.valueOf(it) }.getOrNull() }
+        if (PlanLogica.esActivacionNueva(anterior, nuevo)) _activacionPendiente.value = true
+        prefs.edit().putString(CLAVE_PLAN_VISTO, nuevo.name).apply()
+    }
+
+    fun cerrarActivacion() {
+        _activacionPendiente.value = false
     }
 
     /** Anota que el servidor rechazó un cobro por cuota agotada, para reflejarlo sin esperar la consulta. */
@@ -46,5 +73,7 @@ object PlanStore {
 
     fun limpiar() {
         _estado.value = null
+        _activacionPendiente.value = false
+        contexto?.getSharedPreferences(PREFS, Context.MODE_PRIVATE)?.edit()?.remove(CLAVE_PLAN_VISTO)?.apply()
     }
 }
