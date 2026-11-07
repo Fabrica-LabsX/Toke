@@ -26,7 +26,7 @@ import com.flabs.cobrate.features.acceso.FormPasswords
 import com.flabs.cobrate.features.acceso.FormRegistroClave
 import com.flabs.cobrate.features.acceso.FormRegistroDatos
 import com.flabs.cobrate.features.acceso.FormUnCampo
-import com.flabs.cobrate.features.acceso.LogoToke
+import com.flabs.cobrate.features.acceso.LogoTokeSuave
 import com.flabs.cobrate.features.acceso.TituloAcceso
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -104,7 +104,7 @@ fun LoginScreen(
     AccesoFondo(paleta = paleta) {
         BotonAtras(paleta, handleVolver)
         Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-            LogoToke(paleta, tamano = 52, descripcion = stringResource(R.string.app_name))
+            LogoTokeSuave(paleta, tamano = 96, descripcion = stringResource(R.string.app_name))
         }
 
         when (modoAuth) {

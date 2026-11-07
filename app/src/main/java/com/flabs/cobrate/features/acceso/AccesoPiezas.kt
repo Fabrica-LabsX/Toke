@@ -4,6 +4,9 @@ import com.flabs.cobrate.ui.theme.rememberPulsacion
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.animation.core.spring
+import androidx.compose.foundation.layout.requiredSize
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
@@ -354,5 +357,47 @@ fun AvisoAcceso(paleta: TokePaleta, titulo: String, texto: String) {
                 color = paleta.textoSecundario,
             )
         }
+    }
+}
+
+/**
+ * Símbolo de TOKE! solo, sin loseta: el `ic_toke_logo` (blanco y transparente) teñido con el verde
+ * de marca. Entra una vez con un rebote suave y un aro que se expande y se desvanece (≈900 ms);
+ * después queda quieto. Solo toca la capa gráfica, así que es barato en celulares de pocos recursos.
+ */
+@Composable
+fun LogoTokeSuave(paleta: TokePaleta, tamano: Int, descripcion: String, modifier: Modifier = Modifier) {
+    val entrada = remember { Animatable(0f) }
+    LaunchedEffect(Unit) { entrada.animateTo(1f, tween(durationMillis = 900, easing = FastOutSlowInEasing)) }
+    val escala = remember { Animatable(0.82f) }
+    LaunchedEffect(Unit) { escala.animateTo(1f, spring(dampingRatio = 0.55f, stiffness = 220f)) }
+
+    Box(
+        modifier = modifier
+            .size(tamano.dp)
+            .drawBehind {
+                // Aro suave: crece de 55 % a 100 % del tamaño y se apaga.
+                val t = entrada.value
+                if (t < 1f) {
+                    drawCircle(
+                        color = paleta.verde.copy(alpha = 0.22f * (1f - t)),
+                        radius = size.minDimension / 2f * (0.55f + 0.45f * t),
+                    )
+                }
+            },
+        contentAlignment = Alignment.Center,
+    ) {
+        Image(
+            painter = painterResource(id = R.drawable.ic_toke_logo),
+            contentDescription = descripcion,
+            colorFilter = ColorFilter.tint(paleta.verde),
+            modifier = Modifier
+                .requiredSize((tamano * 2.1f).dp) // el dibujo ocupa solo el centro del archivo
+                .graphicsLayer {
+                    alpha = (entrada.value * 2f).coerceAtMost(1f)
+                    scaleX = escala.value
+                    scaleY = escala.value
+                },
+        )
     }
 }
