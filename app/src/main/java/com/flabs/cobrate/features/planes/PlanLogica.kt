@@ -82,6 +82,15 @@ object PlanLogica {
 
     /** El servidor rechaza con este texto al llegar a la cuota (ver migración planes_free_pro). */
     fun esCuotaAgotada(mensajeDeError: String?): Boolean = mensajeDeError?.contains("CUOTA_AGOTADA") == true
+
+    /** Texto para el usuario cuando el servidor rechaza algo por el plan; null si el error no es de plan. */
+    fun mensajeDeLimite(mensajeDeError: String?): String? = when {
+        mensajeDeError == null -> null
+        mensajeDeError.contains("LIMITE_NEGOCIOS") -> "El plan Free permite 1 negocio. Pasa a Pro para crear más."
+        mensajeDeError.contains("LIMITE_COLABORADORES") -> "El plan Free permite hasta 2 colaboradores. Pasa a Pro para sumar más."
+        mensajeDeError.contains("CUOTA_AGOTADA") -> "Se acabó la cuota de hoy del plan Free. Espera a mañana o activa Pro."
+        else -> null
+    }
 }
 
 /** Cuota ya calculada para pintarla en el Home (solo el plan Free tiene cuota). */

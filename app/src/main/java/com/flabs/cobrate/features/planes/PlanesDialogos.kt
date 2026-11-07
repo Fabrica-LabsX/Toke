@@ -22,6 +22,24 @@ fun ActivarProDialogo(onCerrar: () -> Unit) {
     )
 }
 
+/** Aviso cuando el plan Free no permite lo que se intentó (otro negocio, más colaboradores). */
+@Composable
+fun LimitePlanDialogo(texto: String, onCerrar: () -> Unit) {
+    var verActivacion by remember { mutableStateOf(false) }
+    if (verActivacion) {
+        ActivarProDialogo(onCerrar = { verActivacion = false; onCerrar() })
+        return
+    }
+    DialogoToke(
+        titulo = "Disponible en Pro",
+        texto = texto,
+        textoConfirmar = "Activar Pro",
+        textoCancelar = "Ahora no",
+        onConfirmar = { verActivacion = true },
+        onCancelar = onCerrar,
+    )
+}
+
 /** Aviso cuando se acaba la cuota diaria del plan Free. */
 @Composable
 fun CuotaAgotadaDialogo(onCerrar: () -> Unit) {

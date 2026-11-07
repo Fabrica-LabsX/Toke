@@ -69,6 +69,8 @@ object ErrorMapper {
         
         // 1. Errores de Supabase Rest
         if (throwable is RestException) {
+            com.flabs.cobrate.features.planes.PlanLogica
+                .mensajeDeLimite("${throwable.message} ${throwable.description}")?.let { return it }
             return when (throwable.statusCode) {
                 401 -> "Tu sesión expiró. Inicia sesión nuevamente."
                 403 -> "No tienes permisos para realizar esta acción."

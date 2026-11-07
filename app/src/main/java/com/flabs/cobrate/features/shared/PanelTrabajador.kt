@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -141,14 +142,14 @@ internal fun FichasTrabajador(
             titulo = "Mis QRs",
             subtitulo = "Yape, Plin y bancos",
             onClick = onMisQRs,
-            modifier = Modifier.weight(1f),
+            modifier = Modifier.weight(1f).fillMaxHeight(),
         )
         when (PanelTrabajadorLogica.fichaDerecha(pendientes.size)) {
             PanelTrabajadorLogica.FichaDerecha.POR_RECLAMAR -> FichaPorReclamar(
                 p = p,
                 pendientes = pendientes,
                 onClick = onReclamar,
-                modifier = Modifier.weight(1f),
+                modifier = Modifier.weight(1f).fillMaxHeight(),
             )
             PanelTrabajadorLogica.FichaDerecha.MIS_NEGOCIOS -> FichaSimple(
                 p = p,
@@ -156,7 +157,7 @@ internal fun FichasTrabajador(
                 titulo = "Mis Negocios",
                 subtitulo = "Cambia o únete a uno",
                 onClick = onMisNegocios,
-                modifier = Modifier.weight(1f),
+                modifier = Modifier.weight(1f).fillMaxHeight(),
             )
         }
     }

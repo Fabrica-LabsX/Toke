@@ -52,6 +52,10 @@ fun CrearNegocioScreen(
     var colorHexSeleccionado by rememberSaveable { mutableStateOf<String?>(CrearNegocioLogica.COLOR_POR_DEFECTO) }
     var tipoSeleccionado by rememberSaveable { mutableStateOf<TipoNegocio?>(null) }
     var negocioCreado by remember { mutableStateOf<Negocio?>(null) }
+    var mensajeLimitePlan by remember { mutableStateOf<String?>(null) }
+    mensajeLimitePlan?.let { texto ->
+        com.flabs.cobrate.features.planes.LimitePlanDialogo(texto = texto, onCerrar = { mensajeLimitePlan = null })
+    }
 
     val metodosPorNegocio by MetodoDeCobroStore.metodosPorNegocio.collectAsState()
     val metodosDelNegocio = negocioCreado?.id?.let { metodosPorNegocio[it] } ?: emptyList()
@@ -94,7 +98,9 @@ fun CrearNegocioScreen(
                         FeedbackManager.showSuccess("¡Listo! Negocio creado.")
                         paso = if (businessViewModel != null) PasoWizard.PASO_3_MEDIOS_COBRO else PasoWizard.CONEXION_EXITOSA
                     }.onFailure { err ->
-                        FeedbackManager.showError(err)
+                        val limite = com.flabs.cobrate.features.planes.PlanLogica
+                            .mensajeDeLimite("${err.message} ${(err as? io.github.jan.supabase.exceptions.RestException)?.description}")
+                        if (limite != null) mensajeLimitePlan = limite else FeedbackManager.showError(err)
                         procesando = false
                     }
                 }

@@ -72,5 +72,8 @@ class PlanLogicaTest {
         assertTrue(PlanLogica.esCuotaAgotada("CUOTA_AGOTADA: se acabó la cuota de hoy del plan Free"))
         assertFalse(PlanLogica.esCuotaAgotada("otro error"))
         assertFalse(PlanLogica.esCuotaAgotada(null))
+        assertTrue(PlanLogica.mensajeDeLimite("LIMITE_NEGOCIOS: el plan Free permite 1 negocio(s)")!!.contains("1 negocio"))
+        assertTrue(PlanLogica.mensajeDeLimite("x LIMITE_COLABORADORES x")!!.contains("2 colaboradores"))
+        assertNull(PlanLogica.mensajeDeLimite("otro error"))
     }
 }
