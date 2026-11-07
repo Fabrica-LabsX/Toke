@@ -54,7 +54,7 @@ class WorkerViewModel internal constructor(
                 it.rol == RolCuentaNegocio.TRABAJADOR &&
                 it.estado == EstadoRelacion.ACTIVA
         }
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
     // Operaciones del negocio activo (C9 - Aislamiento).
     val operaciones: StateFlow<List<Operacion>> = combine(
@@ -63,7 +63,7 @@ class WorkerViewModel internal constructor(
         esRelacionActiva
     ) { allOps, negId, activa ->
         if (negId == null || !activa) emptyList() else allOps.filter { it.negocioId == negId }
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     /** Id del trabajador autenticado (desde Supabase Auth). */
     val identidadTrabajador: StateFlow<String?> = CuentaStore.sesionActual
