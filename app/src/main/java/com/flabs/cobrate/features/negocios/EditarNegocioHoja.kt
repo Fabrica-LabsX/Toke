@@ -3,6 +3,9 @@ package com.flabs.cobrate.features.negocios
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -36,6 +39,10 @@ import androidx.compose.ui.unit.sp
 import com.flabs.cobrate.components.TokeIcons
 import com.flabs.cobrate.core.logic.FeedbackManager
 import com.flabs.cobrate.core.model.Negocio
+import com.flabs.cobrate.core.model.TipoNegocio
+import com.flabs.cobrate.features.crearnegocio.CrearNegocioLogica
+import com.flabs.cobrate.features.crearnegocio.SelectorColorMarca
+import com.flabs.cobrate.features.crearnegocio.iconoDeTipo
 import com.flabs.cobrate.features.acceso.BotonAcceso
 import com.flabs.cobrate.features.acceso.CampoAcceso
 import com.flabs.cobrate.ui.theme.PlusJakartaSans
@@ -44,17 +51,19 @@ import com.flabs.cobrate.ui.theme.TokePaleta
 import com.flabs.cobrate.ui.theme.rememberPulsacion
 
 /** Hoja para editar un negocio: nombre, máximo de trabajadores y, abajo, borrarlo. */
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun EditarNegocioHoja(
     paleta: TokePaleta,
     negocio: Negocio,
     maxInicial: Int?,
-    onGuardar: (nombre: String, max: Int?, limpiarMax: Boolean) -> Unit,
+    onGuardar: (nombre: String, tipo: TipoNegocio, colorMarca: String?, max: Int?, limpiarMax: Boolean) -> Unit,
     onBorrar: () -> Unit,
     onDismiss: () -> Unit,
 ) {
     var nombre by remember { mutableStateOf(negocio.nombre) }
+    var tipo by remember { mutableStateOf(negocio.tipo) }
+    var color by remember { mutableStateOf(negocio.colorMarca) }
     var maxTexto by remember(maxInicial) { mutableStateOf(maxInicial?.toString() ?: "") }
 
     ModalBottomSheet(
@@ -79,7 +88,7 @@ fun EditarNegocioHoja(
                         color = paleta.textoPrincipal,
                     )
                     Text(
-                        text = "Cambia el nombre o el tope de trabajadores",
+                        text = "Cambia nombre, rubro, color o tope de trabajadores",
                         style = TextStyle(fontFamily = PlusJakartaSans, fontWeight = FontWeight.Medium, fontSize = 14.sp),
                         color = paleta.textoSecundario,
                     )
@@ -103,6 +112,43 @@ fun EditarNegocioHoja(
             }
 
             CampoAcceso(paleta, "Nombre del negocio", nombre, "Ej: Mi Bodeguita", { nombre = it })
+            Text(
+                text = "Rubro",
+                style = TextStyle(fontFamily = PlusJakartaSans, fontWeight = FontWeight.SemiBold, fontSize = 13.sp),
+                color = paleta.textoSecundario,
+            )
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                CrearNegocioLogica.tipos.forEach { op ->
+                    val activo = op.tipo == tipo
+                    Surface(
+                        onClick = { tipo = op.tipo },
+                        shape = RoundedCornerShape(9999.dp),
+                        color = if (activo) paleta.seleccionFondo else paleta.tarjeta,
+                        border = BorderStroke(1.dp, if (activo) paleta.seleccionFondo else paleta.bordeControl),
+                    ) {
+                        Row(modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                painter = painterResource(id = iconoDeTipo(op.tipo)),
+                                contentDescription = null,
+                                tint = if (activo) paleta.seleccionTexto else paleta.textoPrincipal,
+                                modifier = Modifier.size(18.dp),
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = op.titulo,
+                                style = TextStyle(fontFamily = PlusJakartaSans, fontWeight = FontWeight.Bold, fontSize = 13.sp),
+                                color = if (activo) paleta.seleccionTexto else paleta.textoPrincipal,
+                            )
+                        }
+                    }
+                }
+            }
+            Text(
+                text = "Color de tu marca",
+                style = TextStyle(fontFamily = PlusJakartaSans, fontWeight = FontWeight.SemiBold, fontSize = 13.sp),
+                color = paleta.textoSecundario,
+            )
+            SelectorColorMarca(paleta, color) { color = it }
             CampoAcceso(paleta, "Máximo de trabajadores", maxTexto, "Sin límite", { maxTexto = it.filter(Char::isDigit) }, KeyboardType.Number)
             Text(
                 text = "Déjalo vacío si no quieres poner límite.",
@@ -118,7 +164,7 @@ fun EditarNegocioHoja(
                 when {
                     errorNombre != null -> FeedbackManager.showErrorMessage(errorNombre)
                     errorMax != null -> FeedbackManager.showErrorMessage(errorMax)
-                    else -> onGuardar(nombre.trim(), max, max == null)
+                    else -> onGuardar(nombre.trim(), tipo, color, max, max == null)
                 }
             }
             BotonBorrar(paleta, onBorrar)

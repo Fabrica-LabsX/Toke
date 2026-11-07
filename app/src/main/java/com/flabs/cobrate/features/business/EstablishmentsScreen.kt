@@ -46,6 +46,7 @@ import com.flabs.cobrate.core.model.RolCuentaNegocio
 import com.flabs.cobrate.features.acceso.BotonAcceso
 import com.flabs.cobrate.features.acceso.BotonAtras
 import com.flabs.cobrate.features.negocios.EditarNegocioHoja
+import com.flabs.cobrate.features.crearnegocio.iconoDeTipo
 import com.flabs.cobrate.ui.theme.PlusJakartaSans
 import com.flabs.cobrate.ui.theme.TokeMedidas
 import com.flabs.cobrate.ui.theme.TokePaleta
@@ -148,10 +149,10 @@ fun EstablishmentsScreen(
                 editando = null
                 onBorrarNegocio(negocio.id)
             },
-            onGuardar = { nombre, max, limpiar ->
+            onGuardar = { nombre, tipo, color, max, limpiar ->
                 scope.launch {
                     FeedbackManager.setLoading(true, "Guardando cambios...")
-                    val resultado = NegocioStore.editar(negocio.id, nombre, max, limpiar)
+                    val resultado = NegocioStore.editar(negocio.id, nombre, tipo, color, max, limpiar)
                     FeedbackManager.setLoading(false)
                     resultado.onSuccess {
                         FeedbackManager.showSuccess("Cambios guardados.")
@@ -184,7 +185,7 @@ private fun FilaLocal(
             Surface(shape = RoundedCornerShape(12.dp), color = paleta.tileFondo, modifier = Modifier.size(44.dp)) {
                 Box(contentAlignment = Alignment.Center) {
                     Icon(
-                        painter = painterResource(id = TokeIcons.Tienda),
+                        painter = painterResource(id = iconoDeTipo(negocio.tipo)),
                         contentDescription = null,
                         tint = paleta.textoPrincipal,
                         modifier = Modifier.size(22.dp),

@@ -52,10 +52,10 @@ import com.flabs.cobrate.ui.theme.TokePaleta
 
 /** Pantallas del asistente "Crear negocio". Sin estado: quien las llama guarda los datos. */
 
-private fun colorDe(hex: String?): Color =
+fun colorDe(hex: String?): Color =
     Color(CrearNegocioLogica.argbDeHex(hex) ?: CrearNegocioLogica.argbDeHex(CrearNegocioLogica.COLOR_POR_DEFECTO)!!)
 
-private fun iconoDeTipo(tipo: TipoNegocio): Int = when (tipo) {
+fun iconoDeTipo(tipo: TipoNegocio): Int = when (tipo) {
     TipoNegocio.ABARROTES -> TokeIcons.Canasta
     TipoNegocio.RESTAURANTE -> TokeIcons.Recibo
     TipoNegocio.MARISQUERIA -> TokeIcons.Efectivo
@@ -121,29 +121,7 @@ fun PasoNombreYColor(
                     style = TextStyle(fontFamily = PlusJakartaSans, fontWeight = FontWeight.Bold, fontSize = 14.sp),
                     color = paleta.textoPrincipal,
                 )
-                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    CrearNegocioLogica.colores.forEach { c ->
-                        val elegido = colorHex == c.hex
-                        Box(
-                            modifier = Modifier
-                                .size(38.dp)
-                                .clip(CircleShape)
-                                .background(colorDe(c.hex))
-                                .then(if (elegido) Modifier.border(3.dp, paleta.textoPrincipal, CircleShape) else Modifier)
-                                .clickable { onColor(if (elegido) null else c.hex) },
-                            contentAlignment = Alignment.Center,
-                        ) {
-                            if (elegido) {
-                                Icon(
-                                    painter = painterResource(id = TokeIcons.Check),
-                                    contentDescription = c.nombre,
-                                    tint = Color.White,
-                                    modifier = Modifier.size(16.dp),
-                                )
-                            }
-                        }
-                    }
-                }
+                SelectorColorMarca(paleta, colorHex, onColor)
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Surface(shape = RoundedCornerShape(12.dp), color = colorDe(colorHex), modifier = Modifier.size(44.dp)) {
                         Box(contentAlignment = Alignment.Center) {
@@ -388,5 +366,33 @@ fun PasoMediosCobro(
                 mostrarHoja = false
             },
         )
+    }
+}
+
+/** Fila de colores de marca. Tocar el color elegido lo quita; [onColor] recibe null. */
+@Composable
+fun SelectorColorMarca(paleta: TokePaleta, colorHex: String?, onColor: (String?) -> Unit) {
+    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        CrearNegocioLogica.colores.forEach { c ->
+            val elegido = colorHex == c.hex
+            Box(
+                modifier = Modifier
+                    .size(38.dp)
+                    .clip(CircleShape)
+                    .background(colorDe(c.hex))
+                    .then(if (elegido) Modifier.border(3.dp, paleta.textoPrincipal, CircleShape) else Modifier)
+                    .clickable { onColor(if (elegido) null else c.hex) },
+                contentAlignment = Alignment.Center,
+            ) {
+                if (elegido) {
+                    Icon(
+                        painter = painterResource(id = TokeIcons.Check),
+                        contentDescription = c.nombre,
+                        tint = Color.White,
+                        modifier = Modifier.size(16.dp),
+                    )
+                }
+            }
+        }
     }
 }

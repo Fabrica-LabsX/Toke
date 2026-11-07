@@ -1,5 +1,5 @@
--- Aditiva: tope opcional de trabajadores por negocio y función para que el dueño edite su negocio.
--- No cambia datos existentes: max_trabajadores nulo significa "sin límite".
+-- Aditiva: tope opcional de trabajadores por negocio y función para que el dueño edite su negocio
+-- (nombre, rubro, color y tope). No cambia datos existentes: max_trabajadores nulo = "sin límite".
 
 alter table public.negocios
   add column if not exists max_trabajadores integer
@@ -9,7 +9,9 @@ create or replace function public.actualizar_negocio(
   p_negocio_id uuid,
   p_nombre text default null,
   p_max_trabajadores integer default null,
-  p_limpiar_max boolean default false
+  p_limpiar_max boolean default false,
+  p_tipo text default null,
+  p_color_marca text default null
 ) returns void
 language plpgsql
 security definer
@@ -32,8 +34,19 @@ begin
     raise exception 'El nombre es muy corto';
   end if;
 
+  if p_tipo is not null and p_tipo not in
+     ('RESTAURANTE','MARISQUERIA','ABARROTES','ROPA','ELECTRODOMESTICOS','SERVICIOS','OTRO') then
+    raise exception 'Rubro no válido';
+  end if;
+
+  if p_color_marca is not null and p_color_marca !~ '^#[0-9A-Fa-f]{6}$' then
+    raise exception 'Color no válido';
+  end if;
+
   update public.negocios
      set nombre = coalesce(nullif(btrim(p_nombre), ''), nombre),
+         tipo = coalesce(p_tipo, tipo),
+         color_marca = coalesce(p_color_marca, color_marca),
          max_trabajadores = case
            when p_limpiar_max then null
            else coalesce(p_max_trabajadores, max_trabajadores)
@@ -42,5 +55,5 @@ begin
 end;
 $$;
 
-revoke all on function public.actualizar_negocio(uuid, text, integer, boolean) from public, anon;
-grant execute on function public.actualizar_negocio(uuid, text, integer, boolean) to authenticated;
+revoke all on function public.actualizar_negocio(uuid, text, integer, boolean, text, text) from public, anon;
+grant execute on function public.actualizar_negocio(uuid, text, integer, boolean, text, text) to authenticated;

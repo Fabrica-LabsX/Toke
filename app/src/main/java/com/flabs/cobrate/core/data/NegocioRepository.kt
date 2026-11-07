@@ -103,13 +103,15 @@ internal class NegocioRepository {
             .decodeSingleOrNull<MaxTrabajadoresDto>()?.maxTrabajadores
     }
 
-    /** Edita el nombre y/o el tope de trabajadores (solo el dueño; lo valida el servidor). */
-    suspend fun actualizarNegocio(negocioId: String, nombre: String?, max: Int?, limpiarMax: Boolean): Result<Unit> = runCatching {
+    /** Edita nombre, rubro, color y/o tope de trabajadores (solo el dueño; lo valida el servidor). */
+    suspend fun actualizarNegocio(negocioId: String, nombre: String?, tipo: TipoNegocio?, colorMarca: String?, max: Int?, limpiarMax: Boolean): Result<Unit> = runCatching {
         postgrest.rpc(
             function = "actualizar_negocio",
             parameters = buildJsonObject {
                 put("p_negocio_id", negocioId)
                 if (nombre != null) put("p_nombre", nombre)
+                if (tipo != null) put("p_tipo", tipo.name)
+                if (colorMarca != null) put("p_color_marca", colorMarca)
                 if (max != null) put("p_max_trabajadores", max)
                 put("p_limpiar_max", limpiarMax)
             }

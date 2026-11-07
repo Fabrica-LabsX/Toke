@@ -110,11 +110,13 @@ object NegocioStore {
         repository.obtenerMaxTrabajadores(negocioId).getOrNull()
 
     /** Edita nombre y tope de trabajadores en el servidor y, si sale bien, el nombre local. */
-    suspend fun editar(negocioId: String, nombre: String?, max: Int?, limpiarMax: Boolean): Result<Unit> {
+    suspend fun editar(negocioId: String, nombre: String?, tipo: TipoNegocio?, colorMarca: String?, max: Int?, limpiarMax: Boolean): Result<Unit> {
         val limpio = nombre?.trim()?.ifBlank { null }
-        val resultado = repository.actualizarNegocio(negocioId, limpio, max, limpiarMax)
-        if (resultado.isSuccess && limpio != null) {
-            _negocios.value = _negocios.value.map { if (it.id == negocioId) it.copy(nombre = limpio) else it }
+        val resultado = repository.actualizarNegocio(negocioId, limpio, tipo, colorMarca, max, limpiarMax)
+        if (resultado.isSuccess) {
+            _negocios.value = _negocios.value.map {
+                if (it.id == negocioId) it.copy(nombre = limpio ?: it.nombre, tipo = tipo ?: it.tipo, colorMarca = colorMarca ?: it.colorMarca) else it
+            }
             persistir()
         }
         return resultado
