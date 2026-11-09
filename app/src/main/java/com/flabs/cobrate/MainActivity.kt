@@ -731,6 +731,22 @@ fun CobrateApp() {
                 BillingPlanScreen()
             }
 
+            composableToke(Routes.ACERCA_DE) {
+                com.flabs.cobrate.features.soporte.AcercaDeScreen(
+                    onVolver = { navController.popBackStack() },
+                    onManual = { navController.navigate(Routes.MANUAL) },
+                    onPreguntas = { navController.navigate(Routes.PREGUNTAS) },
+                )
+            }
+
+            composableToke(Routes.MANUAL) {
+                com.flabs.cobrate.features.soporte.ManualScreen(onVolver = { navController.popBackStack() })
+            }
+
+            composableToke(Routes.PREGUNTAS) {
+                com.flabs.cobrate.features.soporte.PreguntasFrecuentesScreen(onVolver = { navController.popBackStack() })
+            }
+
             composable(Routes.PERMISOS_DUENO) {
                 val cuentaId = CuentaStore.sesionActual.collectAsState().value?.id ?: ""
                 val misRelaciones by RelacionCuentaNegocioStore.relaciones.collectAsState()
@@ -798,6 +814,9 @@ fun CobrateApp() {
                 },
                 ItemMas(stringResource(R.string.nombre_permisos), TokeIcons.EscudoCandado) {
                     navController.irADetalle(Routes.PERMISOS_DUENO)
+                },
+                ItemMas(stringResource(R.string.nombre_acerca_soporte), TokeIcons.Soporte) {
+                    navController.irADetalle(Routes.ACERCA_DE)
                 }
             )
             if (negocioSeleccionadoId != null) {
@@ -830,6 +849,9 @@ fun CobrateApp() {
                 },
                 ItemMas(stringResource(R.string.nombre_mi_plan), TokeIcons.Recibo) {
                     navController.irADetalle(Routes.PLAN_FACTURACION_DUENO)
+                },
+                ItemMas(stringResource(R.string.nombre_acerca_soporte), TokeIcons.Soporte) {
+                    navController.irADetalle(Routes.ACERCA_DE)
                 }
             )
             if (esDuenoReal) {
@@ -897,7 +919,7 @@ fun CobrateApp() {
                         FeedbackManager.showSuccess("Saliste del negocio.")
                     }.onFailure { err ->
                         mostrarConfirmarSalir = false
-                        FeedbackManager.showErrorMessage(err.message ?: "Error al salir del negocio")
+                        FeedbackManager.showErrorMessage(com.flabs.cobrate.core.logic.ErrorMapper.amable(err, "Error al salir del negocio"))
                     }
                 }
             },
@@ -928,7 +950,7 @@ fun CobrateApp() {
                         FeedbackManager.showSuccess("Negocio borrado.")
                     }.onFailure { err ->
                         cargandoBorrar = false
-                        FeedbackManager.showErrorMessage(err.message ?: "Error al borrar el negocio")
+                        FeedbackManager.showErrorMessage(com.flabs.cobrate.core.logic.ErrorMapper.amable(err, "Error al borrar el negocio"))
                     }
                 }
             },
@@ -1054,6 +1076,9 @@ object Routes {
     const val METODOS_COBRO_DUENO = "metodos_cobro_dueno"
     const val ESTADISTICAS_DUENO = "estadisticas_dueno"
     const val PLAN_FACTURACION_DUENO = "plan_facturacion_dueno"
+    const val ACERCA_DE = "acerca_de"
+    const val MANUAL = "manual"
+    const val PREGUNTAS = "preguntas_frecuentes"
     const val PERMISOS_DUENO = "permisos_dueno"
     const val VOZ = "voz"
 }

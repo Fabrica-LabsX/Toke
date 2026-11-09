@@ -400,7 +400,7 @@ private fun HomeScreenContent(
                                         negocioViewModel.seleccionarNegocio(null)
                                         FeedbackManager.showSuccess(res.mensaje)
                                     }.onFailure { err ->
-                                        FeedbackManager.showErrorMessage(err.message ?: "Error al cancelar solicitud")
+                                        FeedbackManager.showErrorMessage(com.flabs.cobrate.core.logic.ErrorMapper.amable(err, "Error al cancelar solicitud"))
                                     }
                                 }
                             }
@@ -427,7 +427,7 @@ private fun HomeScreenContent(
                                         }
                                     }.onFailure { err ->
                                         FeedbackManager.setLoading(false)
-                                        FeedbackManager.showErrorMessage(err.message ?: "Error al verificar estado con el servidor")
+                                        FeedbackManager.showErrorMessage(com.flabs.cobrate.core.logic.ErrorMapper.amable(err, "Error al verificar estado con el servidor"))
                                     }
                                 }
                             },
@@ -485,7 +485,7 @@ private fun HomeScreenContent(
                                     }
                                 }.onFailure { err ->
                                     FeedbackManager.setLoading(false)
-                                    FeedbackManager.showErrorMessage(err.message ?: "Error al verificar estado con el servidor")
+                                    FeedbackManager.showErrorMessage(com.flabs.cobrate.core.logic.ErrorMapper.amable(err, "Error al verificar estado con el servidor"))
                                 }
                             }
                         },
@@ -511,7 +511,7 @@ private fun HomeScreenContent(
                                     negocioViewModel.seleccionarNegocio(null)
                                     FeedbackManager.showSuccess(res.mensaje)
                                 }.onFailure { err ->
-                                    FeedbackManager.showErrorMessage(err.message ?: "Error al cancelar solicitud")
+                                    FeedbackManager.showErrorMessage(com.flabs.cobrate.core.logic.ErrorMapper.amable(err, "Error al cancelar solicitud"))
                                 }
                             }
                         },

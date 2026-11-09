@@ -28,6 +28,7 @@ data class TokePaleta(
     val ambar: Color,
     val ambarTexto: Color,
     val enlaceVerde: Color,
+    val enlaceAzul: Color,
     /** Verde de marca: acción principal y estado "recibido", con el color del texto sobre él. */
     val verde: Color,
     val verdeTexto: Color,
@@ -61,6 +62,7 @@ val TokePaletaClara = TokePaleta(
     ambar = Color(0xFFF59E0B),
     ambarTexto = Color(0xFF181202),
     enlaceVerde = Color(0xFF047857),
+    enlaceAzul = Color(0xFF2563EB),
     verde = Color(0xFF059669),
     verdeTexto = Color(0xFFFFFFFF),
     activo = Color(0xFF059669),
@@ -84,6 +86,7 @@ val TokePaletaOscura = TokePaleta(
     ambar = Color(0xFFF59E0B),
     ambarTexto = Color(0xFF181202),
     enlaceVerde = Color(0xFF00C853),
+    enlaceAzul = Color(0xFF60A5FA),
     verde = Color(0xFF00C853),
     verdeTexto = Color(0xFF042615),
     activo = Color(0xFF00C853),

@@ -166,7 +166,7 @@ fun InvitarTrabajadorScreen(
                                     FeedbackManager.showSuccess("Código creado. Quien lo use deberá esperar tu aprobación.")
                                 }
                             }.onFailure { err ->
-                                FeedbackManager.showErrorMessage(err.message ?: "Error al crear invitación")
+                                FeedbackManager.showErrorMessage(com.flabs.cobrate.core.logic.ErrorMapper.amable(err, "Error al crear invitación"))
                             }
                         } finally {
                             creandoInvitacion = false

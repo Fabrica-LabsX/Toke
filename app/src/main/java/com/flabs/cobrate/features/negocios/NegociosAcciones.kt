@@ -31,7 +31,7 @@ object NegociosAcciones {
                 FeedbackManager.showSuccess(resultado.mensaje)
             }
             .onFailure { error ->
-                FeedbackManager.showErrorMessage(error.message ?: "Error al cancelar solicitud")
+                FeedbackManager.showErrorMessage(com.flabs.cobrate.core.logic.ErrorMapper.amable(error, "Error al cancelar solicitud"))
             }
     }
 
@@ -61,7 +61,7 @@ object NegociosAcciones {
             }
             .onFailure { error ->
                 FeedbackManager.setLoading(false)
-                FeedbackManager.showErrorMessage(error.message ?: "Error al verificar estado con el servidor")
+                FeedbackManager.showErrorMessage(com.flabs.cobrate.core.logic.ErrorMapper.amable(error, "Error al verificar estado con el servidor"))
             }
     }
 }

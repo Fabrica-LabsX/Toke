@@ -72,7 +72,7 @@ fun MisNegociosTarjeta(
                             fontSize = 19.sp,
                         ),
                         color = paleta.textoPrincipal,
-                        maxLines = 1,
+                        maxLines = 2,
                         overflow = TextOverflow.Ellipsis,
                     )
                     Text(
@@ -84,7 +84,7 @@ fun MisNegociosTarjeta(
                             fontSize = 14.sp,
                         ),
                         color = paleta.textoSecundario,
-                        maxLines = 1,
+                        maxLines = 2,
                         overflow = TextOverflow.Ellipsis,
                     )
                     NegocioEtiqueta(paleta = paleta, item = item)

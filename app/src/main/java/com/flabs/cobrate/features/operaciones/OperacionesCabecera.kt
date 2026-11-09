@@ -31,7 +31,6 @@ import com.flabs.cobrate.ui.theme.TokePaleta
 fun OperacionesCabecera(
     paleta: TokePaleta,
     onBack: (() -> Unit)?,
-    onRestablecerFiltros: () -> Unit,
 ) {
     Surface(
         color = paleta.tarjeta,
@@ -63,13 +62,6 @@ fun OperacionesCabecera(
                     letterSpacing = (-0.5).sp,
                 ),
                 color = paleta.textoPrincipal,
-            )
-            BotonCuadrado(
-                paleta = paleta,
-                icono = TokeIcons.Filtros,
-                descripcion = "Restablecer filtros",
-                onClick = onRestablecerFiltros,
-                modifier = Modifier.align(Alignment.CenterEnd),
             )
         }
     }

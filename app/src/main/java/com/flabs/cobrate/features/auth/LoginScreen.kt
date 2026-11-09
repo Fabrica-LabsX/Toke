@@ -29,6 +29,7 @@ import com.flabs.cobrate.features.acceso.FormUnCampo
 import com.flabs.cobrate.features.acceso.LogoTokeSuave
 import com.flabs.cobrate.features.acceso.TituloAcceso
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -92,6 +93,9 @@ fun LoginScreen(
             ModoAuth.REGISTRO_PASOS -> {
                 if (pasoRegistro > 1) {
                     pasoRegistro -= 1
+                } else if (modoInicialCrear) {
+                    // Se entró desde "Crear cuenta": atrás vuelve a la bienvenida, no al inicio de sesión.
+                    onVolver()
                 } else {
                     modoAuth = ModoAuth.LOGIN
                 }
@@ -104,7 +108,12 @@ fun LoginScreen(
     AccesoFondo(paleta = paleta) {
         BotonAtras(paleta, handleVolver)
         Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-            LogoTokeSuave(paleta, tamano = 96, descripcion = stringResource(R.string.app_name))
+            if (modoAuth == ModoAuth.REGISTRO_PASOS) {
+                // Crear cuenta tiene su propio icono: una persona con "+" sobre la loseta verde de la marca.
+                com.flabs.cobrate.features.acceso.IconoAccesoAnimado(paleta, com.flabs.cobrate.components.TokeIcons.PersonaAgregarBlanca, tamano = 76)
+            } else {
+                LogoTokeSuave(paleta, tamano = 96, descripcion = stringResource(R.string.app_name))
+            }
         }
 
         when (modoAuth) {
@@ -193,7 +202,7 @@ fun LoginScreen(
                                     FeedbackManager.showSuccess("Código verificado correctamente.")
                                     modoAuth = ModoAuth.RECUPERACION_PASSWORD
                                 }.onFailure { err ->
-                                    FeedbackManager.showErrorMessage(err.message ?: "Código de verificación inválido o expirado.")
+                                    FeedbackManager.showErrorMessage(com.flabs.cobrate.core.logic.ErrorMapper.amable(err, "Código de verificación inválido o expirado."))
                                 }
                             }
                         }
@@ -287,7 +296,7 @@ fun LoginScreen(
                                         if (verif.isFailure) {
                                             FeedbackManager.setLoading(false)
                                             FeedbackManager.showErrorMessage(
-                                                verif.exceptionOrNull()?.message ?: "Código incorrecto o expirado."
+                                                com.flabs.cobrate.core.logic.ErrorMapper.amable(verif.exceptionOrNull(), "Código incorrecto o expirado.")
                                             )
                                             return@launch
                                         }
@@ -308,6 +317,10 @@ fun LoginScreen(
                     modoAuth = ModoAuth.LOGIN
                 })
             }
+        }
+        if (modoAuth == ModoAuth.LOGIN || modoAuth == ModoAuth.REGISTRO_PASOS) {
+            Spacer(modifier = Modifier.weight(1f))
+            com.flabs.cobrate.features.acceso.AvisoTerminos(paleta)
         }
         EspacioAcceso(8)
     }

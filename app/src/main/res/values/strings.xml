@@ -128,4 +128,8 @@
     <string name="nav_equipo">Equipo</string>
     <!-- Número para activar el plan Pro. Pendiente: reemplazar por el número real. -->
     <string name="plan_telefono_activacion">+51 998360217</string>
+    <!-- PENDIENTE: reemplazar por las páginas reales antes de publicar. -->
+    <string name="url_terminos" translatable="false">https://toke.example/terminos</string>
+    <string name="url_privacidad" translatable="false">https://toke.example/privacidad</string>
+    <string name="nombre_acerca_soporte">Acerca de y soporte</string>
 </resources>

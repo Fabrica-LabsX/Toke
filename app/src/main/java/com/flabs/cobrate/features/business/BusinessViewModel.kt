@@ -413,7 +413,7 @@ class BusinessViewModel : ViewModel() {
                 FeedbackManager.showSuccess(res.mensaje)
             }.onFailure { err ->
                 FeedbackManager.setLoading(false)
-                FeedbackManager.showErrorMessage(err.message ?: "Error al procesar la solicitud")
+                FeedbackManager.showErrorMessage(com.flabs.cobrate.core.logic.ErrorMapper.amable(err, "Error al procesar la solicitud"))
             }
         }
     }
@@ -428,7 +428,7 @@ class BusinessViewModel : ViewModel() {
                 FeedbackManager.showSuccess(res.mensaje)
             }.onFailure { err ->
                 FeedbackManager.setLoading(false)
-                FeedbackManager.showErrorMessage(err.message ?: "Error al revocar el código")
+                FeedbackManager.showErrorMessage(com.flabs.cobrate.core.logic.ErrorMapper.amable(err, "Error al revocar el código"))
             }
         }
     }

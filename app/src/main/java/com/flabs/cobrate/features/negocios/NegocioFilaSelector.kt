@@ -60,7 +60,7 @@ fun NegocioFilaSelector(
                         fontSize = 17.sp,
                     ),
                     color = paleta.textoPrincipal,
-                    maxLines = 1,
+                    maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                 )
                 NegocioEtiqueta(paleta = paleta, item = item)

@@ -74,7 +74,6 @@ fun OperacionesScreen(
             OperacionesCabecera(
                 paleta = paleta,
                 onBack = onBack,
-                onRestablecerFiltros = { filtrosElegidos = FiltrosOperaciones() },
             )
         },
     ) { innerPadding ->

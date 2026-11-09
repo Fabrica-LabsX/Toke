@@ -66,17 +66,21 @@ object TokeErrorCodes {
 object ErrorMapper {
     fun translate(throwable: Throwable?): String {
         if (throwable == null) return "Ocurrió un error desconocido."
-        
+
+        // 0. Sin internet o conexión caída: mensaje corto y su código, nunca el texto del servidor.
+        if (esDeRed(throwable)) return MENSAJE_SIN_RED
+        if (esDeTiempo(throwable)) return MENSAJE_TIEMPO
+
         // 1. Errores de Supabase Rest
         if (throwable is RestException) {
             com.flabs.cobrate.features.planes.PlanLogica
                 .mensajeDeLimite("${throwable.message} ${throwable.description}")?.let { return it }
             return when (throwable.statusCode) {
-                401 -> "Tu sesión expiró. Inicia sesión nuevamente."
-                403 -> "No tienes permisos para realizar esta acción."
-                409 -> "Este registro ya existe o entró en conflicto."
-                400 -> "Los datos enviados no son válidos."
-                else -> "Error del servidor (${throwable.statusCode}). Reintenta más tarde."
+                401 -> "Tu sesión expiró. Inicia sesión nuevamente. (Código 401)"
+                403 -> "No tienes permisos para realizar esta acción. (Código 403)"
+                409 -> "Este registro ya existe o entró en conflicto. (Código 409)"
+                400 -> "Los datos enviados no son válidos. (Código 400)"
+                else -> "No pudimos completar la acción. Reintenta más tarde. (Código ${throwable.statusCode})"
             }
         }
         
@@ -91,16 +95,54 @@ object ErrorMapper {
 
         val msg = throwable.message ?: ""
         return when {
-            msg.contains("network", ignoreCase = true) || msg.contains("connect", ignoreCase = true) -> 
-                "No pudimos conectar con el servidor. Revisa tu conexión."
-            msg.contains("timeout", ignoreCase = true) -> 
-                "La conexión está tardando demasiado. Inténtalo de nuevo."
-            msg.contains("auth", ignoreCase = true) -> 
-                "Error de autenticación."
-            msg.contains("duplicate", ignoreCase = true) -> 
+            msg.contains("invalid login", ignoreCase = true) || msg.contains("invalid_credentials", ignoreCase = true) ->
+                "Correo o contraseña incorrectos."
+            msg.contains("auth", ignoreCase = true) ->
+                "Error de autenticación. (Código AUTH)"
+            msg.contains("duplicate", ignoreCase = true) ->
                 "Este registro ya existe."
-            else -> "Ocurrió un problema inesperado. Inténtalo nuevamente."
+            else -> "Ocurrió un problema inesperado. Inténtalo nuevamente. (Código TOKE-000)"
         }
+    }
+
+    const val MENSAJE_SIN_RED = "Sin conexión. Revisa tu internet e inténtalo de nuevo. (Código RED)"
+    const val MENSAJE_TIEMPO = "La conexión tardó demasiado. Inténtalo de nuevo. (Código TIEMPO)"
+
+    private fun causas(t: Throwable): Sequence<Throwable> = generateSequence(t) { it.cause }.take(6)
+
+    /** ¿El fallo es de red (sin internet, servidor inalcanzable)? Mira también las causas internas. */
+    fun esDeRed(t: Throwable): Boolean = causas(t).any {
+        it is UnknownHostException || it is ConnectException ||
+            it.javaClass.simpleName in setOf("HttpRequestException", "ConnectTimeoutException", "NoRouteToHostException") ||
+            (it.message ?: "").let { m ->
+                m.contains("Unable to resolve host", true) || m.contains("Failed to connect", true) ||
+                    m.contains("No address associated", true) || m.contains("Network is unreachable", true)
+            }
+    }
+
+    fun esDeTiempo(t: Throwable): Boolean = causas(t).any {
+        it is SocketTimeoutException || it.javaClass.simpleName.contains("Timeout", true) ||
+            (it.message ?: "").contains("timeout", true) || (it.message ?: "").contains("timed out", true)
+    }
+
+    /** ¿El texto parece de programador (excepciones, hosts, JSON) y no para una persona? */
+    fun esTecnico(mensaje: String): Boolean {
+        val m = mensaje.lowercase()
+        return listOf("exception", "java.", "io.ktor", "supabase", "http", "host", "ssl", "socket", "resolve", "{", "}", "null", "stacktrace", "postgrest", "jwt")
+            .any { m.contains(it) }
+    }
+
+    /**
+     * Texto para la persona: sin internet, el mensaje corto con código; con un texto técnico del servidor,
+     * [alternativa] con su código; y si el mensaje ya es legible (lo escribió la app), tal cual.
+     */
+    fun amable(t: Throwable?, alternativa: String): String {
+        if (t == null) return alternativa
+        if (esDeRed(t)) return MENSAJE_SIN_RED
+        if (esDeTiempo(t)) return MENSAJE_TIEMPO
+        if (t is RestException) return translate(t)
+        val m = t.message
+        return if (m.isNullOrBlank() || esTecnico(m)) "$alternativa (Código TOKE-000)" else m
     }
 
     fun translate(technicalMessage: String?): String {

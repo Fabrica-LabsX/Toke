@@ -96,7 +96,7 @@ fun NegocioEtiqueta(
                     fontSize = 13.sp,
                 ),
                 color = colorTexto,
-                maxLines = 1,
+                maxLines = 2,
             )
         }
     }
