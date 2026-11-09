@@ -151,6 +151,8 @@ fun MisNegociosScreen(
             paleta = paleta,
             negocio = negocio,
             maxInicial = maxInicial,
+            asignacionInicial = com.flabs.cobrate.features.operaciones.AsignacionPreferencia.activada(negocio.id),
+            onAsignacion = { com.flabs.cobrate.features.operaciones.AsignacionPreferencia.cambiar(negocio.id, it) },
             onDismiss = { editando = null },
             onBorrar = {
                 editando = null

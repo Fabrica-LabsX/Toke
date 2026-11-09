@@ -13,6 +13,9 @@ class AsignacionYAvisoTest {
         assertFalse(AsignacionLogica.habilitada(1, null))
         assertFalse(AsignacionLogica.habilitada(1, 1))
         assertTrue(AsignacionLogica.habilitada(2, null))
+        // El dueño puede apagar la asignación aunque haya 2 o más trabajadores.
+        assertFalse(AsignacionLogica.habilitada(2, null, activadaPorElDueno = false))
+        assertFalse(AsignacionLogica.habilitada(0, 3, activadaPorElDueno = false))
         // El celular de un trabajador solo ve su propia relación: manda lo que dice el servidor.
         assertTrue(AsignacionLogica.habilitada(1, 2))
     }

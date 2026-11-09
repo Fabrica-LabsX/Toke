@@ -60,7 +60,10 @@ fun EditarNegocioHoja(
     onGuardar: (nombre: String, tipo: TipoNegocio, colorMarca: String?, max: Int?, limpiarMax: Boolean) -> Unit,
     onBorrar: () -> Unit,
     onDismiss: () -> Unit,
+    asignacionInicial: Boolean = true,
+    onAsignacion: (Boolean) -> Unit = {},
 ) {
+    var asignacion by remember { mutableStateOf(asignacionInicial) }
     var nombre by remember { mutableStateOf(negocio.nombre) }
     var tipo by remember { mutableStateOf(negocio.tipo) }
     var color by remember { mutableStateOf(negocio.colorMarca) }
@@ -157,8 +160,43 @@ fun EditarNegocioHoja(
                 modifier = Modifier.padding(start = 4.dp),
             )
 
+            Surface(
+                shape = RoundedCornerShape(16.dp),
+                color = paleta.tarjeta,
+                border = BorderStroke(1.dp, paleta.borde),
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = "Asignación de cobros",
+                            style = TextStyle(fontFamily = PlusJakartaSans, fontWeight = FontWeight.Bold, fontSize = 16.sp),
+                            color = paleta.textoPrincipal,
+                        )
+                        Text(
+                            text = "Con 2 o más trabajadores, cada cobro lo reclama uno de ellos. Apágalo si no quieres asignar cobros.",
+                            style = TextStyle(fontFamily = PlusJakartaSans, fontWeight = FontWeight.Medium, fontSize = 13.sp),
+                            color = paleta.textoSecundario,
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(12.dp))
+                    androidx.compose.material3.Switch(
+                        checked = asignacion,
+                        onCheckedChange = { asignacion = it },
+                        colors = androidx.compose.material3.SwitchDefaults.colors(
+                            checkedTrackColor = paleta.verde,
+                            checkedThumbColor = paleta.verdeTexto,
+                            uncheckedTrackColor = paleta.bordeControl,
+                            uncheckedBorderColor = paleta.bordeControl,
+                            uncheckedThumbColor = paleta.tarjeta,
+                        ),
+                    )
+                }
+            }
+
             Spacer(modifier = Modifier.height(4.dp))
             BotonAcceso(paleta, "Guardar cambios", principal = true) {
+                onAsignacion(asignacion)
                 val errorNombre = NegocioEdicionLogica.errorNombre(nombre)
                 val (max, errorMax) = NegocioEdicionLogica.leerMax(maxTexto)
                 when {

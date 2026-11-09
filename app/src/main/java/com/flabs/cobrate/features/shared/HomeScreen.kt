@@ -1260,11 +1260,13 @@ private fun RecentOpsSection(
                 )
             }
         } else {
+            // El trabajador junto a la hora solo se muestra si el negocio asigna cobros (2 o más trabajadores).
+            val mostrarAsignado = com.flabs.cobrate.features.operaciones.rememberAsignacionHabilitada()
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 operaciones.forEach { operacion ->
                     HomeOperacionRow(
                         operacion = operacion,
-                        asignadoPorNombre = resolverNombreAsignado(operacion),
+                        asignadoPorNombre = if (mostrarAsignado) resolverNombreAsignado(operacion) else null,
                         onClick = { onSeleccionarOperacion?.invoke(operacion.id) }
                     )
                 }

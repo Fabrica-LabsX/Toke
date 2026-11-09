@@ -200,6 +200,7 @@ class MainActivity : ComponentActivity() {
         PreferenciasAppStore.init(applicationContext)
         com.flabs.cobrate.features.planes.PlanStore.init(applicationContext)
         com.flabs.cobrate.core.data.SesionUnicaStore.init(applicationContext)
+        com.flabs.cobrate.features.operaciones.AsignacionPreferencia.init(applicationContext)
         // Carga el estado operativo global (CAPA 57)
         EstadoOperativoStore.init(applicationContext)
         // Rate Limiter para Auth
