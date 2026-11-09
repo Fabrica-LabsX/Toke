@@ -19,7 +19,7 @@ fun SesionUnicaAviso(authViewModel: AuthViewModel) {
         is AvisoSesion.Ocupada -> DialogoToke(
             titulo = "TOKE solo funciona en un celular a la vez",
             texto = "Tu cuenta está abierta en ${a.dispositivoNombre} desde " +
-                "${SesionUnicaLogica.cuando(a.iniciadaEn, System.currentTimeMillis())}. " +
+                SesionUnicaLogica.cuando(a.iniciadaEn, System.currentTimeMillis()) + ". " +
                 "Si la usas aquí, el otro celular se cerrará.",
             textoConfirmar = "Usar aquí",
             textoCancelar = "Cerrar sesión",
