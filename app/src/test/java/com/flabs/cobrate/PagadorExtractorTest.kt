@@ -28,6 +28,21 @@ class PagadorExtractorTest {
     }
 
     @Test
+    fun nombreDespuesDelMonto() {
+        assertEquals("JUAN PEREZ", PagadorExtractor.extraer("BCP", "Te transfirieron S/ 100.00 de JUAN PEREZ"))
+        assertEquals("Juan P.", PagadorExtractor.extraer("Plin", "Te enviaron S/ 30.00 desde Juan P."))
+        assertEquals("Juan P.", PagadorExtractor.extraer("Plin", "Recibiste un Plin de Juan P. por S/ 20.00"))
+        assertEquals("MARIA LOPEZ", PagadorExtractor.extraer("Interbank", "Recibiste S/ 30.00 de MARIA LOPEZ por Plin"))
+        assertEquals("JUAN PEREZ", PagadorExtractor.extraer("BBVA", "Recibiste S/ 50.00 de JUAN PEREZ vía Plin"))
+    }
+
+    @Test
+    fun nombreConVerbosEnPlural() {
+        assertEquals("Ana R.", PagadorExtractor.extraer("", "Ana R. te transfirieron S/ 9"))
+        assertEquals("Carlos Perez", PagadorExtractor.extraer("", "Carlos Perez te ha enviado S/ 15.50"))
+    }
+
+    @Test
     fun sinNombreDevuelveNulo() {
         assertNull(PagadorExtractor.extraer("", "Te yapeó S/ 1,250.50"))
         assertNull(PagadorExtractor.extraer(null, null))

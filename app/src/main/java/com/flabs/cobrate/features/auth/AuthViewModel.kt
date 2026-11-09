@@ -81,6 +81,8 @@ class AuthViewModel : ViewModel() {
     /** Cierra la sesión local y en Supabase previa quita de token FCM. */
     fun cerrarSesion() {
         viewModelScope.launch {
+            // Libera la cuenta para que el siguiente celular entre sin preguntar.
+            com.flabs.cobrate.core.data.SesionUnicaStore.liberar(CuentaStore.sesionActual.value?.id)
             withTimeoutOrNull(3000L) {
                 RegistroDispositivos.quitar(FirebaseProveedorDeToken(), DispositivoRepository())
             }

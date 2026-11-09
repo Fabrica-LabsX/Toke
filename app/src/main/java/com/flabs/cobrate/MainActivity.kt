@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -198,6 +199,7 @@ class MainActivity : ComponentActivity() {
         // Carga las preferencias de la app (C8 - Tema)
         PreferenciasAppStore.init(applicationContext)
         com.flabs.cobrate.features.planes.PlanStore.init(applicationContext)
+        com.flabs.cobrate.core.data.SesionUnicaStore.init(applicationContext)
         // Carga el estado operativo global (CAPA 57)
         EstadoOperativoStore.init(applicationContext)
         // Rate Limiter para Auth
@@ -226,6 +228,12 @@ fun CobrateApp() {
 
     val sesionActual by CuentaStore.sesionActual.collectAsState()
     val estaInicializando by SupabaseAuthBridge.estaInicializando.collectAsState()
+
+    // Sesión única: al abrir sesión en este celular se comprueba que la cuenta no esté abierta en otro.
+    LaunchedEffect(sesionActual?.id) {
+        if (sesionActual?.id != null) com.flabs.cobrate.core.data.SesionUnicaStore.verificar()
+    }
+    com.flabs.cobrate.features.acceso.SesionUnicaAviso(authViewModel)
 
     // --- C9: Estado de navegación y BottomBar ---
     val backStackEntry by navController.currentBackStackEntryAsState()
@@ -367,6 +375,7 @@ fun CobrateApp() {
 
                 // El plan puede haber cambiado desde Supabase (activación manual): se vuelve a consultar.
                 if (uid != null) {
+                    scopeLifecycle.launch { com.flabs.cobrate.core.data.SesionUnicaStore.verificar() }
                     scopeLifecycle.launch {
                         com.flabs.cobrate.features.planes.PlanStore.refrescar(NegocioStore.negocioActivoId.value)
                     }
@@ -537,7 +546,9 @@ fun CobrateApp() {
         NavHost(
             navController = navController,
             startDestination = Routes.ARRANQUE,
-            modifier = Modifier.padding(innerPadding),
+            // En Android 15+ la app se dibuja bajo la barra de estado: se deja ese espacio libre en todas las
+            // pantallas. Las que ya lo reservaban no lo duplican (el espacio queda consumido aquí).
+            modifier = Modifier.padding(innerPadding).statusBarsPadding(),
             enterTransition = { fadeIn(tween(180)) + slideInHorizontally(tween(180)) { it / 14 } },
             exitTransition = { fadeOut(tween(120)) },
             popEnterTransition = { fadeIn(tween(180)) + slideInHorizontally(tween(180)) { -it / 14 } },
