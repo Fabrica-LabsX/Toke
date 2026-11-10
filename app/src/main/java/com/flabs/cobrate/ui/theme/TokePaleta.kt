@@ -114,3 +114,6 @@ fun tokeEsOscuro(): Boolean {
     val themeMode by PreferenciasAppStore.themeMode.collectAsState()
     return themeMode == ThemeMode.DARK
 }
+
+/** Mezcla este color sobre [base] y devuelve un color SÓLIDO (sin transparencia): los fondos y bordes suaves no deben dejar ver lo de atrás. */
+fun Color.solidoSobre(base: Color, intensidad: Float): Color = androidx.compose.ui.graphics.lerp(base, this.copy(alpha = 1f), intensidad)

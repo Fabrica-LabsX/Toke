@@ -228,11 +228,8 @@ private data class Quadruple<A, B, C, D>(
 )
 
 private fun formatearHora(fechaHora: Long): String {
-    val calendar = Calendar.getInstance().apply {
-        timeInMillis = fechaHora
-    }
-    val formatter = SimpleDateFormat("hh:mm a", Locale("es", "PE"))
-    return formatter.format(calendar.time)
+    // Con el día si el cobro no es de hoy, para que un cobro viejo no parezca de hoy.
+    return com.flabs.cobrate.core.logic.FechaCobro.texto(fechaHora, System.currentTimeMillis())
 }
 
 /** Acción opcional dentro de la card. */

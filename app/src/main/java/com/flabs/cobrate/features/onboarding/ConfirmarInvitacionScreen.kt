@@ -1,4 +1,5 @@
 package com.flabs.cobrate.features.onboarding
+import com.flabs.cobrate.ui.theme.solidoSobre
 import com.flabs.cobrate.ui.theme.TokeRojo
 import com.flabs.cobrate.ui.theme.TokeAmbarTexto
 
@@ -220,10 +221,11 @@ private fun TarjetaNegocio(paleta: TokePaleta, negocio: String, invito: String) 
 @Composable
 private fun MensajeError(texto: String) {
     val rojo = TokeRojo
+    val paleta = tokePaleta()
     Surface(
         shape = RoundedCornerShape(16.dp),
-        color = rojo.copy(alpha = 0.12f),
-        border = BorderStroke(1.dp, rojo.copy(alpha = 0.4f)),
+        color = rojo.solidoSobre(paleta.fondo, 0.12f),
+        border = BorderStroke(1.dp, rojo.solidoSobre(paleta.fondo, 0.4f)),
         modifier = Modifier.fillMaxWidth(),
     ) {
         Text(

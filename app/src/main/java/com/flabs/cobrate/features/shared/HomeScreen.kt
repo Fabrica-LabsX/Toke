@@ -732,11 +732,8 @@ private fun ItemReclamarSheet(
 }
 
 private fun formatearHoraLocal(fechaHora: Long): String {
-    val calendar = Calendar.getInstance().apply {
-        timeInMillis = fechaHora
-    }
-    val formatter = SimpleDateFormat("hh:mm a", Locale.getDefault())
-    return formatter.format(calendar.time)
+    // Con el día si el cobro no es de hoy, para que uno viejo no parezca de hoy.
+    return com.flabs.cobrate.core.logic.FechaCobro.texto(fechaHora, System.currentTimeMillis())
 }
 
 @Composable

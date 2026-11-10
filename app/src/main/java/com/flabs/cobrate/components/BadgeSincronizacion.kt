@@ -29,11 +29,11 @@ fun BadgeSincronizacion(
     val paleta = tokePaleta()
     val fondo = when {
         operativo -> paleta.verdeVivo
-        else -> paleta.rojoFondo
+        else -> paleta.rojo // rojo sólido, igual de firme que el verde del servicio activo
     }
     val borde = when {
         operativo -> paleta.verdeVivoBorde
-        else -> paleta.rojoBorde
+        else -> paleta.rojo
     }
 
     Surface(
@@ -51,7 +51,7 @@ fun BadgeSincronizacion(
                 } else {
                     "Servicio con problemas. Ver permisos"
                 },
-                tint = Color.Unspecified,
+                tint = if (operativo) Color.Unspecified else Color.White,
                 modifier = Modifier.size(20.dp),
             )
         }

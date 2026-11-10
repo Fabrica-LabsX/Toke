@@ -1,4 +1,5 @@
 package com.flabs.cobrate.features.onboarding
+import com.flabs.cobrate.ui.theme.solidoSobre
 import com.flabs.cobrate.ui.theme.TokeMedidas
 import com.flabs.cobrate.ui.theme.TokeRojo
 import com.flabs.cobrate.ui.theme.TokeAmbarTexto
@@ -117,7 +118,7 @@ fun EmpezarScreen(
                 onClick = onCerrarSesion,
                 shape = RoundedCornerShape(9999.dp),
                 color = paleta.tarjeta,
-                border = BorderStroke(1.dp, rojo.copy(alpha = 0.4f)),
+                border = BorderStroke(1.dp, rojo.solidoSobre(paleta.fondo, 0.4f)),
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(TokeMedidas.BotonAltura),

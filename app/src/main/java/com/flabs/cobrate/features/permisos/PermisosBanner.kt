@@ -1,4 +1,5 @@
 package com.flabs.cobrate.features.permisos
+import com.flabs.cobrate.ui.theme.solidoSobre
 import com.flabs.cobrate.ui.theme.TokeRojo
 import com.flabs.cobrate.ui.theme.TokeAmbarTexto
 
@@ -63,8 +64,8 @@ fun PermisosBanner(
 
     Surface(
         shape = RoundedCornerShape(22.dp),
-        color = datos.color.copy(alpha = 0.12f),
-        border = BorderStroke(1.dp, datos.color.copy(alpha = 0.35f)),
+        color = datos.color.solidoSobre(paleta.fondo, 0.12f),
+        border = BorderStroke(1.dp, datos.color.solidoSobre(paleta.fondo, 0.35f)),
         modifier = Modifier.fillMaxWidth(),
     ) {
         Row(
@@ -112,7 +113,7 @@ fun PermisosBanner(
                 Surface(
                     shape = RoundedCornerShape(9999.dp),
                     color = paleta.tarjeta,
-                    border = BorderStroke(1.dp, datos.color.copy(alpha = 0.5f)),
+                    border = BorderStroke(1.dp, datos.color.solidoSobre(paleta.tarjeta, 0.5f)),
                 ) {
                     Text(
                         text = datos.etiqueta,

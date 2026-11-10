@@ -1,4 +1,5 @@
 package com.flabs.cobrate.features.permisos
+import com.flabs.cobrate.ui.theme.solidoSobre
 import com.flabs.cobrate.ui.theme.TokeRojo
 import com.flabs.cobrate.ui.theme.TokeAmbarTexto
 
@@ -80,7 +81,7 @@ private fun PermisoFila(paleta: TokePaleta, permiso: PermisoUi) {
     ) {
         Surface(
             shape = RoundedCornerShape(14.dp),
-            color = if (permiso.resaltado) paleta.ambar.copy(alpha = 0.18f) else paleta.tileFondo,
+            color = if (permiso.resaltado) paleta.ambar.solidoSobre(paleta.tarjeta, 0.18f) else paleta.tileFondo,
             modifier = Modifier.size(48.dp),
         ) {
             Box(contentAlignment = Alignment.Center) {
@@ -125,7 +126,7 @@ private fun PermisoFila(paleta: TokePaleta, permiso: PermisoUi) {
 
 @Composable
 private fun ChipListo(paleta: TokePaleta) {
-    Surface(shape = RoundedCornerShape(9999.dp), color = paleta.activo.copy(alpha = 0.14f)) {
+    Surface(shape = RoundedCornerShape(9999.dp), color = paleta.activo.solidoSobre(paleta.tarjeta, 0.14f)) {
         Row(
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically,

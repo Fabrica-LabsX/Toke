@@ -1,4 +1,5 @@
 package com.flabs.cobrate.components
+import com.flabs.cobrate.ui.theme.solidoSobre
 import com.flabs.cobrate.ui.theme.TokeMedidas
 import com.flabs.cobrate.ui.theme.TokeAmbarTexto
 import com.flabs.cobrate.ui.theme.tokePaleta
@@ -106,8 +107,8 @@ fun PantallaEsperandoAceptacion(
                         ) {
                             Surface(
                                 shape = CircleShape,
-                                color = paleta.ambar.copy(alpha = 0.14f),
-                                border = BorderStroke(1.dp, paleta.ambar.copy(alpha = 0.4f)),
+                                color = paleta.ambar.solidoSobre(paleta.fondo, 0.14f),
+                                border = BorderStroke(1.dp, paleta.ambar.solidoSobre(paleta.fondo, 0.4f)),
                                 modifier = Modifier.size(64.dp)
                             ) {
                                 Box(contentAlignment = Alignment.Center) {
@@ -122,8 +123,8 @@ fun PantallaEsperandoAceptacion(
 
                             Surface(
                                 shape = CircleShape,
-                                color = paleta.ambar.copy(alpha = 0.14f),
-                                border = BorderStroke(1.dp, paleta.ambar.copy(alpha = 0.4f))
+                                color = paleta.ambar.solidoSobre(paleta.fondo, 0.14f),
+                                border = BorderStroke(1.dp, paleta.ambar.solidoSobre(paleta.fondo, 0.4f))
                             ) {
                                 Row(
                                     modifier = Modifier.padding(horizontal = 13.dp, vertical = 5.dp),
