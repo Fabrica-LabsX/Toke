@@ -129,12 +129,12 @@
     <!-- Número para activar el plan Pro. Pendiente: reemplazar por el número real. -->
     <string name="plan_telefono_activacion">+51 998360217</string>
     <!-- PENDIENTE: reemplazar por las páginas reales antes de publicar. -->
-    <string name="url_terminos" translatable="false">https://toke.example/terminos</string>
-    <string name="url_privacidad" translatable="false">https://toke.example/privacidad</string>
+    <string name="url_terminos" translatable="false">https://tokelabs.pages.dev/terminos</string>
+    <string name="url_privacidad" translatable="false">https://tokelabs.pages.dev/privacidad</string>
     <string name="nombre_acerca_soporte">Acerca de y soporte</string>
-    <string name="url_eliminar_cuenta" translatable="false">https://toke.example/eliminar-cuenta</string>
-    <string name="url_seguridad" translatable="false">https://toke.example/seguridad</string>
-    <string name="url_ayuda" translatable="false">https://toke.example/ayuda</string>
+    <string name="url_eliminar_cuenta" translatable="false">https://tokelabs.pages.dev/eliminar-cuenta</string>
+    <string name="url_seguridad" translatable="false">https://tokelabs.pages.dev/seguridad</string>
+    <string name="url_ayuda" translatable="false">https://tokelabs.pages.dev/ayuda</string>
 
     <!-- Mi cuenta -->
     <string name="nombre_mi_cuenta">Mi cuenta</string>

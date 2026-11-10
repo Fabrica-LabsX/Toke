@@ -50,7 +50,7 @@ class ReportesTest {
             op("hoy", ms(2026, 11, 6, 9), 10.0),
             op("lunes", ms(2026, 11, 2, 9), 20.0),
             op("mesPasado", ms(2026, 10, 30, 9), 40.0),
-            op("futuro", ms(2026, 11, 7, 9), 99.0),
+            op("futuro", ms(2027, 1, 2, 9), 99.0),
         )
         assertEquals(listOf("hoy"), ReportesLogica.filtrar(ops, PeriodoReporte.DIA, ahora, utc).map { it.id })
         assertEquals(listOf("hoy", "lunes"), ReportesLogica.filtrar(ops, PeriodoReporte.SEMANA, ahora, utc).map { it.id })

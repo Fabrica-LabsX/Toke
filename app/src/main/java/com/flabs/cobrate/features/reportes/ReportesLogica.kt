@@ -41,6 +41,18 @@ object ReportesLogica {
         return c.timeInMillis
     }
 
+    /** Inicio (exclusivo) del periodo siguiente: el final del que contiene a [ahora]. */
+    fun fin(periodo: PeriodoReporte, ahora: Long, zona: TimeZone = TimeZone.getDefault()): Long {
+        val c = Calendar.getInstance(zona).apply { timeInMillis = inicio(periodo, ahora, zona) }
+        when (periodo) {
+            PeriodoReporte.DIA -> c.add(Calendar.DAY_OF_YEAR, 1)
+            PeriodoReporte.SEMANA -> c.add(Calendar.DAY_OF_YEAR, 7)
+            PeriodoReporte.MES -> c.add(Calendar.MONTH, 1)
+            PeriodoReporte.ANIO -> c.add(Calendar.YEAR, 1)
+        }
+        return c.timeInMillis
+    }
+
     /** Cobros del periodo, del más reciente al más antiguo. */
     fun filtrar(
         operaciones: List<Operacion>,
@@ -49,7 +61,9 @@ object ReportesLogica {
         zona: TimeZone = TimeZone.getDefault(),
     ): List<Operacion> {
         val desde = inicio(periodo, ahora, zona)
-        return operaciones.filter { it.fechaHora in desde..ahora }.sortedByDescending { it.fechaHora }
+        val hasta = fin(periodo, ahora, zona)
+        // Hasta el FIN del periodo (no hasta "ahora"): un cobro con la hora del otro celular un poco adelantada también cuenta.
+        return operaciones.filter { it.fechaHora >= desde && it.fechaHora < hasta }.sortedByDescending { it.fechaHora }
     }
 
     fun resumen(operaciones: List<Operacion>): ResumenPeriodo {
