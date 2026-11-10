@@ -29,6 +29,8 @@ object ActualizacionStore {
     private val _estado = MutableStateFlow<EstadoActualizacion>(EstadoActualizacion.AlDia)
     val estado: StateFlow<EstadoActualizacion> = _estado
 
+    @Volatile private var sinVersionPublicada = false
+
     private val _opcionalDescartada = MutableStateFlow(false)
     val opcionalDescartada: StateFlow<Boolean> = _opcionalDescartada
 
@@ -55,7 +57,13 @@ object ActualizacionStore {
     }
 
     private suspend fun consultar(c: Context, prefs: SharedPreferences) {
-        val m = descargarManifiesto() ?: return // servidor caído o sin red: se conserva lo guardado
+        sinVersionPublicada = false
+        val m = descargarManifiesto()
+        if (m == null) {
+            // 404 explícito: el servidor dice que no hay versión publicada, así que lo guardado ya no vale.
+            if (sinVersionPublicada) { prefs.edit().clear().apply(); _estado.value = EstadoActualizacion.AlDia }
+            return // sin red o servidor caído: se conserva lo guardado
+        }
         if (!ActualizacionLogica.manifiestoValido(m, c.packageName)) {
             LogSeguro.w("Actualizacion", "Respuesta de versión descartada: no es válida para este paquete")
             return
@@ -85,6 +93,7 @@ object ActualizacionStore {
                 setRequestProperty("apikey", BuildConfig.SUPABASE_ANON_KEY)
                 setRequestProperty("Accept", "application/json")
             }
+            if (con.responseCode == 404) { sinVersionPublicada = true; return@withContext null }
             if (con.responseCode != 200) return@withContext null
             json.decodeFromString(ManifiestoVersion.serializer(), con.inputStream.bufferedReader().use { it.readText() })
         } catch (e: Exception) {

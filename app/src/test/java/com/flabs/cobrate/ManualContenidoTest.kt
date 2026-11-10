@@ -8,9 +8,10 @@ import org.junit.Test
 class ManualContenidoTest {
 
     @Test
-    fun hayLasNueveGuiasPedidasConIdsUnicos() {
+    fun estanLasGuiasPedidasConIdsUnicos() {
         val ids = ManualContenido.articulos.map { it.id }
-        assertEquals(9, ids.size)
+        assertEquals(12, ids.size) // las 9 pedidas + trabajador, mi cuenta y eliminar cuenta
+        listOf("crear-negocio", "anadir-colaborador", "quitar-colaborador", "borrar-negocio", "modificar-negocio", "quitar-asignacion", "exportar-excel", "configurar-billetera", "avisos-voz").forEach { assertTrue(it in ids) }
         assertEquals(ids.size, ids.toSet().size)
     }
 

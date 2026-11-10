@@ -40,6 +40,18 @@ object ManualContenido {
         resaltado = resaltado,
     )
 
+    private fun menuMasConBorrar() = MockPantalla(
+        titulo = "Más",
+        elementos = listOf(
+            ElementoMock.Fila(TokeIcons.Maletin, "Mis negocios"),
+            ElementoMock.Fila(TokeIcons.Reportes, "Reportes"),
+            ElementoMock.Fila(TokeIcons.Recibo, "Mi plan"),
+            ElementoMock.Fila(TokeIcons.Soporte, "Acerca de y soporte"),
+            ElementoMock.Fila(TokeIcons.Papelera, "Borrar negocio"),
+        ),
+        resaltado = 4,
+    )
+
     private fun hojaEditar(resaltado: Int, asignacion: Boolean = true) = MockPantalla(
         titulo = "Editar negocio",
         elementos = listOf(
@@ -51,7 +63,7 @@ object ManualContenido {
         resaltado = resaltado,
     )
 
-    val articulos: List<ArticuloManual> = listOf(
+    private val articulosBase: List<ArticuloManual> = listOf(
         ArticuloManual(
             id = "crear-negocio",
             titulo = "Cómo crear un negocio",
@@ -115,7 +127,7 @@ object ManualContenido {
             resumen = "Se borra con todo su historial.",
             icono = TokeIcons.Papelera,
             pasos = listOf(
-                PasoManual("Toca “Más” y, abajo de la lista, “Borrar negocio”. También puedes hacerlo desde el lápiz en “Mis negocios”.", menuMas(4)),
+                PasoManual("Toca “Más” y, al final de la lista, “Borrar negocio”. También puedes hacerlo desde el lápiz en “Mis negocios”.", menuMasConBorrar()),
                 PasoManual("Escribe el nombre de tu negocio para confirmar que de verdad quieres borrarlo.", MockPantalla("Borrar negocio", listOf(ElementoMock.Campo("Escribe: Mi Bodeguita", "Mi Bodeguita")), 0)),
                 PasoManual("Toca “Borrar”. No se puede deshacer: se pierden los cobros y el equipo de ese negocio.", MockPantalla("Borrar negocio", listOf(ElementoMock.Boton("Borrar negocio")), 0)),
             ),
@@ -152,7 +164,7 @@ object ManualContenido {
                 PasoManual("Entra a “Más” > “Reportes”.", menuMas(2)),
                 PasoManual("Toca “Exportar en Excel”.", MockPantalla("Reportes", listOf(ElementoMock.Fila(TokeIcons.Reportes, "S/ 1,250.00 hoy"), ElementoMock.Boton("Exportar en Excel")), 1)),
                 PasoManual("Elige el periodo (día, semana, mes o año).", MockPantalla("Exportar", listOf(ElementoMock.Fila(TokeIcons.Calendario, "Este mes"), ElementoMock.Boton("Exportar")), 0)),
-                PasoManual("Elige dónde enviarlo: WhatsApp, correo o guardarlo. Necesita el plan Pro.", MockPantalla("Compartir", listOf(ElementoMock.Fila(TokeIcons.Compartir, "WhatsApp")), 0)),
+                PasoManual("Elige dónde enviarlo: WhatsApp, correo o guardarlo. En el plan Free puedes exportar el día; semana, mes y año son del plan Pro.", MockPantalla("Compartir", listOf(ElementoMock.Fila(TokeIcons.Compartir, "WhatsApp")), 0)),
             ),
         ),
         ArticuloManual(
@@ -178,10 +190,49 @@ object ManualContenido {
                     "Elige “Cauteloso” (solo dice “Pago confirmado”) o “Básico” (dice la billetera y el monto; plan Pro).",
                     MockPantalla("Aviso en voz alta", listOf(ElementoMock.Fila(TokeIcons.VolumenAlto, "Cauteloso"), ElementoMock.Fila(TokeIcons.VolumenAlto, "Básico")), 0),
                 ),
-                PasoManual("Toca “Probar” para escuchar cómo suena antes de salir.", MockPantalla("Aviso en voz alta", listOf(ElementoMock.Boton("Probar aviso")), 0)),
+                PasoManual("Toca “Probar voz” para escuchar cómo suena antes de salir.", MockPantalla("Aviso en voz alta", listOf(ElementoMock.Boton("Probar voz")), 0)),
             ),
         ),
     )
+
+    /** Guías extra, fuera de las 9 pedidas: entrar como trabajador y manejar la cuenta. */
+    val articulosExtra: List<ArticuloManual> = listOf(
+        ArticuloManual(
+            id = "entrar-trabajador",
+            titulo = "Cómo entro como trabajador",
+            resumen = "Con el código que te da tu jefe.",
+            icono = TokeIcons.Llave,
+            pasos = listOf(
+                PasoManual("Pídele a tu jefe el código de invitación.", MockPantalla("Código listo", listOf(ElementoMock.Campo("Código", "GAB5XL")), 0)),
+                PasoManual("Abre TOKE y toca “Tengo un código de trabajador”.", MockPantalla("Bienvenida", listOf(ElementoMock.Boton("Iniciar sesión", principal = false), ElementoMock.Boton("Tengo un código de trabajador", principal = false)), 1)),
+                PasoManual("Escribe el código y toca “Unirme”. Si tu jefe aprueba antes de entrar, espera su aceptación.", MockPantalla("Código de trabajador", listOf(ElementoMock.Campo("Código de invitación", "GAB5XL"), ElementoMock.Boton("Unirme")), 1)),
+            ),
+        ),
+        ArticuloManual(
+            id = "mi-cuenta",
+            titulo = "Cómo cambio mi correo o contraseña",
+            resumen = "Desde “Más” > “Mi cuenta”.",
+            icono = TokeIcons.Persona,
+            pasos = listOf(
+                PasoManual("Entra a “Más” > “Mi cuenta”.", MockPantalla("Más", listOf(ElementoMock.Fila(TokeIcons.EscudoCandado, "Permisos"), ElementoMock.Fila(TokeIcons.Persona, "Mi cuenta"), ElementoMock.Fila(TokeIcons.Soporte, "Acerca de y soporte")), 1)),
+                PasoManual("Toca “Actualizar correo”, escribe el nuevo y confirma con el código que te llega.", MockPantalla("Mi cuenta", listOf(ElementoMock.Fila(TokeIcons.Persona, "tu@correo.com"), ElementoMock.Boton("Actualizar correo", principal = false)), 1)),
+                PasoManual("Para la contraseña, toca “Cambiar contraseña” y escribe primero la actual.", MockPantalla("Mi cuenta", listOf(ElementoMock.Boton("Cambiar contraseña", principal = false)), 0)),
+            ),
+        ),
+        ArticuloManual(
+            id = "eliminar-cuenta",
+            titulo = "Cómo elimino mi cuenta",
+            resumen = "Se borra tu acceso; no se puede deshacer.",
+            icono = TokeIcons.Papelera,
+            pasos = listOf(
+                PasoManual("Entra a “Más” > “Mi cuenta” y toca “Eliminar cuenta”.", MockPantalla("Mi cuenta", listOf(ElementoMock.Boton("Cambiar contraseña", principal = false), ElementoMock.Boton("Eliminar cuenta", principal = false)), 1)),
+                PasoManual("Lee qué se borra y escribe tu contraseña (o ELIMINAR si entraste con código).", MockPantalla("Eliminar cuenta", listOf(ElementoMock.Campo("Tu contraseña", "••••••••"), ElementoMock.Boton("Eliminar mi cuenta")), 0)),
+                PasoManual("Si eres dueño, tus negocios y sus cobros también se borran: exporta antes a Excel lo que quieras guardar.", MockPantalla("Eliminar cuenta", listOf(ElementoMock.Boton("Sí, eliminar cuenta y negocios")), 0)),
+            ),
+        ),
+    )
+
+    val articulos: List<ArticuloManual> get() = articulosBase + articulosExtra
 
     val preguntas: List<PreguntaFrecuente> = listOf(
         PreguntaFrecuente(
@@ -231,6 +282,14 @@ object ManualContenido {
         PreguntaFrecuente(
             "¿Qué hago si un cobro no aparece?",
             "Revisa que tengas internet, que TOKE esté encendido y que el acceso a notificaciones esté activo en “Permisos”. Si sigue igual, escríbenos por WhatsApp desde “Acerca de y soporte”.",
+        ),
+        PreguntaFrecuente(
+            "¿Cómo actualizo TOKE?",
+            "Cuando hay una versión nueva, TOKE te lo avisa al abrirlo y la descarga desde ahí. Android te pide confirmar la instalación y, la primera vez, permitir que TOKE instale su propia actualización.",
+        ),
+        PreguntaFrecuente(
+            "¿Qué pasa si me pausan o me expulsan de un negocio?",
+            "Si te pausan, dejas de ver los cobros hasta que te reanuden. Si te expulsan, pierdes el acceso a ese negocio y necesitas un código nuevo para volver.",
         ),
     )
 }
