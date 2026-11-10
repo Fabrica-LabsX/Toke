@@ -107,6 +107,10 @@ fun AcercaDeScreen(onVolver: () -> Unit, onManual: () -> Unit = {}, onPreguntas:
             Fila(paleta, TokeIcons.Soporte, "Escribir por WhatsApp", "Habla directamente con nosotros") {
                 abrir(AcercaDeLogica.enlaceSoporte(telefono, version))
             }
+            HorizontalDivider(modifier = Modifier.padding(start = 68.dp), color = paleta.borde)
+            Fila(paleta, TokeIcons.Soporte, "Escribir por correo", "AeroCorpKT@protonmail.com") {
+                abrir("mailto:AeroCorpKT@protonmail.com?subject=" + Uri.encode("Soporte TOKE " + version))
+            }
         }
         Seccion(paleta, "Información legal") {
             Fila(paleta, TokeIcons.Recibo, "Términos y condiciones", null) { abrir(urlTerminos) }
