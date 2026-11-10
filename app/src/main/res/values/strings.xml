@@ -132,4 +132,77 @@
     <string name="url_terminos" translatable="false">https://toke.example/terminos</string>
     <string name="url_privacidad" translatable="false">https://toke.example/privacidad</string>
     <string name="nombre_acerca_soporte">Acerca de y soporte</string>
+    <string name="url_eliminar_cuenta" translatable="false">https://toke.example/eliminar-cuenta</string>
+    <string name="url_seguridad" translatable="false">https://toke.example/seguridad</string>
+    <string name="url_ayuda" translatable="false">https://toke.example/ayuda</string>
+
+    <!-- Mi cuenta -->
+    <string name="nombre_mi_cuenta">Mi cuenta</string>
+    <string name="cuenta_titulo">Mi cuenta</string>
+    <string name="cuenta_nombre">Nombre</string>
+    <string name="cuenta_sin_nombre">Sin nombre</string>
+    <string name="cuenta_correo">Correo electrónico</string>
+    <string name="cuenta_estado_correo">Estado del correo</string>
+    <string name="cuenta_correo_verificado">Verificado</string>
+    <string name="cuenta_correo_sin_verificar">Sin verificar</string>
+    <string name="cuenta_sin_correo_explicacion">Entraste con un código de trabajador, así que esta cuenta no tiene correo ni contraseña.</string>
+    <string name="cuenta_actualizar_correo">Actualizar correo</string>
+    <string name="cuenta_actualizar_correo_ayuda">Te enviaremos un código al correo nuevo para confirmarlo. El actual sigue activo hasta entonces.</string>
+    <string name="cuenta_correo_nuevo">Correo nuevo</string>
+    <string name="cuenta_enviar_codigo">Enviar código</string>
+    <string name="cuenta_confirmar_correo">Confirma tu correo</string>
+    <string name="cuenta_confirmar_correo_ayuda">Escribe el código que enviamos a %1$s.</string>
+    <string name="cuenta_codigo">Código</string>
+    <string name="cuenta_confirmar">Confirmar</string>
+    <string name="cuenta_ya_confirme">Ya confirmé con el enlace</string>
+    <string name="cuenta_cambiar_password">Cambiar contraseña</string>
+    <string name="cuenta_cambiar_password_ayuda">Por seguridad, escribe primero tu contraseña actual.</string>
+    <string name="cuenta_password_actual">Contraseña actual</string>
+    <string name="cuenta_password_nueva">Contraseña nueva</string>
+    <string name="cuenta_password_confirmar">Repite la contraseña nueva</string>
+    <string name="cuenta_guardar_password">Guardar contraseña</string>
+    <string name="cuenta_privacidad">Política de privacidad</string>
+    <string name="cuenta_terminos">Términos y condiciones</string>
+    <string name="cuenta_pagina_eliminar">Cómo eliminar tu cuenta</string>
+    <string name="cuenta_eliminar">Eliminar cuenta</string>
+    <string name="cuenta_eliminar_consecuencias">Esta acción no se puede deshacer.</string>
+    <string name="cuenta_eliminar_lista">Se cierra tu acceso a TOKE y se borran tu cuenta, tus dispositivos y tu plan. Si eres trabajador, los cobros que atendiste se conservan para el dueño. Si eres dueño, tus negocios y sus cobros también se eliminan: antes puedes exportarlos a Excel desde Reportes.</string>
+    <string name="cuenta_eliminar_password">Tu contraseña</string>
+    <string name="cuenta_eliminar_frase">Escribe ELIMINAR para confirmar</string>
+    <string name="cuenta_eliminar_negocios">Tienes %1$d negocio(s). Si sigues, se eliminarán junto con todos sus cobros.</string>
+    <string name="cuenta_eliminar_confirmar">Eliminar mi cuenta</string>
+    <string name="cuenta_eliminar_todo">Sí, eliminar cuenta y negocios</string>
+    <string name="cuenta_correo_enviado">Aún no vemos la confirmación. Revisa tu correo e inténtalo de nuevo.</string>
+    <string name="cuenta_correo_actualizado">Correo actualizado.</string>
+    <string name="cuenta_correo_invalido">Escribe un correo válido.</string>
+    <string name="cuenta_correo_igual">Ese ya es tu correo actual.</string>
+    <string name="cuenta_codigo_invalido">El código no es correcto o venció. Pide uno nuevo.</string>
+    <string name="cuenta_password_ok">Contraseña actualizada.</string>
+    <string name="cuenta_password_incorrecta">La contraseña no es correcta.</string>
+    <string name="cuenta_error_red">Sin conexión. Revisa tu internet e inténtalo de nuevo. (Código RED)</string>
+    <string name="cuenta_error_general">No se pudo completar. Inténtalo de nuevo en unos minutos.</string>
+
+    <!-- Actualizador -->
+    <string name="actualizacion_titulo_obligatoria">Actualiza TOKE</string>
+    <string name="actualizacion_titulo_opcional">Hay una versión nueva</string>
+    <string name="actualizacion_mensaje_obligatorio">Esta versión de TOKE ya no es compatible. Actualiza para continuar</string>
+    <string name="actualizacion_mensaje_opcional">Puedes seguir usando TOKE, pero la versión nueva trae mejoras.</string>
+    <string name="actualizacion_version_actual">Tu versión</string>
+    <string name="actualizacion_version_nueva">Versión nueva</string>
+    <string name="actualizacion_tamano">Tamaño</string>
+    <string name="actualizacion_restante">Faltan %1$s</string>
+    <string name="actualizacion_descargar">Descargar actualización</string>
+    <string name="actualizacion_cancelar">Cancelar descarga</string>
+    <string name="actualizacion_reintentar">Reintentar</string>
+    <string name="actualizacion_instalar">Instalar</string>
+    <string name="actualizacion_dar_permiso">Permitir instalar desde TOKE</string>
+    <string name="actualizacion_despues">Ahora no</string>
+    <string name="actualizacion_salir">Salir de TOKE</string>
+    <string name="actualizacion_cancelada">Descarga cancelada. Puedes volver a intentarlo cuando quieras.</string>
+    <string name="actualizacion_lista">Descarga lista y verificada. Android te pedirá confirmar la instalación.</string>
+    <string name="actualizacion_permiso_explicacion">Android necesita tu permiso para que TOKE instale su propia actualización. Actívalo en la pantalla que se abre, vuelve aquí y toca Instalar.</string>
+    <string name="actualizacion_error_red">No se pudo descargar. Revisa tu internet e inténtalo de nuevo. (Código RED)</string>
+    <string name="actualizacion_error_archivo">El archivo descargado no está completo o fue alterado, así que no se instaló. Inténtalo de nuevo. (Código ARCHIVO)</string>
+    <string name="actualizacion_error_firma">El archivo no corresponde a TOKE, así que no se instaló. (Código FIRMA)</string>
+    <string name="actualizacion_error_espacio">No hay espacio suficiente en el celular. Libera espacio e inténtalo de nuevo. (Código ESPACIO)</string>
 </resources>

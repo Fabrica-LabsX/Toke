@@ -112,6 +112,12 @@ fun AcercaDeScreen(onVolver: () -> Unit, onManual: () -> Unit = {}, onPreguntas:
             Fila(paleta, TokeIcons.Recibo, "Términos y condiciones", null) { abrir(urlTerminos) }
             HorizontalDivider(modifier = Modifier.padding(start = 68.dp), color = paleta.borde)
             Fila(paleta, TokeIcons.EscudoCandado, "Política de privacidad", null) { abrir(urlPrivacidad) }
+            HorizontalDivider(modifier = Modifier.padding(start = 68.dp), color = paleta.borde)
+            Fila(paleta, TokeIcons.EscudoCandado, "Seguridad", null) { abrir(contexto.getString(R.string.url_seguridad)) }
+            HorizontalDivider(modifier = Modifier.padding(start = 68.dp), color = paleta.borde)
+            Fila(paleta, TokeIcons.Ayuda, "Ayuda en la web", null) { abrir(contexto.getString(R.string.url_ayuda)) }
+            HorizontalDivider(modifier = Modifier.padding(start = 68.dp), color = paleta.borde)
+            Fila(paleta, TokeIcons.Recibo, "Eliminación de cuenta", null) { abrir(contexto.getString(R.string.url_eliminar_cuenta)) }
         }
 
         Text(

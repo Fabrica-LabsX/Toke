@@ -78,6 +78,14 @@ class AuthViewModel : ViewModel() {
         return SupabaseAuthBridge.completarRegistro(nombre, passwordElegida)
     }
 
+    /** La cuenta ya fue eliminada en el servidor: se borra todo lo local y se vuelve al acceso (sin llamar a la red). */
+    fun cuentaEliminada() {
+        viewModelScope.launch {
+            CuentaStore.cerrarSesion()
+            SupabaseAuthBridge.limpiarSesionLocal()
+        }
+    }
+
     /** Cierra la sesión local y en Supabase previa quita de token FCM. */
     fun cerrarSesion() {
         viewModelScope.launch {

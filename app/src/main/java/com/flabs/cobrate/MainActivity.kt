@@ -206,12 +206,38 @@ class MainActivity : ComponentActivity() {
         // Rate Limiter para Auth
         LoginRateLimiter.init(applicationContext)
 
+        // Comprobación de versión en segundo plano; si ya se sabe que esta versión no es compatible, se bloquea de inmediato.
+        com.flabs.cobrate.features.actualizacion.ActualizacionStore.iniciar(applicationContext)
+
         setContent {
             val themeMode by PreferenciasAppStore.themeMode.collectAsState()
 
             CobrateTheme(themeMode = themeMode) {
+                val actualizacion by com.flabs.cobrate.features.actualizacion.ActualizacionStore.estado.collectAsState()
+                val omitida by com.flabs.cobrate.features.actualizacion.ActualizacionStore.opcionalDescartada.collectAsState()
+                val obligatoria = actualizacion as? com.flabs.cobrate.features.actualizacion.EstadoActualizacion.Obligatoria
+                val opcional = actualizacion as? com.flabs.cobrate.features.actualizacion.EstadoActualizacion.Opcional
                 Box {
-                    CobrateApp()
+                    // Versión no compatible: la pantalla de actualización reemplaza TODA la app (no se compone
+                    // la navegación, así que Atrás, deep links o accesos directos no pueden saltarla).
+                    if (obligatoria != null) {
+                        com.flabs.cobrate.features.actualizacion.ActualizacionPantalla(
+                            manifiesto = obligatoria.manifiesto,
+                            obligatoria = true,
+                            onDespues = {},
+                            onSalir = { finishAffinity() },
+                        )
+                    } else {
+                        CobrateApp()
+                        if (opcional != null && !omitida) {
+                            com.flabs.cobrate.features.actualizacion.ActualizacionPantalla(
+                                manifiesto = opcional.manifiesto,
+                                obligatoria = false,
+                                onDespues = { com.flabs.cobrate.features.actualizacion.ActualizacionStore.descartarOpcional() },
+                                onSalir = {},
+                            )
+                        }
+                    }
                     FeedbackOverlay()
                 }
             }
@@ -739,6 +765,13 @@ fun CobrateApp() {
                 )
             }
 
+            composable(Routes.MI_CUENTA) {
+                com.flabs.cobrate.features.cuenta.MiCuentaScreen(
+                    onVolver = { navController.popBackStack() },
+                    onCuentaEliminada = { authViewModel.cuentaEliminada() },
+                )
+            }
+
             composableToke(Routes.MANUAL) {
                 com.flabs.cobrate.features.soporte.ManualScreen(onVolver = { navController.popBackStack() })
             }
@@ -815,6 +848,9 @@ fun CobrateApp() {
                 ItemMas(stringResource(R.string.nombre_permisos), TokeIcons.EscudoCandado) {
                     navController.irADetalle(Routes.PERMISOS_DUENO)
                 },
+                ItemMas(stringResource(R.string.nombre_mi_cuenta), TokeIcons.Persona) {
+                    navController.irADetalle(Routes.MI_CUENTA)
+                },
                 ItemMas(stringResource(R.string.nombre_acerca_soporte), TokeIcons.Soporte) {
                     navController.irADetalle(Routes.ACERCA_DE)
                 }
@@ -849,6 +885,9 @@ fun CobrateApp() {
                 },
                 ItemMas(stringResource(R.string.nombre_mi_plan), TokeIcons.Recibo) {
                     navController.irADetalle(Routes.PLAN_FACTURACION_DUENO)
+                },
+                ItemMas(stringResource(R.string.nombre_mi_cuenta), TokeIcons.Persona) {
+                    navController.irADetalle(Routes.MI_CUENTA)
                 },
                 ItemMas(stringResource(R.string.nombre_acerca_soporte), TokeIcons.Soporte) {
                     navController.irADetalle(Routes.ACERCA_DE)
@@ -1077,6 +1116,7 @@ object Routes {
     const val ESTADISTICAS_DUENO = "estadisticas_dueno"
     const val PLAN_FACTURACION_DUENO = "plan_facturacion_dueno"
     const val ACERCA_DE = "acerca_de"
+    const val MI_CUENTA = "mi_cuenta"
     const val MANUAL = "manual"
     const val PREGUNTAS = "preguntas_frecuentes"
     const val PERMISOS_DUENO = "permisos_dueno"

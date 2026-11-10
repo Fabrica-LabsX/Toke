@@ -2,6 +2,7 @@ package com.flabs.cobrate.core.data
 
 import com.flabs.cobrate.core.logic.AuthErrorUtils
 import com.flabs.cobrate.core.logic.LogSeguro
+import com.flabs.cobrate.features.cuenta.ResultadoEliminacion
 import io.github.jan.supabase.auth.OtpType
 import io.github.jan.supabase.auth.SignOutScope
 import io.github.jan.supabase.auth.auth
@@ -158,6 +159,80 @@ object SupabaseAuthBridge {
             SupabaseClientProvider.supabase.auth.signOut(scope = SignOutScope.OTHERS)
         }
     }
+
+    // ---- Mi cuenta ----
+
+    /** Vuelve a pedir el usuario al servidor (para ver el correo ya confirmado). */
+    suspend fun refrescarUsuario(): Result<UserInfo?> = runCatching {
+        SupabaseClientProvider.supabase.auth.retrieveUserForCurrentSession(updateSession = true)
+    }
+
+    /** Pide el cambio de correo: Supabase envía el mensaje de confirmación; el correo no cambia hasta confirmarlo. */
+    suspend fun solicitarCambioCorreo(nuevoCorreo: String): Result<Unit> = runCatching {
+        SupabaseClientProvider.supabase.auth.updateUser { email = nuevoCorreo.trim() }
+        Unit
+    }
+
+    /** Confirma el cambio de correo con el código recibido en el correo nuevo. */
+    suspend fun confirmarCambioCorreo(nuevoCorreo: String, token: String): Result<Unit> = runCatching {
+        SupabaseClientProvider.supabase.auth.verifyEmailOtp(
+            type = OtpType.Email.EMAIL_CHANGE,
+            email = nuevoCorreo.trim(),
+            token = token.trim(),
+        )
+    }
+
+    /** Reautentica con la contraseña actual (sin guardarla en ningún sitio) antes de una acción sensible. */
+    suspend fun reautenticar(correoActual: String, passwordActual: String): Result<Unit> = runCatching {
+        SupabaseClientProvider.supabase.auth.signInWith(Email) {
+            this.email = correoActual
+            this.password = passwordActual
+        }
+    }
+
+    /** Cambia la contraseña de una sesión ya abierta: reautentica, actualiza y cierra las otras sesiones. */
+    suspend fun cambiarPassword(correoActual: String, passwordActual: String, nueva: String): Result<Unit> = runCatching {
+        reautenticar(correoActual, passwordActual).getOrThrow()
+        SupabaseClientProvider.supabase.auth.updateUser { password = nueva }
+        runCatching { SupabaseClientProvider.supabase.auth.signOut(scope = SignOutScope.OTHERS) }
+        Unit
+    }
+
+    /**
+     * Pide al servidor (Edge Function eliminar-cuenta, con la clave del servidor, nunca desde Android) que elimine
+     * la cuenta de la sesión actual. Es idempotente: repetirlo tras un corte no falla.
+     */
+    suspend fun eliminarCuenta(password: String?, confirmacion: String?, cerrarNegocios: Boolean): ResultadoEliminacion =
+        kotlinx.coroutines.withContext(Dispatchers.IO) {
+            val token = SupabaseClientProvider.supabase.auth.currentAccessTokenOrNull() ?: return@withContext ResultadoEliminacion.ErrorServidor
+            var con: java.net.HttpURLConnection? = null
+            try {
+                con = (java.net.URL("${com.flabs.cobrate.BuildConfig.SUPABASE_URL.trimEnd('/')}/functions/v1/eliminar-cuenta").openConnection() as java.net.HttpURLConnection).apply {
+                    requestMethod = "POST"
+                    connectTimeout = 15000
+                    readTimeout = 30000
+                    doOutput = true
+                    setRequestProperty("Authorization", "Bearer $token")
+                    setRequestProperty("apikey", com.flabs.cobrate.BuildConfig.SUPABASE_ANON_KEY)
+                    setRequestProperty("Content-Type", "application/json")
+                }
+                val cuerpo = buildJsonObject {
+                    if (password != null) put("password", password)
+                    if (confirmacion != null) put("confirmacion", confirmacion)
+                    put("cerrarNegocios", cerrarNegocios)
+                }.toString()
+                con.outputStream.use { it.write(cuerpo.toByteArray()) }
+                val codigo = con.responseCode
+                val texto = (if (codigo in 200..299) con.inputStream else con.errorStream)?.bufferedReader()?.use { it.readText() }.orEmpty()
+                ResultadoEliminacion.desdeRespuesta(codigo, texto)
+            } catch (e: java.io.IOException) {
+                ResultadoEliminacion.SinRed
+            } catch (e: Exception) {
+                ResultadoEliminacion.ErrorServidor
+            } finally {
+                con?.disconnect()
+            }
+        }
 
     /** Solicita OTP para registro en pasos. */
     suspend fun solicitarOtpRegistro(email: String): Result<Unit> = runCatching {
