@@ -289,6 +289,23 @@ object CuentaStore {
         persistir()
     }
 
+    /**
+     * Cambia el nombre de la cuenta activa: Supabase Auth, la tabla `cuentas` y lo guardado en el celular.
+     * No pide verificación. Falla sin cambiar nada local si Supabase Auth no lo acepta.
+     */
+    suspend fun actualizarNombre(nombre: String): Result<Unit> {
+        val actual = _sesionActual.value ?: return Result.failure(IllegalStateException("Sin sesión"))
+        val limpio = nombre.trim()
+        SupabaseAuthBridge.actualizarNombre(limpio).onFailure { return Result.failure(it) }
+        val nueva = actual.copy(username = limpio)
+        _cuentas.value = _cuentas.value.map { if (it.id == nueva.id) nueva else it }
+        _sesionActual.value = nueva
+        persistir()
+        // La tabla `cuentas` se reintenta sola en el próximo inicio de sesión si esto falla.
+        cuentaRepo.upsert(nueva).onFailure { LogSeguro.w("CuentaStore", "No se pudo guardar el nombre en cuentas", it) }
+        return Result.success(Unit)
+    }
+
     /** Busca una cuenta por su id. */
     fun buscarPorId(id: String): Cuenta? =
         _cuentas.value.find { it.id == id }

@@ -6,11 +6,16 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
+import androidx.compose.ui.res.painterResource
+import com.flabs.cobrate.components.TokeIcons
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -43,7 +48,7 @@ import com.flabs.cobrate.ui.theme.TokePaleta
 import com.flabs.cobrate.ui.theme.tokePaleta
 import kotlinx.coroutines.launch
 
-private enum class Vista { PRINCIPAL, CORREO, CODIGO_CORREO, PASSWORD, ELIMINAR }
+private enum class Vista { PRINCIPAL, NOMBRE, CORREO, CODIGO_CORREO, PASSWORD, ELIMINAR }
 
 private fun estilo(peso: FontWeight, tam: Int) = TextStyle(fontFamily = PlusJakartaSans, fontWeight = peso, fontSize = tam.sp)
 
@@ -67,6 +72,7 @@ fun MiCuentaScreen(onVolver: () -> Unit, onCuentaEliminada: () -> Unit) {
     var ocupado by remember { mutableStateOf(false) }
 
     // Campos (viven aquí para sobrevivir al cambio de vista; las contraseñas nunca se guardan ni se persisten).
+    var nombreNuevo by rememberSaveable { mutableStateOf("") }
     var correoNuevo by rememberSaveable { mutableStateOf("") }
     var codigo by rememberSaveable { mutableStateOf("") }
     var passActual by remember { mutableStateOf("") }
@@ -93,6 +99,7 @@ fun MiCuentaScreen(onVolver: () -> Unit, onCuentaEliminada: () -> Unit) {
     val msgCodigoMalo = stringResource(R.string.cuenta_codigo_invalido)
     val msgCorreoInvalido = stringResource(R.string.cuenta_correo_invalido)
     val msgCorreoIgual = stringResource(R.string.cuenta_correo_igual)
+    val msgNombreOk = stringResource(R.string.cuenta_nombre_ok)
 
     AccesoFondo(paleta = paleta) {
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -102,7 +109,27 @@ fun MiCuentaScreen(onVolver: () -> Unit, onCuentaEliminada: () -> Unit) {
             Vista.PRINCIPAL -> {
                 TituloAcceso(paleta, stringResource(R.string.cuenta_titulo))
                 Tarjeta(paleta) {
-                    Fila(paleta, stringResource(R.string.cuenta_nombre), cuenta?.username?.takeIf { it.isNotBlank() } ?: stringResource(R.string.cuenta_sin_nombre))
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(modifier = Modifier.weight(1f)) {
+                            Fila(paleta, stringResource(R.string.cuenta_nombre), cuenta?.username?.takeIf { it.isNotBlank() } ?: stringResource(R.string.cuenta_sin_nombre))
+                        }
+                        Surface(
+                            onClick = { nombreNuevo = cuenta?.username.orEmpty(); ir(Vista.NOMBRE) },
+                            shape = RoundedCornerShape(12.dp),
+                            color = paleta.tileFondo,
+                            border = BorderStroke(1.dp, paleta.bordeControl),
+                            modifier = Modifier.size(TokeMedidas.BotonIcono),
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Icon(
+                                    painter = painterResource(id = TokeIcons.Editar),
+                                    contentDescription = stringResource(R.string.cuenta_editar_nombre),
+                                    tint = paleta.textoPrincipal,
+                                    modifier = Modifier.size(18.dp),
+                                )
+                            }
+                        }
+                    }
                     if (tipo == TipoCuenta.CON_CORREO) {
                         Fila(paleta, stringResource(R.string.cuenta_correo), correo.orEmpty())
                         Fila(
@@ -124,6 +151,23 @@ fun MiCuentaScreen(onVolver: () -> Unit, onCuentaEliminada: () -> Unit) {
                     Enlace(paleta, stringResource(R.string.cuenta_pagina_eliminar)) { abrir(contexto.getString(R.string.url_eliminar_cuenta)) }
                 }
                 BotonAcceso(paleta, stringResource(R.string.cuenta_eliminar), principal = false) { ir(Vista.ELIMINAR) }
+            }
+
+            Vista.NOMBRE -> {
+                TituloAcceso(paleta, stringResource(R.string.cuenta_editar_nombre), stringResource(R.string.cuenta_editar_nombre_ayuda))
+                CampoAcceso(paleta, stringResource(R.string.cuenta_nombre_nuevo), nombreNuevo, "", { nombreNuevo = it.take(MiCuentaLogica.NOMBRE_MAX) })
+                mensaje?.let { Aviso(paleta, it, error = true) }
+                val puedeGuardar = MiCuentaLogica.nombreValido(nombreNuevo, cuenta?.username) && !ocupado
+                BotonAcceso(paleta, stringResource(R.string.cuenta_guardar_nombre), principal = puedeGuardar) {
+                    if (!puedeGuardar) return@BotonAcceso
+                    ocupado = true
+                    scope.launch {
+                        CuentaStore.actualizarNombre(nombreNuevo)
+                            .onSuccess { limpiarCampos(); vista = Vista.PRINCIPAL; mensaje = msgNombreOk }
+                            .onFailure { mensaje = if (esRed(it)) msgSinRed else msgGeneral }
+                        ocupado = false
+                    }
+                }
             }
 
             Vista.CORREO -> {

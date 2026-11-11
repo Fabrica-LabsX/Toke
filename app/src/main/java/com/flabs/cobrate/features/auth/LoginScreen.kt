@@ -15,6 +15,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import com.flabs.cobrate.R
+import com.flabs.cobrate.core.data.CuentaStore
 import com.flabs.cobrate.core.logic.FeedbackManager
 import com.flabs.cobrate.features.acceso.AccesoFondo
 import com.flabs.cobrate.features.acceso.AccesoLogica
@@ -96,6 +97,12 @@ fun LoginScreen(
                 modoAuth = ModoAuth.LOGIN
             }
             ModoAuth.REGISTRO_PASOS -> {
+                if (codigoRegistroVerificado) {
+                    // Ya se abrió sesión con el código pero no se eligió contraseña: se cierra y se vuelve a empezar.
+                    RecuperacionEnCurso.terminar()
+                    authViewModel.cerrarSesion()
+                    codigoRegistroVerificado = false
+                }
                 if (pasoRegistro > 1) {
                     pasoRegistro -= 1
                 } else if (modoInicialCrear) {
@@ -301,9 +308,13 @@ fun LoginScreen(
                             } else {
                                 scope.launch {
                                     FeedbackManager.setLoading(true, "Verificando código...")
+                                    // Verificar el código abre sesión: sin esta marca la app saltaría a Inicio y
+                                    // cancelaría el guardado del nombre y la contraseña.
+                                    RecuperacionEnCurso.iniciar()
                                     if (!codigoRegistroVerificado) {
                                         val verif = authViewModel.verificarOtpRegistro(email, otpTokenRegistro)
                                         if (verif.isFailure) {
+                                            RecuperacionEnCurso.terminar()
                                             FeedbackManager.setLoading(false)
                                             FeedbackManager.showErrorMessage(
                                                 com.flabs.cobrate.core.logic.ErrorMapper.amable(verif.exceptionOrNull(), "Código incorrecto o expirado.")
@@ -316,7 +327,10 @@ fun LoginScreen(
                                     val res = authViewModel.completarRegistro(nombreRegistro, passwordRegistro)
                                     FeedbackManager.setLoading(false)
                                     res.onSuccess {
-                                        FeedbackManager.showSuccess("¡Bienvenido a TOKE!, $nombreRegistro")
+                                        // El nombre elegido reemplaza al que se dedujo del correo al abrir la sesión.
+                                        CuentaStore.actualizarNombre(nombreRegistro)
+                                        FeedbackManager.showSuccess("¡Bienvenido a TOKE!, ${nombreRegistro.trim()}")
+                                        RecuperacionEnCurso.terminar()
                                     }.onFailure { err -> FeedbackManager.showError(err) }
                                 }
                             }

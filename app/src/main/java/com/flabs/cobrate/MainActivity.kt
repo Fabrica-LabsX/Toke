@@ -1064,11 +1064,14 @@ private fun InicioScreen(
     onRefrescarTab: (() -> Unit)? = null,
     onAbrirMas: () -> Unit = {}
 ) {
-    PedirPermisoNotificaciones()
-    PedirExencionBateria()
-
     val misNegocios by negocioViewModel.misNegocios.collectAsState()
     val seleccionadoId by negocioViewModel.negocioSeleccionadoId.collectAsState()
+
+    // Los avisos de permisos solo tienen sentido con un negocio abierto (Home), no en "¿Cómo deseas empezar?".
+    if (misNegocios.isNotEmpty()) {
+        PedirPermisoNotificaciones()
+        PedirExencionBateria()
+    }
 
     // Sincronizar el negocio seleccionado con el BusinessViewModel para que los datos
     // del Home correspondan siempre al negocio elegido en el Hub.

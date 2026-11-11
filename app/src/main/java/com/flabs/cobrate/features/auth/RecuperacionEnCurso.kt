@@ -4,7 +4,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
 /**
- * Marca "estoy cambiando mi contraseña". Verificar el código de recuperación abre sesión en Supabase;
+ * Marca "estoy en recuperar contraseña o terminando de crear mi cuenta". Verificar el código de recuperación abre sesión en Supabase;
  * mientras esta marca esté activa, la navegación global no debe sacar al usuario de la pantalla de
  * contraseña nueva hacia Inicio (ni mostrar "¿Cómo deseas empezar?").
  */

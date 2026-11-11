@@ -141,6 +141,11 @@
     <string name="cuenta_titulo">Mi cuenta</string>
     <string name="cuenta_nombre">Nombre</string>
     <string name="cuenta_sin_nombre">Sin nombre</string>
+    <string name="cuenta_editar_nombre">Cambiar nombre</string>
+    <string name="cuenta_editar_nombre_ayuda">Es el nombre que ven las personas de tu negocio. Se cambia al instante, sin verificación.</string>
+    <string name="cuenta_nombre_nuevo">Nombre nuevo</string>
+    <string name="cuenta_guardar_nombre">Guardar nombre</string>
+    <string name="cuenta_nombre_ok">Nombre actualizado.</string>
     <string name="cuenta_correo">Correo electrónico</string>
     <string name="cuenta_estado_correo">Estado del correo</string>
     <string name="cuenta_correo_verificado">Verificado</string>

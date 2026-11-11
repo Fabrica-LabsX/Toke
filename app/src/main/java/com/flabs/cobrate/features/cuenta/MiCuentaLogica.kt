@@ -29,6 +29,15 @@ object MiCuentaLogica {
         else -> AccesoLogica.errorPasswords(nueva, confirmacion)
     }
 
+    const val NOMBRE_MIN = 2
+    const val NOMBRE_MAX = 40
+
+    /** El nombre se cambia sin verificación; solo se exige que sea razonable. true = se puede guardar. */
+    fun nombreValido(nuevo: String, actual: String?): Boolean {
+        val n = nuevo.trim()
+        return n.length in NOMBRE_MIN..NOMBRE_MAX && !n.equals(actual?.trim(), ignoreCase = false)
+    }
+
     const val FRASE_ELIMINAR = "ELIMINAR"
 
     /** Eliminar: cuentas con correo confirman con su contraseña; las anónimas escribiendo la frase. */

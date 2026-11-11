@@ -1,0 +1,3 @@
+-- Aplicada en Supabase como "limpieza_usuarios_sin_verificar".
+-- Cada hora (minuto 15) borra: correos sin verificar con más de 24 h, y sesiones anónimas
+-- sin negocio y sin actividad en 7 días. Ver public.limpiar_usuarios_sin_usar().

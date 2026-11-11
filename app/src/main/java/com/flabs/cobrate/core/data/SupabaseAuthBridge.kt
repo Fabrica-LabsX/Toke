@@ -257,9 +257,22 @@ object SupabaseAuthBridge {
     suspend fun completarRegistro(nombre: String, passwordElegida: String): Result<Unit> = runCatching {
         SupabaseClientProvider.supabase.auth.updateUser {
             password = passwordElegida
-            data = buildJsonObject {
-                put("username", nombre.trim())
-            }
+            data = datosDeNombre(nombre)
         }
+    }
+
+    /** Cambia solo el nombre (sin verificación): queda en los datos del usuario de Supabase. */
+    suspend fun actualizarNombre(nombre: String): Result<Unit> = runCatching {
+        SupabaseClientProvider.supabase.auth.updateUser { data = datosDeNombre(nombre) }
+        Unit
+    }
+
+    // "username" lo lee la app; "display_name"/"full_name"/"name" son los que muestra el panel de Supabase.
+    private fun datosDeNombre(nombre: String) = buildJsonObject {
+        val n = nombre.trim()
+        put("username", n)
+        put("display_name", n)
+        put("full_name", n)
+        put("name", n)
     }
 }
