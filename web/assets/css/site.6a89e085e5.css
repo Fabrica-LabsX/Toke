@@ -125,7 +125,8 @@ section{padding:88px 0}
 .fr.yes{border-color:var(--brand)}
 .fr.yes .st{color:var(--brand)}
 .fr img{width:34px;height:38px;object-fit:contain;flex:none}
-.fr .ch{width:34px;height:34px;border-radius:50%;flex:none;background:var(--border);color:var(--muted);display:grid;place-items:center;font-size:.72rem;font-weight:800}
+.fr .ch{width:46px;height:46px;border-radius:50%;flex:none;background:var(--text);color:var(--bg);display:grid;place-items:center}
+.fr .ch svg{width:29px;height:29px}
 .shield{width:92px;margin:0 auto 20px}
 .facts{margin-top:28px;display:grid;gap:12px}
 .fact{display:flex;gap:12px;align-items:flex-start;font-size:.97rem}
