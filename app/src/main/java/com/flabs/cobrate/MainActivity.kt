@@ -283,8 +283,11 @@ fun CobrateApp() {
     }
 
     // Lógica de navegación global basada en el estado de la sesión (CAPA 19 & CAPA 54).
-    LaunchedEffect(sesionActual, estaInicializando, rutaActual == Routes.ARRANQUE) {
+    val recuperandoClave by com.flabs.cobrate.features.auth.RecuperacionEnCurso.activa.collectAsState()
+    LaunchedEffect(sesionActual, estaInicializando, rutaActual == Routes.ARRANQUE, recuperandoClave) {
         if (estaInicializando) return@LaunchedEffect
+        // Cambiando la contraseña: la sesión ya existe, pero se termina ese paso antes de entrar.
+        if (recuperandoClave && sesionActual != null) return@LaunchedEffect
 
         val intent = (navController.context as? Activity)?.intent
         val routeExtra = intent?.getStringExtra("route")

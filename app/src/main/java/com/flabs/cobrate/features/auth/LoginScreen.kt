@@ -89,7 +89,12 @@ fun LoginScreen(
             ModoAuth.LOGIN -> onVolver()
             ModoAuth.RECUPERACION_EMAIL -> modoAuth = ModoAuth.LOGIN
             ModoAuth.RECUPERACION_OTP -> modoAuth = ModoAuth.RECUPERACION_EMAIL
-            ModoAuth.RECUPERACION_PASSWORD -> modoAuth = ModoAuth.LOGIN
+            ModoAuth.RECUPERACION_PASSWORD -> {
+                // Salir sin cambiar la contraseña: se cierra la sesión que abrió el código.
+                RecuperacionEnCurso.terminar()
+                authViewModel.cerrarSesion()
+                modoAuth = ModoAuth.LOGIN
+            }
             ModoAuth.REGISTRO_PASOS -> {
                 if (pasoRegistro > 1) {
                     pasoRegistro -= 1
@@ -196,12 +201,14 @@ fun LoginScreen(
                         } else {
                             scope.launch {
                                 FeedbackManager.setLoading(true, "Verificando código...")
+                                RecuperacionEnCurso.iniciar() // antes: verificar abre sesión y la navegación no debe saltar
                                 val res = authViewModel.verificarOtpRecuperacion(email, otpTokenRecuperacion)
                                 FeedbackManager.setLoading(false)
                                 res.onSuccess {
                                     FeedbackManager.showSuccess("Código verificado correctamente.")
                                     modoAuth = ModoAuth.RECUPERACION_PASSWORD
                                 }.onFailure { err ->
+                                    RecuperacionEnCurso.terminar()
                                     FeedbackManager.showErrorMessage(com.flabs.cobrate.core.logic.ErrorMapper.amable(err, "Código de verificación inválido o expirado."))
                                 }
                             }
@@ -232,7 +239,10 @@ fun LoginScreen(
                         }
                     },
                     textoEnlace = "Continuar sin cambiar",
-                    onEnlace = { FeedbackManager.showSuccess("Sesión iniciada correctamente.") },
+                    onEnlace = {
+                        FeedbackManager.showSuccess("Sesión iniciada correctamente.")
+                        RecuperacionEnCurso.terminar()
+                    },
                 )
             }
 
@@ -347,6 +357,7 @@ fun LoginScreen(
                             res.onSuccess {
                                 FeedbackManager.showSuccess("Contraseña actualizada. Otras sesiones han sido cerradas.")
                                 modoAuth = ModoAuth.LOGIN
+                                RecuperacionEnCurso.terminar() // la sesión ya está abierta: ahora sí entra a la app
                             }.onFailure { err -> FeedbackManager.showError(err) }
                         }
                     }
