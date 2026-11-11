@@ -5,6 +5,48 @@
   /* Proyecto Supabase público (la URL no es un secreto). Fuente única de versiones: check-app-release. */
   var RELEASE_URL = 'https://ianiulmdyzsqtrqpujkx.supabase.co/functions/v1/check-app-release?channel=stable';
 
+  /* Tema claro/oscuro: por defecto claro; se recuerda lo que elija la persona */
+  var temaBtn = document.querySelector('.theme-btn');
+  function aplicarTema(t) {
+    document.documentElement.setAttribute('data-theme', t);
+    if (temaBtn) temaBtn.setAttribute('aria-label', t === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro');
+  }
+  if (temaBtn) {
+    aplicarTema(document.documentElement.getAttribute('data-theme') || 'light');
+    temaBtn.addEventListener('click', function () {
+      var nuevo = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      aplicarTema(nuevo);
+      try { localStorage.setItem('toke-theme', nuevo); } catch (e) {}
+    });
+  }
+
+  /* Carrusel vertical de "Cómo funciona": marca el paso visible y mueve los puntos */
+  var vc = document.querySelector('[data-vcar]');
+  if (vc && 'IntersectionObserver' in window) {
+    var pista = vc.querySelector('.vtrack');
+    var diapos = vc.querySelectorAll('.vslide');
+    var puntos = vc.querySelectorAll('[data-go]');
+    var marcar = function (n) {
+      diapos.forEach(function (d, k) { d.classList.toggle('on', k === n); });
+      puntos.forEach(function (p, k) { p.classList.toggle('on', k === n); });
+    };
+    var io = new IntersectionObserver(function (entradas) {
+      entradas.forEach(function (e) {
+        if (e.isIntersecting && e.intersectionRatio >= 0.6) marcar(Number(e.target.getAttribute('data-i')));
+      });
+    }, { root: pista, threshold: [0.6] });
+    diapos.forEach(function (d) { io.observe(d); });
+    puntos.forEach(function (p) {
+      p.addEventListener('click', function () {
+        var n = Number(p.getAttribute('data-go'));
+        pista.scrollTo({ top: n * pista.clientHeight, behavior: 'smooth' });
+      });
+    });
+    marcar(0);
+  } else if (vc) {
+    vc.querySelectorAll('.vslide').forEach(function (d) { d.classList.add('on'); });
+  }
+
   /* Menú en celular */
   var btn = document.querySelector('.menu-btn');
   var nav = document.getElementById('nav');
