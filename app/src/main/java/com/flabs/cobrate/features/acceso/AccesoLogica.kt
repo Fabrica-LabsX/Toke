@@ -4,7 +4,10 @@ package com.flabs.cobrate.features.acceso
 object AccesoLogica {
     const val LARGO_MINIMO_PASSWORD = 6
 
-    fun correoValido(correo: String): Boolean = correo.isNotBlank() && correo.contains("@")
+    fun correoValido(correo: String): Boolean = com.flabs.cobrate.core.logic.EntradaSegura.correoSeguro(correo)
+
+    /** Nombre de usuario al crear la cuenta: null si es aceptable. */
+    fun errorNombreUsuario(nombre: String): String? = com.flabs.cobrate.core.logic.EntradaSegura.errorNombre(nombre, 2, 40)
 
     /** Mensaje de error de dos contraseñas nuevas, o null si son aceptables. */
     fun errorPasswords(password: String, confirmacion: String): String? = when {

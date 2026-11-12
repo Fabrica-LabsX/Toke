@@ -35,7 +35,8 @@ object MiCuentaLogica {
     /** El nombre se cambia sin verificación; solo se exige que sea razonable. true = se puede guardar. */
     fun nombreValido(nuevo: String, actual: String?): Boolean {
         val n = nuevo.trim()
-        return n.length in NOMBRE_MIN..NOMBRE_MAX && !n.equals(actual?.trim(), ignoreCase = false)
+        return com.flabs.cobrate.core.logic.EntradaSegura.errorNombre(n, NOMBRE_MIN, NOMBRE_MAX) == null &&
+            !n.equals(actual?.trim(), ignoreCase = false)
     }
 
     const val FRASE_ELIMINAR = "ELIMINAR"

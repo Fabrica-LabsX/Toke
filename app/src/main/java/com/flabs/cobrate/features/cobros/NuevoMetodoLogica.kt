@@ -91,7 +91,7 @@ object NuevoMetodoLogica {
         }
 
     /** El número o cuenta es obligatorio; el titular es opcional. */
-    fun datosValidos(dato: String): Boolean = dato.isNotBlank()
+    fun datosValidos(dato: String): Boolean = com.flabs.cobrate.core.logic.EntradaSegura.datoDeCobroSeguro(dato)
 
     fun subtituloDe(tipo: TipoMetodoCobro): String? =
         if (tipo == TipoMetodoCobro.PLIN) "Elige tu banco o billetera" else null

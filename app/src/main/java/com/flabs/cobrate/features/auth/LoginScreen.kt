@@ -268,8 +268,9 @@ fun LoginScreen(
                         email = email,
                         onEmail = { email = it },
                         onContinuar = {
-                            if (nombreRegistro.isBlank()) {
-                                FeedbackManager.showErrorMessage("Ingresa tu nombre de usuario.")
+                            val errorNombre = AccesoLogica.errorNombreUsuario(nombreRegistro)
+                            if (errorNombre != null) {
+                                FeedbackManager.showErrorMessage(errorNombre)
                             } else if (!AccesoLogica.correoValido(email)) {
                                 FeedbackManager.showErrorMessage("Ingresa un correo electrónico válido.")
                             } else {

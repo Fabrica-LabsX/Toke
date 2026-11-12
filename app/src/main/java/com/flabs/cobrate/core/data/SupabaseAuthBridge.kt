@@ -269,7 +269,7 @@ object SupabaseAuthBridge {
 
     // "username" lo lee la app; "display_name"/"full_name"/"name" son los que muestra el panel de Supabase.
     private fun datosDeNombre(nombre: String) = buildJsonObject {
-        val n = nombre.trim()
+        val n = com.flabs.cobrate.core.logic.EntradaSegura.limpiar(nombre, 40)
         put("username", n)
         put("display_name", n)
         put("full_name", n)

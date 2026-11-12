@@ -198,7 +198,7 @@ fun EditarMetodoHoja(
 
             val habilitado = NuevoMetodoLogica.datosValidos(dato)
             Surface(
-                onClick = { onConfirm(metodo.id, dato.trim(), titular.trim(), oculto) },
+                onClick = { onConfirm(metodo.id, com.flabs.cobrate.core.logic.EntradaSegura.limpiar(dato, 40), com.flabs.cobrate.core.logic.EntradaSegura.limpiar(titular, 40), oculto) },
                 enabled = habilitado,
                 shape = RoundedCornerShape(9999.dp),
                 color = if (habilitado) paleta.verde else paleta.bordeControl,

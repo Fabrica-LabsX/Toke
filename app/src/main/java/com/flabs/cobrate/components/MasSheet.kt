@@ -272,6 +272,7 @@ private fun ListaDestinos(paleta: TokePaleta, items: List<ItemMas>, onItem: (Ite
 @Composable
 private fun FilaDestino(paleta: TokePaleta, item: ItemMas, onClick: () -> Unit) {
     val color = if (item.destructivo) paleta.rojo else paleta.textoPrincipal
+    val colorIcono = if (item.destructivo) androidx.compose.ui.graphics.Color.White else color
     Surface(onClick = onClick, color = androidx.compose.ui.graphics.Color.Transparent, modifier = Modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier.height(58.dp).padding(horizontal = 14.dp),
@@ -279,14 +280,14 @@ private fun FilaDestino(paleta: TokePaleta, item: ItemMas, onClick: () -> Unit) 
         ) {
             Surface(
                 shape = RoundedCornerShape(12.dp),
-                color = if (item.destructivo) paleta.rojoFondo else paleta.tileFondo,
+                color = if (item.destructivo) paleta.rojo else paleta.tileFondo, // sólido, sin transparencia
                 modifier = Modifier.size(40.dp),
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     Icon(
                         painter = painterResource(id = item.icono),
                         contentDescription = null,
-                        tint = color,
+                        tint = colorIcono,
                         modifier = Modifier.size(22.dp),
                     )
                 }

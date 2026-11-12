@@ -6,8 +6,10 @@ object NegocioEdicionLogica {
     const val MAX_TRABAJADORES_PERMITIDO = 500
 
     /** Mensaje de error del nombre, o null si es válido. */
-    fun errorNombre(nombre: String): String? =
-        if (nombre.trim().length < LARGO_MINIMO_NOMBRE) "El nombre debe tener al menos $LARGO_MINIMO_NOMBRE letras." else null
+    fun errorNombre(nombre: String): String? = when {
+        nombre.trim().length < LARGO_MINIMO_NOMBRE -> "El nombre debe tener al menos $LARGO_MINIMO_NOMBRE letras."
+        else -> com.flabs.cobrate.core.logic.EntradaSegura.errorNombre(nombre, LARGO_MINIMO_NOMBRE, 40)
+    }
 
     /** Texto vacío = sin límite (null). Devuelve error si no es un entero entre 1 y 500. */
     fun leerMax(texto: String): Pair<Int?, String?> {

@@ -218,15 +218,14 @@ private fun BotonBorrar(paleta: TokePaleta, onClick: () -> Unit) {
         onClick = onClick,
         interactionSource = pulso.fuente,
         shape = RoundedCornerShape(9999.dp),
-        color = paleta.rojoFondo,
-        border = BorderStroke(1.dp, paleta.rojoBorde),
+        color = paleta.rojo, // rojo sólido, sin transparencia, igual en claro y oscuro
         modifier = Modifier.fillMaxWidth().height(TokeMedidas.BotonAltura).then(pulso.modificador),
     ) {
         Box(contentAlignment = Alignment.Center) {
             Text(
                 text = "Borrar negocio",
                 style = TextStyle(fontFamily = PlusJakartaSans, fontWeight = FontWeight.Bold, fontSize = 16.sp),
-                color = paleta.rojo,
+                color = androidx.compose.ui.graphics.Color.White,
             )
         }
     }

@@ -188,10 +188,11 @@ fun NuevoMetodoHoja(
                             teclado = KeyboardType.Text,
                             onCambia = { titular = it },
                         )
+                        AvisoBilleteraAbierta(paleta, nombre)
                         BotonGuardar(
                             paleta = paleta,
                             habilitado = NuevoMetodoLogica.datosValidos(dato),
-                            onClick = { onConfirm(elegido, dato.trim(), titular.trim()) },
+                            onClick = { onConfirm(elegido, com.flabs.cobrate.core.logic.EntradaSegura.limpiar(dato, 40), com.flabs.cobrate.core.logic.EntradaSegura.limpiar(titular, 40)) },
                         )
                         Text(
                             text = "Después podrás cargar la foto de tu QR.",
@@ -207,6 +208,25 @@ fun NuevoMetodoHoja(
                 }
             }
             Spacer(modifier = Modifier.height(16.dp))
+        }
+    }
+}
+
+/** Aviso rojo sólido: Toke lee la notificación de la billetera; si esa app está cerrada, el cobro se detecta tarde. */
+@Composable
+private fun AvisoBilleteraAbierta(paleta: TokePaleta, billetera: String) {
+    Surface(shape = RoundedCornerShape(14.dp), color = paleta.rojo, modifier = Modifier.fillMaxWidth()) {
+        Column(modifier = Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Text(
+                text = "Importante",
+                style = TextStyle(fontFamily = PlusJakartaSans, fontWeight = FontWeight.ExtraBold, fontSize = 14.sp),
+                color = androidx.compose.ui.graphics.Color.White,
+            )
+            Text(
+                text = "Mantén $billetera abierta o activa en segundo plano. Así Toke detecta cada cobro lo más pronto posible.",
+                style = TextStyle(fontFamily = PlusJakartaSans, fontWeight = FontWeight.SemiBold, fontSize = 14.sp, lineHeight = 19.sp),
+                color = androidx.compose.ui.graphics.Color.White,
+            )
         }
     }
 }
