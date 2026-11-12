@@ -2,6 +2,11 @@
 
 Fecha: 2026-11-12. Solo contiene lo que **no** se puede saber por el código ni por decisiones ya tomadas. Para contestar, escribe la letra o la respuesta junto al ID. Estado: PENDIENTE / RESPONDIDA / IMPLEMENTADA.
 
+## Actualización 2026-11-12 (consolidación)
+Respondidas e implementadas: Q-PRI-1 (modelo de trabajo), Q-PRI-2, Q-PRI-3, Q-PRI-5, Q-PRI-6 (no se guarda), Q-ELI-1, Q-SEG-1, Q-SEG-2, Q-SEG-3, Q-COM-2, Q-COM-4, Q-COM-3 (parcial: sin "solo lectura"), Q-LIC-1, Q-PRV-1 (Vercel no se usa).
+Respondidas pero **no construidas**: Q-ELI-2 (30 días; falta autorizar el cambio en Supabase).
+Siguen **pendientes**: Q-ID-1 a Q-ID-4 (datos de la persona natural), Q-PRI-4, Q-PRI-7, Q-PRI-8, Q-PRV-2 a Q-PRV-5, Q-COM-1 y Q-COM-5 (texto oficial inaccesible). Detalle en `MATRIZ_DECISIONES_APROBADAS_TOKE.md`.
+
 **Ya decidido (no se vuelve a preguntar):** responsable = grupo "Fábrica Labs", sin empresa, RUC ni domicilio; edad mínima 18; borrado inmediato de cuenta/negocio y QR en menos de 1 día; sin copias de seguridad para el cliente por ahora; reembolso 7 días; Pro mensual sin renovación automática; pack 3 meses S/ 40; Free 20 avisos/1 negocio/2 trabajadores/4 métodos; textos 0.1 redactados por el equipo, sin abogado. Fuente: conversación del 2026-11-12 y `docs/PENDIENTES_LEGALES_WEB.md`.
 
 ## 1. Identidad jurídica
