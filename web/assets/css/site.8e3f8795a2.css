@@ -348,4 +348,9 @@ footer{border-top:1px solid var(--border);background:var(--card);padding:44px 0 
 .ldoc-sec{overflow-wrap:anywhere}
 .ldoc-sec table{display:block;overflow-x:auto;max-width:100%}
 .ldoc-sec th,.ldoc-sec td{min-width:120px}
+.popmodal{margin:auto;border:1px solid var(--border);border-radius:var(--r);background:var(--card);color:var(--text);padding:24px;width:min(420px,calc(100vw - 32px))}
+.popmodal::backdrop{background:rgba(0,0,0,.45)}
+.popmodal h3{margin:0 0 8px}
+.popmodal .actions{display:grid;gap:10px;margin-top:16px}
+button.btn{font:inherit;cursor:pointer}
 @media(max-width:860px){.ldoc{grid-template-columns:1fr;gap:16px}.ldoc-toc{position:static}.ldoc-sec{padding:18px 16px}}
