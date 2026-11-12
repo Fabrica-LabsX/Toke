@@ -30,3 +30,8 @@ app/google-services.json
 keystore.properties
 *.jks
 *.keystore
+
+# Copias y documentos privados viven fuera del repositorio
+*.zip
+docs/
+scripts/
