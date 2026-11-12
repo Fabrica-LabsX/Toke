@@ -50,12 +50,6 @@ object ActualizacionStore {
         scope.launch { consultar(c, prefs) }
     }
 
-    /** Repite la consulta (al reintentar o al volver a la app). */
-    fun reconsultar(contexto: Context) {
-        val c = contexto.applicationContext
-        scope.launch { consultar(c, c.getSharedPreferences(PREFS, Context.MODE_PRIVATE)) }
-    }
-
     private suspend fun consultar(c: Context, prefs: SharedPreferences) {
         sinVersionPublicada = false
         val m = descargarManifiesto()

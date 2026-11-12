@@ -69,14 +69,4 @@ object QrImageUploader {
         }
     }
 
-    /**
-     * Valida que un path de QR tenga el formato esperado.
-     * Usado para verificar integridad antes de actualizar BD.
-     */
-    fun isValidQrPath(path: String?): Boolean {
-        if (path.isNullOrBlank()) return false
-        // Formato esperado: negocioId/tipo-uuid.png
-        val parts = path.split("/")
-        return parts.size == 2 && parts[1].contains("-") && parts[1].endsWith(".png")
-    }
 }

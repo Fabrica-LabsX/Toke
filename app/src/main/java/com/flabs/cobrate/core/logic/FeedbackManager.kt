@@ -47,21 +47,6 @@ object FeedbackManager {
         }
     }
 
-    /** Muestra un aviso de conexión. */
-    fun setOffline(isOffline: Boolean) {
-        if (isOffline) {
-            _currentFeedback.value = FeedbackState(FeedbackType.OFFLINE, "Sin conexión a Internet", durationMillis = null)
-        } else if (_currentFeedback.value?.type == FeedbackType.OFFLINE) {
-            _currentFeedback.value = null
-        }
-    }
-
-    /** Conveniencia para mostrar carga. */
-    fun showLoading(message: String = "Cargando...") = setLoading(true, message)
-
-    /** Conveniencia para ocultar carga. */
-    fun dismissLoading() = setLoading(false)
-
     /** Limpia el feedback actual. */
     fun clear() {
         _currentFeedback.value = null

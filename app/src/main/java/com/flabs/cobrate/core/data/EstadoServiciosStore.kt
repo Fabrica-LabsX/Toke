@@ -49,18 +49,6 @@ object EstadoServiciosStore {
             ?: EstadoServicios(negocioId = negocioId)
 
     /**
-     * Establece el estado de SERVICIOS de un negocio (C11).
-     */
-    fun setActivado(negocioId: String, activado: Boolean) {
-        val actual = estadoDe(negocioId)
-        if (actual.activado == activado) return
-        
-        val nuevo = actual.copy(activado = activado)
-        _estados.value = _estados.value.filterNot { it.negocioId == negocioId } + nuevo
-        persistir()
-    }
-
-    /**
      * Alterna el estado de SERVICIOS de un negocio.
      *
      * Solo construye el estado/switch local: NO implementa ninguna lógica real

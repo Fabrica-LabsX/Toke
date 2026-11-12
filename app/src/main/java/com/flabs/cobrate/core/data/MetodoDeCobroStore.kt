@@ -70,12 +70,6 @@ object MetodoDeCobroStore {
         _metodosPorNegocio.value[negocioId] ?: emptyList()
 
     /**
-     * ¿El método está activo en este negocio?
-     */
-    fun estaActivo(negocioId: String, tipo: TipoMetodoCobro): Boolean? =
-        obtenerPorNegocio(negocioId).find { it.tipo == tipo }?.activo
-
-    /**
      * Crea un nuevo método en Supabase y lo añade a la caché.
      */
     suspend fun crear(negocioId: String, tipo: TipoMetodoCobro, datoDeCobro: String, nombreDestinatario: String): Result<MetodoDeCobro> {
@@ -212,15 +206,6 @@ object MetodoDeCobroStore {
         } catch (e: Exception) {
             null
         }
-    }
-
-    /**
-     * Fuerza la descarga de métodos desde el servidor. 
-     * Invocado tras eventos Realtime para asegurar consistencia.
-     */
-    suspend fun forzarRefrescoRemoto(negocioId: String) {
-        val remote = repository.obtenerPorNegocio(negocioId).getOrNull() ?: return
-        sincronizar(negocioId, remote)
     }
 
     /**

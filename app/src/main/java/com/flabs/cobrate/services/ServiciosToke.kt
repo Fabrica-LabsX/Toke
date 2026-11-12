@@ -71,20 +71,6 @@ object ServiciosToke {
         }
     }
 
-    /** Apaga todas las funciones de TOKE y finaliza las tareas de la aplicación vía ActivityManager. */
-    suspend fun apagarTodoYCerrar(context: Context) {
-        val appContext = context.applicationContext
-        runCatching { apagarTodo(appContext) }
-        cerrarTarea(null, appContext)
-    }
-
-    /** Apaga todas las funciones de TOKE y finaliza la actividad indicada directamente. */
-    suspend fun apagarYSalir(activity: Activity) {
-        val appContext = activity.applicationContext
-        runCatching { apagarTodo(appContext) }
-        cerrarTarea(activity, appContext)
-    }
-
     /** Enciende todas las funciones de TOKE en segundo plano y tiempo real de forma segura y libre de carreras. */
     suspend fun encenderTodo(context: Context) = withContext(Dispatchers.IO) {
         val appContext = context.applicationContext

@@ -314,12 +314,6 @@ object OperacionPendienteStore {
         limpiarMemoria()
     }
 
-    /** Limpia todo el disco en purga explícita. */
-    suspend fun purgarDisco(context: Context) {
-        limpiarMemoria()
-        context.dataStore.edit { it.remove(pendientesKey) }
-    }
-
     // ---- Persistencia ----
 
     private suspend fun leerDeDisco(context: Context): List<ElementoPendiente> =

@@ -33,12 +33,6 @@ object RolResolver {
         }
     }
 
-    /** ¿La cuenta es administrador en al menos un negocio? */
-    fun esAdministrador(
-        cuentaId: String,
-        relaciones: List<RelacionCuentaNegocio>
-    ): Boolean = rolEfectivoDe(cuentaId, relaciones) == RolEfectivo.ADMINISTRADOR
-
     /** ¿La cuenta es trabajador en al menos un negocio? */
     fun esTrabajador(
         cuentaId: String,

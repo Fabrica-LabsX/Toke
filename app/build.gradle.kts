@@ -85,7 +85,7 @@ dependencies {
     implementation(libs.datastorePreferences)
     implementation(libs.androidx.security.crypto)
 
-    // Supabase SDK (solo plomería, sin uso todavía)
+    // Supabase SDK
     implementation(platform(libs.supabaseBom))
     implementation(libs.supabasePostgrest)
     implementation(libs.supabaseAuth)

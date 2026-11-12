@@ -115,15 +115,6 @@ object AndroidNotifier {
     }
 
     /**
-     * Muestra la notificación persistente de "TOKE está operando" (C11).
-     */
-    fun mostrarOperando(context: Context, negocioNombre: String?) {
-        val appContext = context.applicationContext
-        val notificacion = construirOperando(appContext, negocioNombre)
-        notificarSeguro(appContext, NOTIF_ID_OPERANDO, notificacion)
-    }
-
-    /**
      * Muestra alerta de método no configurado o inactivo (C11). Solo Dueños.
      */
     fun mostrarMetodoNoConfigurado(

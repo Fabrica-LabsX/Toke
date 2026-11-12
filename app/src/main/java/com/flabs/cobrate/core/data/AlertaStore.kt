@@ -86,14 +86,6 @@ object AlertaStore {
     }
 
     /**
-     * Descarta/elimina una alerta individualmente de memoria y disco.
-     */
-    fun descartarAlerta(alertaId: String) {
-        _alertas.value = _alertas.value.filterNot { it.id == alertaId }
-        persistir()
-    }
-
-    /**
      * Resuelve/elimina de memoria y disco únicamente las alertas asociadas al negocioId y tipoMetodoCobro indicado.
      */
     fun resolverPorMetodo(negocioId: String, tipoMetodo: TipoMetodoCobro) {
