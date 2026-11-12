@@ -138,8 +138,14 @@ wrangler pages deploy web --project-name tokelabs --branch main --commit-dirty=t
    ```bash
    keytool -genkeypair -v -keystore toke-release.jks -alias toke -keyalg RSA -keysize 4096 -validity 10000
    ```
-2. Crear `keystore.properties` (ignorado por git) con ruta, alias y contraseñas; en `build.gradle.kts` añadir `signingConfigs.release` que lo lea y asignarlo a `buildTypes.release`
-   con `isMinifyEnabled = true` y `isShrinkResources = true` (reemplazando `optimization { enable = false }`).
+2. Crear `keystore.properties` en la raíz del proyecto (ya está en `.gitignore`, igual que `*.jks`) con:
+   ```
+   storeFile=C:/ruta/fuera/del/repo/toke-release.jks
+   storePassword=...
+   keyAlias=toke
+   keyPassword=...
+   ```
+   `app/build.gradle.kts` ya lee ese archivo (`signingConfigs.release`) y la versión final ya sale con **R8 activado** (reglas en `app/proguard-rules.pro`, incluye quitar `Log.v/d/i`).
 3. Subir `versionCode` (entero creciente) y `versionName`. Compilar: `./gradlew assembleRelease`.
 4. Comprobar firma y hash:
    ```bash

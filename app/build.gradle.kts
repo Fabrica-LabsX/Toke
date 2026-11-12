@@ -39,14 +39,36 @@ extensions.configure<ApplicationExtension> {
         buildConfigField("String", "SUPABASE_ANON_KEY", "\"" + supabaseAnonKey + "\"")
     }
 
+    // Firma de la versión pública: la llave vive FUERA del repositorio y se describe en keystore.properties (ignorado por git).
+    // Sin ese archivo, la versión final sale sin firmar (o con la llave de depuración si se pasa -PfirmarConDebug, solo para probar).
+    val keystoreProps = Properties()
+    rootProject.file("keystore.properties").takeIf { it.exists() }?.inputStream()?.use { keystoreProps.load(it) }
+    if (keystoreProps.getProperty("storeFile") != null) {
+        signingConfigs {
+            create("release") {
+                storeFile = file(keystoreProps.getProperty("storeFile"))
+                storePassword = keystoreProps.getProperty("storePassword")
+                keyAlias = keystoreProps.getProperty("keyAlias")
+                keyPassword = keystoreProps.getProperty("keyPassword")
+            }
+        }
+    }
+
     buildTypes {
         release {
-            // shortcut: R8 apagado hasta probar la versión final en un teléfono (./gradlew assembleRelease -PfirmarConDebug); luego enable = true.
+            // R8: achica, ofusca y quita los Log.d/v/i de la versión final. Reglas en proguard-rules.pro.
             optimization {
-                enable = false
+                enable = true
+                keepRules {
+                    files.add(getDefaultProguardFile("proguard-android-optimize.txt"))
+                    files.add(file("proguard-rules.pro"))
+                }
             }
-            // Solo para probar la versión final en un teléfono propio: ./gradlew assembleRelease -PfirmarConDebug
-            if (project.hasProperty("firmarConDebug")) {
+            val firmaPublica = signingConfigs.findByName("release")
+            if (firmaPublica != null) {
+                signingConfig = firmaPublica
+            } else if (project.hasProperty("firmarConDebug")) {
+                // Solo para probar la versión final en un teléfono propio: ./gradlew assembleRelease -PfirmarConDebug
                 signingConfig = signingConfigs.getByName("debug")
             }
         }

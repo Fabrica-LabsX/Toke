@@ -25,3 +25,8 @@ app/google-services.json
 .gradle_home/
 .wrangler/
 .kotlin/
+
+# Llave de firma de la versión pública (NUNCA al repositorio)
+keystore.properties
+*.jks
+*.keystore

@@ -5,3 +5,10 @@
 -keepclassmembers class com.flabs.cobrate.** { *** Companion; }
 -keepclasseswithmembers class com.flabs.cobrate.** { kotlinx.serialization.KSerializer serializer(...); }
 -dontwarn org.slf4j.**
+
+# Versión pública: los Log.v/d/i desaparecen del código final (el código ya usa LogSeguro, que apaga d fuera de depuración).
+-assumenosideeffects class android.util.Log {
+    public static int v(...);
+    public static int d(...);
+    public static int i(...);
+}
