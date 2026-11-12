@@ -1,4 +1,6 @@
 package com.flabs.cobrate.features.business
+
+import com.flabs.cobrate.core.logic.LogSeguro
 import com.flabs.cobrate.ui.theme.TokeMedidas
 
 import android.graphics.Bitmap
@@ -104,7 +106,7 @@ fun QrEditorScreen(
                     sourceBitmap = original
                 }
             } catch (e: Exception) {
-                Log.e("QrEditorScreen", "Error decodificando imagen: ${e.message}")
+                LogSeguro.e("QrEditorScreen", "Error decodificando imagen", e)
             } finally {
                 estaCargandoBitmap = false
             }
@@ -324,7 +326,7 @@ fun QrEditorScreen(
                                     onConfirmCrop(resultBytes)
                                 }
                             } catch (e: Exception) {
-                                Log.e("QrEditorScreen", "Fallo al extraer recorte: ${e.message}")
+                                LogSeguro.e("QrEditorScreen", "Fallo al extraer recorte", e)
                             }
                         }
                     },

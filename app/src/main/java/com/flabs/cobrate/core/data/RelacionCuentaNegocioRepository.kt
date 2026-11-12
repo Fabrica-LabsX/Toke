@@ -175,11 +175,11 @@ internal class RelacionCuentaNegocioRepository {
     ) {
         fun aMiembroOrNull(): MiembroEquipo? {
             val rolEnum = runCatching { RolCuentaNegocio.valueOf((rolRaw ?: "").uppercase()) }.getOrElse {
-                Log.w("TokeEquipo", "Rol no reconocido: $rolRaw para $cuentaId")
+                LogSeguro.w("TokeEquipo", "Rol no reconocido: $rolRaw para $cuentaId")
                 return null
             }
             val estadoEnum = runCatching { EstadoRelacion.valueOf((estadoRaw ?: "").uppercase()) }.getOrElse {
-                Log.w("TokeEquipo", "Estado no reconocido: $estadoRaw para $cuentaId")
+                LogSeguro.w("TokeEquipo", "Estado no reconocido: $estadoRaw para $cuentaId")
                 return null
             }
             return MiembroEquipo(

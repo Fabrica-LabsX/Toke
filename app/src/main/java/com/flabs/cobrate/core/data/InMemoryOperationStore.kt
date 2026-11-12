@@ -1,5 +1,7 @@
 package com.flabs.cobrate.core.data
 
+
+import com.flabs.cobrate.core.logic.LogSeguro
 import android.content.Context
 import android.util.Log
 import com.flabs.cobrate.core.logic.EstadoObservabilidadEnvio
@@ -129,13 +131,13 @@ object InMemoryOperationStore {
 
             if (com.flabs.cobrate.features.planes.PlanLogica.esCuotaAgotada(error?.message)) {
                 // Cuota diaria del plan Free agotada: no se guarda para reintentar, el servidor no la va a aceptar hoy.
-                Log.w("InMemoryOperationStore", "Cobro rechazado: cuota diaria agotada")
+                LogSeguro.w("InMemoryOperationStore", "Cobro rechazado: cuota diaria agotada")
                 com.flabs.cobrate.features.planes.PlanStore.marcarCuotaAgotada()
                 return Result.failure(error!!)
             }
 
             if (error is SecurityException) {
-                Log.w("InMemoryOperationStore", "Operación rechazada por permisos: ${error.message}")
+                LogSeguro.w("InMemoryOperationStore", "Operación rechazada por permisos", error)
                 return Result.failure(error)
             }
 
@@ -218,7 +220,7 @@ object InMemoryOperationStore {
 
         val result = repo.obtenerDelNegocio(negocioId)
         if (result.isFailure) {
-            Log.w("InMemoryOperationStore", "Fallo al reconciliar negocio $negocioId. Conservando caché previa.")
+            LogSeguro.w("InMemoryOperationStore", "Fallo al reconciliar negocio $negocioId. Conservando caché previa.")
             return
         }
 
@@ -264,7 +266,7 @@ object InMemoryOperationStore {
             val currentEpoch = epochSesion.get()
 
             if (generacionInicio != generacionActual || epochInicio != currentEpoch || sessionUidInicio != currentUid || currentUid == null) {
-                Log.d("InMemoryOperationStore", "Reconciliación descartada por mutación concurrente o cambio de sesión ($negocioId)")
+                LogSeguro.d("InMemoryOperationStore", "Reconciliación descartada por mutación concurrente o cambio de sesión ($negocioId)")
                 return@withLock
             }
 

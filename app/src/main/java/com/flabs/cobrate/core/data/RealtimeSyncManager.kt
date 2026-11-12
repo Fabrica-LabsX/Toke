@@ -73,13 +73,13 @@ internal object RealtimeSyncManager {
     fun configurarEscucha(context: Context, negocioIds: List<String>) {
         val currentUid = CuentaStore.sesionActual.value?.id
         if (currentUid == null) {
-            Log.w(TAG, "No se puede configurar Realtime: no hay sesión activa")
+            LogSeguro.w(TAG, "No se puede configurar Realtime: no hay sesión activa")
             return
         }
 
         // Si la sesión cambió sin pasar por detenerTodo (raro), reiniciamos.
         if (activeSessionUid != null && activeSessionUid != currentUid) {
-            Log.d(TAG, "Cambio de sesión detectado en manager. Reiniciando listeners...")
+            LogSeguro.d(TAG, "Cambio de sesión detectado en manager. Reiniciando listeners...")
             scope.launch { detenerTodo() }
         }
         
@@ -95,12 +95,12 @@ internal object RealtimeSyncManager {
                         val supabase = SupabaseClientProvider.supabase
                         if (red == null) {
                             if (redPrevia != null) {
-                                Log.d(TAG, "Sin red validada: desconectando Realtime para pausar reintentos...")
+                                LogSeguro.d(TAG, "Sin red validada: desconectando Realtime para pausar reintentos...")
                                 supabase.realtime.disconnect()
                                 redPrevia = null
                             }
                         } else if (red != redPrevia) {
-                            Log.d(TAG, "Red validada disponible y cambió: reconectando Realtime...")
+                            LogSeguro.d(TAG, "Red validada disponible y cambió: reconectando Realtime...")
                             if (redPrevia != null) {
                                 supabase.realtime.disconnect()
                             }
@@ -163,7 +163,7 @@ internal object RealtimeSyncManager {
         val currentUid = CuentaStore.sesionActual.value?.id
         val match = currentUid != null && currentUid == activeSessionUid
         if (!match) {
-            Log.w(TAG, "[STALE] Ignorando evento Realtime: sesión no coincide ($activeSessionUid vs $currentUid)")
+            LogSeguro.w(TAG, "[STALE] Ignorando evento Realtime: sesión no coincide ($activeSessionUid vs $currentUid)")
         }
         return match
     }
@@ -207,7 +207,7 @@ internal object RealtimeSyncManager {
             is PostgresAction.Delete -> {
                 val id = action.oldRecord["id"]?.jsonPrimitive?.contentOrNull ?: return
                 val negocioId = action.oldRecord["negocio_id"]?.jsonPrimitive?.contentOrNull ?: return
-                Log.d(TAG, "DELETE remoto recibido para $id (negocio: $negocioId)")
+                LogSeguro.d(TAG, "DELETE remoto recibido para $id (negocio: $negocioId)")
                 InMemoryOperationStore.eliminarPorIdRemoto(id, negocioId)
                 return
             }
@@ -229,7 +229,7 @@ internal object RealtimeSyncManager {
                         operacionLocal.trabajadorAsignadoId != nuevoTrabajadorId
 
                 if (esCambioRelevante) {
-                    Log.d(TAG, "Cambio remoto relevante detectado para $id ($nuevoEstado). Refrescando...")
+                    LogSeguro.d(TAG, "Cambio remoto relevante detectado para $id ($nuevoEstado). Refrescando...")
                     InMemoryOperationStore.refrescarUna(id)
                     
                     val actualizada = InMemoryOperationStore.operaciones.value.find { it.id == id }
@@ -237,7 +237,7 @@ internal object RealtimeSyncManager {
                         OperationNotifier.notificar(context, actualizada)
                     }
                 } else {
-                    Log.d(TAG, "Eco o cambio no relevante para $id. Ignorado.")
+                    LogSeguro.d(TAG, "Eco o cambio no relevante para $id. Ignorado.")
                 }
             }
             else -> return
@@ -263,7 +263,7 @@ internal object RealtimeSyncManager {
                 }
                 else -> return
             }
-            Log.d(TAG, "Cambio procesado exitosamente para métodos de cobro (${action::class.simpleName})")
+            LogSeguro.d(TAG, "Cambio procesado exitosamente para métodos de cobro (${action::class.simpleName})")
         } catch (e: Exception) {
             LogSeguro.e(TAG, "Error al procesar cambio remoto de método", e)
         }

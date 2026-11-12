@@ -1,5 +1,7 @@
 package com.flabs.cobrate.core.data
 
+
+import com.flabs.cobrate.core.logic.LogSeguro
 import android.content.Context
 import android.util.Log
 import androidx.datastore.preferences.core.edit
@@ -84,7 +86,7 @@ private fun CambioDeEstado.aDto(): CambioDeEstadoLocalDto =
 private fun OperacionLocalDto.aModelo(): Operacion? {
     val origenParsed = origen.aOrigen()
     if (origenParsed == null) {
-        Log.w("OperationLocalStore", "Descartando de la lista local la operación incompatible con origen '$origen' (ID: $id)")
+        LogSeguro.w("OperationLocalStore", "Descartando de la lista local la operación incompatible con origen '$origen' (ID: $id)")
         return null
     }
     return Operacion(

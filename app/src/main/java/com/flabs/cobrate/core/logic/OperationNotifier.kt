@@ -33,7 +33,7 @@ object OperationNotifier {
      */
     fun notificar(context: Context, operacion: Operacion) {
         if (!EstadoOperativoStore.encendido.value) {
-            Log.d(TAG, "Notificación omitida porque TOKE está apagado a nivel global")
+            LogSeguro.d(TAG, "Notificación omitida porque TOKE está apagado a nivel global")
             return
         }
 
@@ -45,7 +45,7 @@ object OperationNotifier {
         }
         
         if (relacion?.estado != EstadoRelacion.ACTIVA) {
-            Log.d(TAG, "Notificación omitida por estado de relación: ${relacion?.estado}")
+            LogSeguro.d(TAG, "Notificación omitida por estado de relación: ${relacion?.estado}")
             return
         }
 
@@ -54,7 +54,7 @@ object OperationNotifier {
         val esDueno = com.flabs.cobrate.core.data.NegocioStore.negocios.value
             .find { it.id == operacion.negocioId }?.dueñoCuentaId == cuentaId
         if (!DestinatarioAviso.avisaPagoConfirmado(esDueno)) {
-            Log.d(TAG, "Pago confirmado no se avisa al dueño del negocio")
+            LogSeguro.d(TAG, "Pago confirmado no se avisa al dueño del negocio")
             return
         }
 

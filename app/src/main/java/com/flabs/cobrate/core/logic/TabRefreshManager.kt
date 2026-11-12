@@ -49,7 +49,7 @@ object TabRefreshManager {
             delay(1500L)
             _refreshStates.value = _refreshStates.value + (route to TabRefreshState.IDLE)
         } else {
-            LogSeguro.w("TabRefreshManager", "[REFRESH-FAIL] Ruta $route: ${result.exceptionOrNull()?.message}")
+            LogSeguro.w("TabRefreshManager", "[REFRESH-FAIL] Ruta $route", result.exceptionOrNull())
             _refreshStates.value = _refreshStates.value + (route to TabRefreshState.IDLE)
         }
     }

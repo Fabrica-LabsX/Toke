@@ -1,5 +1,7 @@
 package com.flabs.cobrate.core.data
 
+
+import com.flabs.cobrate.core.logic.LogSeguro
 import android.content.Context
 import android.util.Log
 import com.flabs.cobrate.core.model.Alerta
@@ -96,7 +98,7 @@ object AlertaStore {
         if (filtradas.size != antes.size) {
             _alertas.value = filtradas
             persistir()
-            Log.d("AlertaStore", "Resueltas ${antes.size - filtradas.size} alerta(s) para $tipoMetodo en negocio $negocioId")
+            LogSeguro.d("AlertaStore", "Resueltas ${antes.size - filtradas.size} alerta(s) para $tipoMetodo en negocio $negocioId")
         }
     }
 

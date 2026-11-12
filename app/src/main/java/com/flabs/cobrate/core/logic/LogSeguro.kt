@@ -36,8 +36,11 @@ object LogSeguro {
         return resultado
     }
 
+    /** El mensaje de una excepción puede traer datos del usuario (filas, textos): solo se imprime en la versión de depuración. */
+    private fun detalle(error: Throwable): String = if (BuildConfig.DEBUG) ": ${sanitizar(error.message)}" else ""
+
     fun e(tag: String, mensaje: String, error: Throwable? = null) {
-        val errSimple = if (error != null) "${error.javaClass.simpleName}: ${sanitizar(error.message)}" else ""
+        val errSimple = if (error != null) "${error.javaClass.simpleName}${detalle(error)}" else ""
         val textoFinal = if (errSimple.isNotEmpty()) "$mensaje | $errSimple" else mensaje
         try {
             Log.e(tag, textoFinal)
@@ -47,7 +50,7 @@ object LogSeguro {
     }
 
     fun w(tag: String, mensaje: String, error: Throwable? = null) {
-        val errSimple = if (error != null) "${error.javaClass.simpleName}: ${sanitizar(error.message)}" else ""
+        val errSimple = if (error != null) "${error.javaClass.simpleName}${detalle(error)}" else ""
         val textoFinal = if (errSimple.isNotEmpty()) "$mensaje | $errSimple" else mensaje
         try {
             Log.w(tag, textoFinal)
@@ -58,7 +61,7 @@ object LogSeguro {
 
     fun d(tag: String, mensaje: String, error: Throwable? = null) {
         if (BuildConfig.DEBUG) {
-            val errSimple = if (error != null) "${error.javaClass.simpleName}: ${sanitizar(error.message)}" else ""
+            val errSimple = if (error != null) "${error.javaClass.simpleName}${detalle(error)}" else ""
             val textoFinal = if (errSimple.isNotEmpty()) "$mensaje | $errSimple" else mensaje
             try {
                 Log.d(tag, textoFinal)

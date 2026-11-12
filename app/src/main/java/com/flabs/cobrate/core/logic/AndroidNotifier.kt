@@ -257,7 +257,7 @@ object AndroidNotifier {
         try {
             NotificationManagerCompat.from(context).notify(tag, id, notification)
         } catch (e: SecurityException) {
-            Log.w(TAG, "Sin permiso POST_NOTIFICATIONS", e)
+            LogSeguro.w(TAG, "Sin permiso POST_NOTIFICATIONS", e)
         }
     }
 
@@ -265,7 +265,7 @@ object AndroidNotifier {
         try {
             NotificationManagerCompat.from(context).notify(id, notification)
         } catch (e: SecurityException) {
-            Log.w(TAG, "Sin permiso POST_NOTIFICATIONS", e)
+            LogSeguro.w(TAG, "Sin permiso POST_NOTIFICATIONS", e)
         }
     }
 

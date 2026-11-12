@@ -92,10 +92,10 @@ object CuentaStore {
 
                 // Sincronizamos la sesión actual con Supabase Auth (CAPA 20).
                 SupabaseAuthBridge.estadoSesion.collect { estado ->
-                    Log.d("TokeSesion", "EstadoSesion recibido: ${estado::class.simpleName}")
+                    LogSeguro.d("TokeSesion", "EstadoSesion recibido: ${estado::class.simpleName}")
                     when (estado) {
                         EstadoSesion.Inicializando -> {
-                            Log.d("TokeSesion", "Inicializando sesión Supabase Auth...")
+                            LogSeguro.d("TokeSesion", "Inicializando sesión Supabase Auth...")
                         }
                         is EstadoSesion.Activa -> {
                             val userInfo = estado.usuario
@@ -120,14 +120,14 @@ object CuentaStore {
                             }
                             _sesionActual.value = cuenta
                             sesionSeguraStore.guardarSesionActiva(uid)
-                            Log.d("TokeSesion", "Sesión Activa confirmada para UID ${uid.take(6)}. Guardado en SesionSeguraStore.")
+                            LogSeguro.d("TokeSesion", "Sesión Activa confirmada para UID ${uid.take(6)}. Guardado en SesionSeguraStore.")
 
                             if (uid == ultimoUidSincronizado && _estadoSincronizacion.value == EstadoSincronizacionRemota.EXITO) {
-                                Log.d("CuentaStore", "[SYNC] SYNC SKIPPED (UID ${uid.take(6)} ya sincronizado con éxito)")
+                                LogSeguro.d("CuentaStore", "[SYNC] SYNC SKIPPED (UID ${uid.take(6)} ya sincronizado con éxito)")
                                 return@collect
                             }
 
-                            Log.d("CuentaStore", "[SYNC] SYNC START (UID ${uid.take(6)})")
+                            LogSeguro.d("CuentaStore", "[SYNC] SYNC START (UID ${uid.take(6)})")
 
                             scope.launch {
                                 cuentaRepo.upsert(cuenta)
@@ -137,14 +137,14 @@ object CuentaStore {
 
                                 sincronizarDatos(uid).onSuccess {
                                     ultimoUidSincronizado = uid
-                                    Log.d("CuentaStore", "[SYNC] SYNC END EXITO (UID ${uid.take(6)})")
+                                    LogSeguro.d("CuentaStore", "[SYNC] SYNC END EXITO (UID ${uid.take(6)})")
                                 }.onFailure { err ->
                                     LogSeguro.w("CuentaStore", "[SYNC] SYNC END CON ERROR (UID ${uid.take(6)}). No se marcará como completado.", err)
                                 }
                             }
                         }
                         EstadoSesion.CerradaPorUsuario, EstadoSesion.SinSesion -> {
-                            Log.d("TokeSesion", "Sesión cerrada o sin sesión. Limpiando sesión local.")
+                            LogSeguro.d("TokeSesion", "Sesión cerrada o sin sesión. Limpiando sesión local.")
                             _sesionActual.value = null
                             ultimoUidSincronizado = null
                             _estadoSincronizacion.value = EstadoSincronizacionRemota.IDLE
@@ -155,18 +155,18 @@ object CuentaStore {
                                 val uidGuardado = sesionSeguraStore.leerSesionActiva()
                                 val cuentaLocal = if (uidGuardado != null) _cuentas.value.find { it.id == uidGuardado } else null
                                 if (uidGuardado != null && cuentaLocal != null) {
-                                    Log.d("TokeSesion", "Fallo de refresco por red. Estableciendo Sesión Provisional para UID ${uidGuardado.take(6)} sin sync.")
+                                    LogSeguro.d("TokeSesion", "Fallo de refresco por red. Estableciendo Sesión Provisional para UID ${uidGuardado.take(6)} sin sync.")
                                     _sesionActual.value = cuentaLocal
                                     ultimoUidSincronizado = null
                                 } else {
-                                    Log.d("TokeSesion", "Fallo de refresco por red sin cuenta local. Limpiando sesión.")
+                                    LogSeguro.d("TokeSesion", "Fallo de refresco por red sin cuenta local. Limpiando sesión.")
                                     _sesionActual.value = null
                                     ultimoUidSincronizado = null
                                     _estadoSincronizacion.value = EstadoSincronizacionRemota.IDLE
                                     sesionSeguraStore.limpiarSesion()
                                 }
                             } else {
-                                Log.d("TokeSesion", "Fallo de refresco técnico (no por red). Cerrando sesión.")
+                                LogSeguro.d("TokeSesion", "Fallo de refresco técnico (no por red). Cerrando sesión.")
                                 _sesionActual.value = null
                                 ultimoUidSincronizado = null
                                 _estadoSincronizacion.value = EstadoSincronizacionRemota.IDLE
@@ -200,7 +200,7 @@ object CuentaStore {
             val relacionesResult = relacionRepo.relacionesDe(cuentaId)
             if (relacionesResult.isFailure) {
                 val err = relacionesResult.exceptionOrNull()
-                LogSeguro.w("CuentaStore", "[SYNC-FAIL] Error consultando relaciones de ${cuentaId.take(6)}: ${err?.message}")
+                LogSeguro.w("CuentaStore", "[SYNC-FAIL] Error consultando relaciones de ${cuentaId.take(6)}", err)
                 if (generation == currentSyncGeneration) {
                     _estadoSincronizacion.value = EstadoSincronizacionRemota.ERROR
                 }
@@ -222,7 +222,7 @@ object CuentaStore {
             val negociosResult = negocioRepo.obtenerNegociosDeCuenta(cuentaId)
             if (negociosResult.isFailure) {
                 val err = negociosResult.exceptionOrNull()
-                LogSeguro.w("CuentaStore", "[SYNC-FAIL] Error consultando negocios de ${cuentaId.take(6)}: ${err?.message}")
+                LogSeguro.w("CuentaStore", "[SYNC-FAIL] Error consultando negocios de ${cuentaId.take(6)}", err)
                 if (generation == currentSyncGeneration) {
                     _estadoSincronizacion.value = EstadoSincronizacionRemota.ERROR
                 }
@@ -329,7 +329,6 @@ object CuentaStore {
         InMemoryOperationStore.limpiar()
         NegocioStore.limpiar()
         RelacionCuentaNegocioStore.limpiar()
-        EventoDeNotificacionStore.limpiar()
         AlertaStore.limpiar()
         InvitacionStore.limpiar()
         MetodoDeCobroStore.limpiar()

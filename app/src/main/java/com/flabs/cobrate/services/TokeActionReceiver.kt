@@ -20,11 +20,11 @@ class TokeActionReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
         val action = intent.action
-        Log.d(TAG, "Acción recibida: $action")
+        LogSeguro.d(TAG, "Acción recibida: $action")
 
         when (action) {
             ACTION_APAGAR_SERVICIOS -> {
-                Log.i(TAG, "Apagando todos los servicios de TOKE")
+                LogSeguro.d(TAG, "Apagando todos los servicios de TOKE")
                 val pendingResult = goAsync()
                 CoroutineScope(Dispatchers.IO).launch {
                     val appContext = context.applicationContext
@@ -42,7 +42,7 @@ class TokeActionReceiver : BroadcastReceiver() {
             }
             ACTION_REINTENTAR_ENVIO_COBRO -> {
                 val operacionId = intent.getStringExtra(EXTRA_OPERACION_ID) ?: return
-                Log.i(TAG, "Reintentando envío de cobro: $operacionId")
+                LogSeguro.d(TAG, "Reintentando envío de cobro: $operacionId")
                 val pendingResult = goAsync()
                 CoroutineScope(Dispatchers.IO).launch {
                     try {

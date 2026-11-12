@@ -1,13 +1,12 @@
-<?xml version="1.0" encoding="utf-8"?><!--
-   Sample data extraction rules file; uncomment and customize as necessary.
-   See https://developer.android.com/about/versions/12/backup-restore#xml-changes
-   for details.
--->
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SEG-3: lista blanca (Android 12 o más). Solo tema y aviso de voz; el resto de datos locales no sale del celular. -->
 <data-extraction-rules>
     <cloud-backup>
-        <exclude domain="sharedpref" path="sesion_segura.xml"/>
+        <include domain="file" path="datastore/preferencias_app.preferences_pb"/>
+        <include domain="file" path="datastore/configuracion_voz.preferences_pb"/>
     </cloud-backup>
     <device-transfer>
-        <exclude domain="sharedpref" path="sesion_segura.xml"/>
+        <include domain="file" path="datastore/preferencias_app.preferences_pb"/>
+        <include domain="file" path="datastore/configuracion_voz.preferences_pb"/>
     </device-transfer>
 </data-extraction-rules>

@@ -52,9 +52,7 @@ fun esquemaToke(oscuro: Boolean): ColorScheme {
 /** Envuelve una pantalla con el esquema de [esquemaToke] (el tema general ya lo usa; se conserva por compatibilidad). */
 @Composable
 fun TokeMaterial(content: @Composable () -> Unit) {
-    androidx.compose.runtime.CompositionLocalProvider(androidx.compose.foundation.LocalIndication provides IndicacionToke) {
-        MaterialTheme(colorScheme = esquemaToke(tokeEsOscuro()), shapes = Shapes, typography = Typography, content = content)
-    }
+    MaterialTheme(colorScheme = esquemaToke(tokeEsOscuro()), shapes = Shapes, typography = Typography, content = content)
 }
 
 /** Igual que `composable`, pero con la pantalla envuelta en [TokeMaterial]. */

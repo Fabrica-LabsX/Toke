@@ -26,7 +26,6 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.flabs.cobrate.core.data.EventoDeNotificacionStore
 import com.flabs.cobrate.core.data.InMemoryOperationStore
 import com.flabs.cobrate.core.data.NegocioStore
 import com.flabs.cobrate.core.data.RelacionCuentaNegocioStore
@@ -58,7 +57,6 @@ fun DetalleOperacionScreen(
     val negocios by NegocioStore.negocios.collectAsState()
     val trabajadoresReales by businessViewModel.trabajadoresReales.collectAsState()
     val relaciones by RelacionCuentaNegocioStore.relaciones.collectAsState()
-    val eventosNotificacion by EventoDeNotificacionStore.eventos.collectAsState()
 
     val operacion = remember(operaciones, operacionId) { operaciones.find { it.id == operacionId } }
 
@@ -87,11 +85,7 @@ fun DetalleOperacionScreen(
             return@Scaffold
         }
 
-        val tituloNotificacion = remember(operacion, eventosNotificacion) {
-            (operacion.origen as? OrigenOperacion.Detectada)?.eventoId?.let { id ->
-                eventosNotificacion.find { it.id == id }?.titulo
-            }
-        }
+        val tituloNotificacion: String? = null // PRI-6: el texto original no se guarda; el pagador viene normalizado en la operación
         val trabajadoresActivos = remember(relaciones, operacion.negocioId) {
             relaciones.count {
                 it.negocioId == operacion.negocioId &&

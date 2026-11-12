@@ -11,7 +11,6 @@ import android.util.Log
 import com.flabs.cobrate.core.data.AlertaStore
 import com.flabs.cobrate.core.data.ConfiguracionDeVozStore
 import com.flabs.cobrate.core.data.CuentaStore
-import com.flabs.cobrate.core.data.EventoDeNotificacionStore
 import com.flabs.cobrate.core.data.MetodoDeCobroStore
 import com.flabs.cobrate.core.model.EventoDeNotificacion
 import java.util.UUID
@@ -71,12 +70,12 @@ class TokeNotificationListenerService : NotificationListenerService() {
 
     override fun onCreate() {
         super.onCreate()
-        Log.d(TAG, "[DIAG] onCreate() pid=${Process.myPid()} t=${marcaTiempo()}")
+        LogSeguro.d(TAG, "[DIAG] onCreate() pid=${Process.myPid()} t=${marcaTiempo()}")
     }
 
     override fun onListenerConnected() {
         super.onListenerConnected()
-        Log.d(TAG, "[DIAG] onListenerConnected() pid=${Process.myPid()} t=${marcaTiempo()}")
+        LogSeguro.d(TAG, "[DIAG] onListenerConnected() pid=${Process.myPid()} t=${marcaTiempo()}")
         
         // Cancelar monitores y trabajos anteriores si existían (idempotencia en reconexiones)
         sessionMonitorJob?.cancel()
@@ -93,7 +92,6 @@ class TokeNotificationListenerService : NotificationListenerService() {
         RelacionCuentaNegocioStore.init(this)
         InvitacionStore.init(this)
         
-        EventoDeNotificacionStore.init(this)
         AlertaStore.init(this)
         InMemoryOperationStore.init(this)
         ConfiguracionDeVozStore.init(this)
@@ -102,7 +100,7 @@ class TokeNotificationListenerService : NotificationListenerService() {
         
         iniciarMonitoreoSesion()
         
-        Log.d(TAG, "Listener conectado y stores inicializados. pid=${Process.myPid()} t=${marcaTiempo()}")
+        LogSeguro.d(TAG, "Listener conectado y stores inicializados. pid=${Process.myPid()} t=${marcaTiempo()}")
     }
 
     /**
@@ -115,7 +113,7 @@ class TokeNotificationListenerService : NotificationListenerService() {
             CuentaStore.sesionActual.collect { cuenta ->
                 val nuevoUid = cuenta?.id
                 if (nuevoUid != currentSessionUid) {
-                    Log.d(TAG, "[SESSION] Cambio de sesión detectado: $currentSessionUid -> $nuevoUid. Invalidando contexto previo.")
+                    LogSeguro.d(TAG, "[SESSION] Cambio de sesión detectado: $currentSessionUid -> $nuevoUid. Invalidando contexto previo.")
                     sessionJob?.cancel()
                     sessionJob = SupervisorJob()
                     currentSessionUid = nuevoUid
@@ -125,7 +123,7 @@ class TokeNotificationListenerService : NotificationListenerService() {
     }
 
     override fun onListenerDisconnected() {
-        Log.d(TAG, "[DIAG] onListenerDisconnected() pid=${Process.myPid()} t=${marcaTiempo()}")
+        LogSeguro.d(TAG, "[DIAG] onListenerDisconnected() pid=${Process.myPid()} t=${marcaTiempo()}")
         isListenerConnected = false
         instance = null
         sessionMonitorJob?.cancel()
@@ -138,7 +136,7 @@ class TokeNotificationListenerService : NotificationListenerService() {
     }
 
     override fun onDestroy() {
-        Log.d(TAG, "[DIAG] onDestroy() pid=${android.os.Process.myPid()} t=${marcaTiempo()}")
+        LogSeguro.d(TAG, "[DIAG] onDestroy() pid=${android.os.Process.myPid()} t=${marcaTiempo()}")
         isListenerConnected = false
         instance = null
         sessionMonitorJob?.cancel()
@@ -172,7 +170,7 @@ class TokeNotificationListenerService : NotificationListenerService() {
         if (!AppsDePagoConfiables.esFuenteConfiables(paquete)) {
             // NOTA de depuración: este log NO debe interpretarse como "posible
             // pago perdido"; es tráfico ajeno al sistema de pagos.
-            Log.d(TAG, "Ignorado (fuente no confiable): $paquete")
+            LogSeguro.d(TAG, "Ignorado (fuente no confiable): $paquete")
             return
         }
 
@@ -180,7 +178,7 @@ class TokeNotificationListenerService : NotificationListenerService() {
         // notificaciones y las que no tienen contenido legible (título o
         // texto).
         if (paquete == applicationContext.packageName) {
-            Log.d(TAG, "Notificación propia ignorada ($paquete)")
+            LogSeguro.d(TAG, "Notificación propia ignorada ($paquete)")
             return
         }
 
@@ -197,7 +195,7 @@ class TokeNotificationListenerService : NotificationListenerService() {
             .orEmpty()
 
         if (titulo.isEmpty() && texto.isEmpty()) {
-            Log.d(TAG, "Notificación sin contenido legible ignorada ($paquete)")
+            LogSeguro.d(TAG, "Notificación sin contenido legible ignorada ($paquete)")
             return
         }
 
@@ -209,13 +207,13 @@ class TokeNotificationListenerService : NotificationListenerService() {
         val negocioId = resolverNegocioActual()
 
         if (sesionAlInicio == null || negocioId == null) {
-            Log.d(TAG, "Notificación ignorada: no hay sesión activa o negocio resuelto")
+            LogSeguro.d(TAG, "Notificación ignorada: no hay sesión activa o negocio resuelto")
             return
         }
 
         // CAPA 58: REGLA DE APAGADO GLOBAL
         if (!EstadoOperativoStore.encendido.value) {
-            Log.d(TAG, "Notificación ignorada: TOKE está apagado a nivel global")
+            LogSeguro.d(TAG, "Notificación ignorada: TOKE está apagado a nivel global")
             return
         }
 
@@ -223,7 +221,7 @@ class TokeNotificationListenerService : NotificationListenerService() {
         // ignoramos el procesamiento por completo.
         val activadoServicios = EstadoServiciosStore.estadoDe(negocioId).activado
         if (!activadoServicios) {
-            Log.d(TAG, "SERVICIOS desactivado para negocio=$negocioId. Notificación ignorada.")
+            LogSeguro.d(TAG, "SERVICIOS desactivado para negocio=$negocioId. Notificación ignorada.")
             return
         }
 
@@ -238,8 +236,7 @@ class TokeNotificationListenerService : NotificationListenerService() {
             procesado = false
         )
 
-        EventoDeNotificacionStore.agregar(evento)
-        Log.d(TAG, "Evento capturado de: $paquete -> \"$titulo: $texto\"")
+        // PRI-6: el texto original no se guarda ni se imprime; vive solo en memoria mientras se procesa.
 
         // CAPA 6c: aplica el parser sobre el evento recién capturado y marca el
         // evento como procesado según el resultado. No se crea ninguna
@@ -251,14 +248,13 @@ class TokeNotificationListenerService : NotificationListenerService() {
                     // configurado o no.
                     procesarPagoConfianzaAlta(evento, resultado.monto, paquete, sesionAlInicio)
                 } else {
-                    Log.d(TAG, "Posible pago detectado: S/ ${resultado.monto} (confianza MEDIA)")
+                    LogSeguro.d(TAG, "Posible pago detectado (confianza MEDIA)")
                 }
             }
             ResultadoParseo.NoEsPago -> {
-                Log.d(TAG, "Descartado como ruido ($paquete)")
+                LogSeguro.d(TAG, "Descartado como ruido ($paquete)")
             }
         }
-        EventoDeNotificacionStore.marcarProcesado(evento.id)
     }
 
     /**
@@ -278,13 +274,13 @@ class TokeNotificationListenerService : NotificationListenerService() {
 
         // REGLA ABSOLUTA (Sección 4.1): El listener solo continúa si el usuario actual es el DUEÑO.
         if (todosMisNegocios.isEmpty()) {
-            Log.d(TAG, "Ignorado en procesarPagoConfianzaAlta: usuario $uid no es Dueño de ningún negocio.")
+            LogSeguro.d(TAG, "Ignorado en procesarPagoConfianzaAlta: usuario $uid no es Dueño de ningún negocio.")
             return
         }
 
         val tipoMetodo = MapeoAppsMetodoDeCobro.metodoDeCobroPara(paquete)
         if (tipoMetodo == null) {
-            Log.d(TAG, "Posible pago detectado: S/ $monto (confianza ALTA, método no determinable)")
+            LogSeguro.d(TAG, "Posible pago detectado (confianza ALTA, método no determinable)")
             return
         }
 
@@ -309,7 +305,7 @@ class TokeNotificationListenerService : NotificationListenerService() {
             }
             else -> {
                 // Violación de billetera única: más de uno activo.
-                LogSeguro.e(TAG, "Error: el método $tipoMetodo está activo en múltiples negocios del dueño $uid", null)
+                LogSeguro.e(TAG, "Error: el método $tipoMetodo está activo en múltiples negocios del dueño ${uid.take(6)}", null)
                 return
             }
         }
@@ -340,7 +336,7 @@ class TokeNotificationListenerService : NotificationListenerService() {
         val job = sessionJob ?: Job()
         serviceScope.launch(job) {
             if (currentSessionUid != sesionAlInicio) {
-                Log.w(TAG, "[STALE] Abortando creación: cambio de sesión detectado ($sesionAlInicio -> $currentSessionUid)")
+                LogSeguro.w(TAG, "[STALE] Abortando creación: cambio de sesión detectado ($sesionAlInicio -> $currentSessionUid)")
                 return@launch
             }
 
@@ -351,7 +347,7 @@ class TokeNotificationListenerService : NotificationListenerService() {
 
         // Si el método no estaba configurado o activo en el negocio (Regla B)
         if (metodoCobroRealId == null) {
-            Log.d(TAG, "Notificando al Dueño: método $tipoMetodo no configurado/activo en negocio $negocioIdResuelto.")
+            LogSeguro.d(TAG, "Notificando al Dueño: método $tipoMetodo no configurado/activo en negocio $negocioIdResuelto.")
             AndroidNotifier.mostrarMetodoNoConfigurado(
                 context = this,
                 tipo = tipoMetodo,
@@ -388,7 +384,7 @@ class TokeNotificationListenerService : NotificationListenerService() {
     }
 
     override fun onNotificationRemoved(sbn: StatusBarNotification) {
-        Log.d(TAG, "Notificación eliminada de: ${sbn.packageName}")
+        LogSeguro.d(TAG, "Notificación eliminada de: ${sbn.packageName}")
     }
 
     /**

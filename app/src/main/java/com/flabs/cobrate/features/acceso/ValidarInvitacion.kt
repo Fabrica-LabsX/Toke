@@ -35,7 +35,7 @@ suspend fun validarCodigoInvitacion(codigo: String): InvitacionTrabajador? {
 
     val invitacion = result.getOrNull()
     val motivo = InvitacionValidation.motivoDeRechazo(invitacion, System.currentTimeMillis())
-    Log.d("TokeInvitacion", "motivoRechazo=$motivo")
+    LogSeguro.d("TokeInvitacion", "motivoRechazo=$motivo")
 
     val mensaje = when (motivo) {
         MotivoRechazo.NO_EXISTE -> "Código de invitación no encontrado. Código de ayuda: ${TokeErrorCodes.INVITACION_NO_ENCONTRADA}"
@@ -64,7 +64,7 @@ suspend fun validarCodigoInvitacion(codigo: String): InvitacionTrabajador? {
     val cuentaReady = withTimeoutOrNull(8000L) { CuentaStore.sesionActual.filter { it != null }.first() }
     FeedbackManager.setLoading(false)
     if (cuentaReady == null) {
-        Log.w("TokeInvitacion", "sesión no disponible tras 8s")
+        LogSeguro.w("TokeInvitacion", "sesión no disponible tras 8s")
         FeedbackManager.showErrorMessage(
             "Sesión del trabajador no disponible. Código de ayuda: ${TokeErrorCodes.SESION_TRABAJADOR_NO_DISPONIBLE}"
         )

@@ -31,13 +31,13 @@ object QrImageUploader {
         // Path final: negocioId/{tipo}-{uuid}.png
         val fullPath = "$negocioId/$fileName"
 
-        Log.d(TAG, "Iniciando upload a: $fullPath (tamaño confirmado: ${imageData.size} bytes)")
+        LogSeguro.d(TAG, "Iniciando upload a: $fullPath (tamaño confirmado: ${imageData.size} bytes)")
 
         // Upload a Storage
         val storage = SupabaseClientProvider.supabase.storage.from(BUCKET_NAME)
         storage.upload(fullPath, imageData)
 
-        Log.d(TAG, "Upload exitoso. Path: $fullPath")
+        LogSeguro.d(TAG, "Upload exitoso. Path: $fullPath")
 
         // Retornar el path persistente
         fullPath
@@ -53,7 +53,7 @@ object QrImageUploader {
      */
     suspend fun tryDeleteOldQr(negocioId: String, oldPath: String?) {
         if (oldPath.isNullOrBlank()) {
-            Log.d(TAG, "No hay QR anterior para eliminar")
+            LogSeguro.d(TAG, "No hay QR anterior para eliminar")
             return
         }
 

@@ -87,7 +87,7 @@ fun ConfirmarInvitacionScreen(
                 preview = it
                 loading = false
                 if (it == null) {
-                    Log.w("TokeInvitacion", "preview devolvió null")
+                    LogSeguro.w("TokeInvitacion", "preview devolvió null")
                     errorPreview = "Código de invitación no encontrado. Código de ayuda: ${TokeErrorCodes.INVITACION_NO_ENCONTRADA}"
                 }
             }

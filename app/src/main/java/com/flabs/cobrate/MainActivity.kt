@@ -185,6 +185,7 @@ class MainActivity : ComponentActivity() {
         InMemoryOperationStore.init(applicationContext)
         // Carga las cuentas persistidas y restaura la última sesión activa.
         CuentaStore.init(applicationContext)
+        com.flabs.cobrate.core.data.EventoDeNotificacionStore.init(applicationContext)
         // Carga negocios y relaciones persistidas (CAPA 3).
         NegocioStore.init(applicationContext)
         RelacionCuentaNegocioStore.init(applicationContext)

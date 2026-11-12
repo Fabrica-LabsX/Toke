@@ -1,11 +1,7 @@
-<?xml version="1.0" encoding="utf-8"?><!--
-   Sample backup rules file; uncomment and customize as necessary.
-   See https://developer.android.com/guide/topics/data/autobackup
-   for details.
-   Note: This file is ignored for devices older than API 31
-   See https://developer.android.com/about/versions/12/backup-restore
--->
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SEG-3: lista blanca. Solo se copian preferencias no sensibles; no se copian sesión, operaciones, negocios,
+     métodos de cobro ni nada más. Con <include> todo lo demás queda excluido. Se aplica a Android 11 o menos. -->
 <full-backup-content>
-    <!-- Exclude encrypted preferences because KeyStore keys are not backed up -->
-    <exclude domain="sharedpref" path="sesion_segura.xml"/>
+    <include domain="file" path="datastore/preferencias_app.preferences_pb"/>
+    <include domain="file" path="datastore/configuracion_voz.preferences_pb"/>
 </full-backup-content>

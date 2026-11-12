@@ -96,7 +96,7 @@ object OperacionPendienteStore {
                         // Guarda contra race condition A -> B
                         if (currentSessionUid == newUid) {
                             _todasLasPendientes.value = guardadas
-                            Log.d(TAG, "Rehidratada cola en memoria únicamente para UID $newUid (${guardadas.size} elementos de este usuario)")
+                            LogSeguro.d(TAG, "Rehidratada cola en memoria únicamente para UID $newUid (${guardadas.size} elementos de este usuario)")
                         }
                     }
                 }
@@ -109,7 +109,7 @@ object OperacionPendienteStore {
                 val uid = currentSessionUid
                 if (disponible && uid != null && EstadoOperativoStore.encendido.value) {
                     if (_todasLasPendientes.value.any { it.ownerId == uid }) {
-                        Log.d(TAG, "Red disponible. Procesando cola pendiente para UID $uid...")
+                        LogSeguro.d(TAG, "Red disponible. Procesando cola pendiente para UID $uid...")
                         procesarCola(ctx)
                     }
                 }
@@ -134,7 +134,7 @@ object OperacionPendienteStore {
     ) {
         val activeUid = CuentaStore.sesionActual.value?.id
         if (ownerId == null || ownerId != activeUid || activeUid != currentSessionUid) {
-            Log.w(TAG, "Rechazando agregar a la cola offline: ownerId $ownerId no coincide con la sesión activa $activeUid")
+            LogSeguro.w(TAG, "Rechazando agregar a la cola offline: ownerId $ownerId no coincide con la sesión activa $activeUid")
             return
         }
 
@@ -151,7 +151,7 @@ object OperacionPendienteStore {
             EstadoObservabilidadEnvio.ESPERANDO_RED
         }
         notificarSiCorresponde(context, operacion, estadoEnvio)
-        Log.d(TAG, "Operación ${operacion.id} agregada a la cola ($estadoSincronizacion, Owner: $ownerId)")
+        LogSeguro.d(TAG, "Operación ${operacion.id} agregada a la cola ($estadoSincronizacion, Owner: $ownerId)")
     }
 
     /**
@@ -172,13 +172,13 @@ object OperacionPendienteStore {
         val result = repository.crear(operacion)
 
         if (result.isSuccess) {
-            Log.d(TAG, "Reintento manual exitoso para ${operacion.id}. Eliminando de cola.")
+            LogSeguro.d(TAG, "Reintento manual exitoso para ${operacion.id}. Eliminando de cola.")
             eliminarDeCola(context, operacion.id)
             notificarSiCorresponde(context, operacion, EstadoObservabilidadEnvio.ENVIADO)
             return Result.success(Unit)
         } else {
             if (result.exceptionOrNull() is SecurityException) {
-                Log.w(TAG, "Reintento manual no autorizado para ${operacion.id}. Eliminando de cola.")
+                LogSeguro.w(TAG, "Reintento manual no autorizado para ${operacion.id}. Eliminando de cola.")
                 eliminarDeCola(context, operacion.id)
                 return Result.failure(result.exceptionOrNull()!!)
             }
@@ -198,7 +198,7 @@ object OperacionPendienteStore {
     /** Procesa las operaciones pendientes del usuario activo. */
     private suspend fun procesarCola(context: Context) {
         if (!EstadoOperativoStore.encendido.value) {
-            Log.d(TAG, "Procesamiento de cola omitido porque TOKE está apagado")
+            LogSeguro.d(TAG, "Procesamiento de cola omitido porque TOKE está apagado")
             return
         }
         if (mutexProcesamiento.isLocked) return
@@ -216,11 +216,11 @@ object OperacionPendienteStore {
                 val result = repository.crear(operacion)
 
                 if (result.isSuccess) {
-                    Log.d(TAG, "Reintento de cola exitoso para ${operacion.id}.")
+                    LogSeguro.d(TAG, "Reintento de cola exitoso para ${operacion.id}.")
                     eliminarDeCola(context, operacion.id)
                     notificarSiCorresponde(context, operacion, EstadoObservabilidadEnvio.ENVIADO)
                 } else if (result.exceptionOrNull() is SecurityException) {
-                    Log.w(TAG, "Operación ${operacion.id} rechazada por permisos. Eliminando de cola.")
+                    LogSeguro.w(TAG, "Operación ${operacion.id} rechazada por permisos. Eliminando de cola.")
                     eliminarDeCola(context, operacion.id)
                 } else {
                     val sinRed = !NetworkMonitor.disponible.value
@@ -377,7 +377,7 @@ private fun CambioDeEstado.aDto() = CambioDeEstadoLocalDto(timestamp = timestamp
 private fun OperacionLocalDto.aModeloConElementoPendiente(): ElementoPendiente? {
     val origenParsed = origen.aOrigen()
     if (origenParsed == null) {
-        Log.w("OperacionPendienteStore", "Descartando operación legacy incompatible con origen '$origen' (ID: $id)")
+        LogSeguro.w("OperacionPendienteStore", "Descartando operación legacy incompatible con origen '$origen' (ID: $id)")
         return null
     }
     val op = Operacion(

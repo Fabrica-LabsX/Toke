@@ -1,5 +1,7 @@
 package com.flabs.cobrate.core.data
 
+
+import com.flabs.cobrate.core.logic.LogSeguro
 import android.content.Context
 import android.content.SharedPreferences
 import android.util.Log
@@ -32,12 +34,12 @@ internal class SesionSeguraStore(context: Context) {
         return try {
             crearEncryptedPrefs(context)
         } catch (e: Exception) {
-            Log.e(TAG, "Error al abrir EncryptedSharedPreferences. Limpiando llaves corruptas y reintentando...", e)
+            LogSeguro.e(TAG, "Error al abrir EncryptedSharedPreferences. Limpiando llaves corruptas y reintentando...", e)
             limpiarAlmacenamientoCorrupto(context)
             try {
                 crearEncryptedPrefs(context)
             } catch (e2: Exception) {
-                Log.e(TAG, "Falló segundo intento de EncryptedSharedPreferences. Fallback a SharedPreferences normal.", e2)
+                LogSeguro.e(TAG, "Falló segundo intento de EncryptedSharedPreferences. Fallback a SharedPreferences normal.", e2)
                 context.getSharedPreferences(FILE_NAME, Context.MODE_PRIVATE)
             }
         }
@@ -47,14 +49,14 @@ internal class SesionSeguraStore(context: Context) {
         try {
             context.deleteSharedPreferences(FILE_NAME)
         } catch (e: Exception) {
-            Log.e(TAG, "Error al borrar SharedPreferences $FILE_NAME", e)
+            LogSeguro.e(TAG, "Error al borrar SharedPreferences $FILE_NAME", e)
         }
         try {
             val keyStore = KeyStore.getInstance("AndroidKeyStore")
             keyStore.load(null)
             keyStore.deleteEntry(MasterKey.DEFAULT_MASTER_KEY_ALIAS)
         } catch (e: Exception) {
-            Log.e(TAG, "Error al borrar MasterKey de KeyStore", e)
+            LogSeguro.e(TAG, "Error al borrar MasterKey de KeyStore", e)
         }
     }
 
@@ -76,7 +78,7 @@ internal class SesionSeguraStore(context: Context) {
     fun leerSesionActiva(): String? = try {
         prefs.getString(KEY_SESION_ACTIVA_ID, null)
     } catch (e: Exception) {
-        Log.e(TAG, "Error leyendo sesión activa", e)
+        LogSeguro.e(TAG, "Error leyendo sesión activa", e)
         null
     }
 
@@ -85,7 +87,7 @@ internal class SesionSeguraStore(context: Context) {
         try {
             prefs.edit().putString(KEY_SESION_ACTIVA_ID, cuentaId).apply()
         } catch (e: Exception) {
-            Log.e(TAG, "Error guardando sesión activa", e)
+            LogSeguro.e(TAG, "Error guardando sesión activa", e)
         }
     }
 
@@ -94,7 +96,7 @@ internal class SesionSeguraStore(context: Context) {
         try {
             prefs.edit().remove(KEY_SESION_ACTIVA_ID).apply()
         } catch (e: Exception) {
-            Log.e(TAG, "Error limpiando sesión activa", e)
+            LogSeguro.e(TAG, "Error limpiando sesión activa", e)
         }
     }
 

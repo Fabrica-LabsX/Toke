@@ -1,5 +1,7 @@
 package com.flabs.cobrate.features.planes
 
+
+import com.flabs.cobrate.core.logic.LogSeguro
 import android.content.Context
 import android.util.Log
 import com.flabs.cobrate.core.data.SupabaseClientProvider
@@ -54,7 +56,7 @@ object PlanStore {
                 .find { n -> n.id == negocioId }?.dueñoCuentaId == uid
             if (esMiNegocio) registrarPlanVisto(uid!!, nuevo.plan)
         }.onFailure {
-            Log.w("PlanStore", "No se pudo consultar el plan: ${it.message}")
+            LogSeguro.w("PlanStore", "No se pudo consultar el plan", it)
         }
     }
 

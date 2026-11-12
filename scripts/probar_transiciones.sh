@@ -33,7 +33,7 @@ restaurar() {
 trap restaurar EXIT
 A shell settings put global window_animation_scale 1.0
 A shell settings put global transition_animation_scale 1.0
-A shell settings put global animator_duration_scale 1.0
+A shell settings put global animator_duration_scale "${ESCALA:-1.0}"
 
 tocar() { A shell input tap "$1" "$2"; }
 atras() { A shell input keyevent 4; }
