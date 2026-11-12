@@ -23,7 +23,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <link rel="preload" href="/assets/fonts/pjs-latin.153fc85b70.woff2" as="font" type="font/woff2" crossorigin>
 <script src="/assets/js/theme.e778065358.js"></script>
-<link rel="stylesheet" href="/assets/css/site.6a89e085e5.css">
+<link rel="stylesheet" href="/assets/css/site.6ee533fd6d.css">
 </head>
 <body>
 <svg width="0" height="0" class="sr" aria-hidden="true"><defs><symbol id="mark" viewBox="330 290 400 400"><path fill="currentColor" d="M382 350H557V632A48.5 48.5 0 0 1 460 632V440H382A45 45 0 0 1 382 350Z"/><path fill="currentColor" d="M565 440V382A58 58 0 0 1 623 440Z"/><path fill="currentColor" d="M636 440A64 64 0 0 0 574 376.1V353.1A87 87 0 0 1 659 440Z"/><path fill="currentColor" d="M680 440A108 108 0 0 0 574 332V309A131 131 0 0 1 703 440Z"/></symbol></defs></svg>
@@ -38,21 +38,12 @@
   </div>
 </div></header>
 <main id="contenido">
-<div class="wrap page-head"><span class="eyebrow">Descargas</span><h1>Descarga Toke.</h1><p>Instalador oficial para Android. Los datos de la versión se leen en vivo de nuestra fuente pública.</p></div>
+<div class="wrap page-head"><span class="eyebrow">Descargas</span><h1>Descarga Toke.</h1><p>Instalador oficial para Android, solo desde esta página.</p></div>
 <div class="wrap prose">
-  <div class="release" data-release>
+  <div class="release">
   <h2>Versión oficial</h2>
-  <p class="state" data-state="loading">Consultando la última versión…</p>
-  <p class="state" data-state="empty" hidden>Todavía no hay una versión publicada. Vuelve pronto.</p>
-  <p class="state" data-state="error" hidden>No pudimos consultar la versión. Inténtalo de nuevo en unos minutos.</p>
-  <dl data-state="ok" hidden>
-    <dt>Versión</dt><dd data-f="version"></dd>
-    <dt>Publicada</dt><dd data-f="date"></dd>
-    <dt>Tamaño</dt><dd data-f="size"></dd>
-    <dt>SHA-256</dt><dd><span class="mono" id="sha" data-f="sha"></span><button class="copy" type="button" data-copy="#sha">Copiar</button></dd>
-  </dl>
-  <div class="actions"><a class="btn btn-primary" data-apk aria-disabled="true" href="/descargas"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7 11l5 5 5-5M5 20h14"/></svg>Descargar en web (.APK)</a><span class="btn" aria-disabled="true">Play Store (pronto)</span></div>
-  <div class="thanks" id="thanks" role="status"><b>La descarga comenzará pronto.</b>¡Gracias por elegir Toke! ¿No empezó la descarga? Pulsa de nuevo el botón.</div>
+  <p class="state">Todavía no hay una versión publicada. Cuando exista, aquí verás la versión, la fecha, el tamaño, el SHA-256 y el botón de descarga.</p>
+  <div class="actions"><span class="btn btn-primary" aria-disabled="true">Descargar en web (.APK) · próximamente</span><span class="btn" aria-disabled="true">Play Store (pronto)</span></div>
 </div>
   <h2>Requisitos</h2>
   <ul><li>Android 7.0 o superior.</li><li>Internet, para avisar a tu equipo.</li><li>Permiso de acceso a notificaciones, para leer tus avisos de pago.</li></ul>
@@ -60,10 +51,14 @@
   <ol class="install">
     <li><div><b>Descarga el archivo .APK</b><br>Es el instalador oficial de Toke.</div></li>
     <li><div><b>Permite instalar desde tu navegador</b><br>Android te pedirá activar “Fuentes desconocidas” o “Instalar apps desconocidas” para tu navegador. Es normal en apps que aún no están en Play Store.</div></li>
-    <li><div><b>Toca Instalar y abre Toke</b><br>Si Play Protect muestra un aviso, es una confirmación habitual para apps en fase beta: elige “Instalar de todos modos”. Después activa el acceso a notificaciones, que Toke usa para ver tus pagos, y quita el ahorro de energía para que Android no la apague.</div></li>
+    <li><div><b>Toca Instalar y abre Toke</b><br>Si Play Protect muestra un aviso, es una confirmación habitual para apps en fase beta: elige “Instalar de todos modos”. Después activa el acceso a notificaciones, que Toke usa para ver tus avisos de pago.</div></li>
   </ol>
+  <h2>Permisos que pide la app</h2>
+  <ul><li><b>Acceso a notificaciones:</b> para detectar el aviso de pago de tu billetera. No lee chats ni mensajes personales.</li><li><b>Notificaciones:</b> para avisarte de cada cobro.</li><li><b>Instalar apps desconocidas:</b> solo para actualizar Toke desde la propia app, y siempre con tu confirmación.</li><li><b>Internet y segundo plano:</b> para avisar a tu equipo sin demoras.</li></ul>
+  <h2>Cómo se actualiza</h2>
+  <p>Toke te avisa dentro de la app cuando hay una versión nueva. Antes de instalarla comprueba el tamaño, el SHA-256 y que la firma sea la de Toke; Android te pide confirmar. Una actualización obligatoria se indica con claridad.</p>
   <h2>Cómo comprobar el archivo</h2>
-  <p>Compara el SHA-256 de arriba con el del archivo que descargaste. Si no coincide, no lo instales y <a href="/contacto">avísanos</a>.</p>
+  <p>Compara el SHA-256 publicado aquí con el del archivo que descargaste. Si no coincide, no lo instales y <a href="/contacto">avísanos</a>.</p>
   <p>Mejoras de cada versión: <a href="/novedades">Novedades</a>.</p>
 </div>
 </main>
@@ -75,12 +70,12 @@
     </div>
     <div><h4>Producto</h4><ul><li><a href="/#como-funciona">Cómo funciona</a></li><li><a href="/#planes">Planes</a></li><li><a href="/descargas">Descargas</a></li><li><a href="/novedades">Novedades</a></li></ul></div>
     <div><h4>Ayuda</h4><ul><li><a href="/ayuda">Manual y preguntas</a></li><li><a href="/seguridad">Seguridad</a></li><li><a href="/eliminar-cuenta">Eliminar mi cuenta</a></li><li><a href="/contacto">Contacto</a></li></ul></div>
-    <div><h4>Legal</h4><ul><li><a href="/terminos">Términos y condiciones</a></li><li><a href="/privacidad">Privacidad</a></li><li><a href="/licencias">Licencias</a></li></ul></div>
+    <div><h4>Legal</h4><ul><li><a href="/legal">Centro legal</a></li><li><a href="/terminos">Términos y condiciones</a></li><li><a href="/privacidad">Privacidad</a></li><li><a href="/cookies">Cookies</a></li><li><a href="/planes-y-pagos">Planes y pagos</a></li><li><a href="/uso-aceptable">Uso aceptable</a></li><li><a href="/licencias">Licencias</a></li></ul></div>
   </div>
   <p class="oficial">Sitio oficial de Toke: <strong>tokelabs.pages.dev</strong>. Toke solo se descarga desde aquí. No te dejes engañar por páginas parecidas en otras redes.</p>
   <div class="copy-line"><span>© 2026 Fábrica Labs. Todos los derechos reservados.</span><span>Yape y Plin son marcas de sus titulares. Toke no está afiliada a ellas.</span></div>
 </div></footer>
-<script src="/assets/js/site.76345d5f0b.js" defer></script>
+<script src="/assets/js/site.d9eba35ddc.js" defer></script>
 
 </body>
 </html>

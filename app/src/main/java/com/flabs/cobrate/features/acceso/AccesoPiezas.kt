@@ -1,6 +1,5 @@
 package com.flabs.cobrate.features.acceso
 import com.flabs.cobrate.ui.theme.TokeMedidas
-import com.flabs.cobrate.ui.theme.entradaEnCascada
 import com.flabs.cobrate.ui.theme.rememberPulsacion
 
 import androidx.compose.foundation.BorderStroke
@@ -170,7 +169,7 @@ fun TituloAcceso(
 ) {
     val alineacion = if (centrado) TextAlign.Center else TextAlign.Start
     Column(
-        modifier = Modifier.fillMaxWidth().entradaEnCascada(),
+        modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(6.dp),
         horizontalAlignment = if (centrado) Alignment.CenterHorizontally else Alignment.Start,
     ) {
@@ -215,7 +214,7 @@ fun CampoAcceso(
     onAlternarVisible: () -> Unit = {},
 ) {
     var enfocado by remember { mutableStateOf(false) }
-    Column(modifier = Modifier.entradaEnCascada(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
         Text(
             text = etiqueta,
             style = TextStyle(fontFamily = PlusJakartaSans, fontWeight = FontWeight.SemiBold, fontSize = 13.sp),
@@ -302,7 +301,6 @@ fun BotonAcceso(paleta: TokePaleta, texto: String, principal: Boolean, onClick: 
         color = if (principal) paleta.verde else paleta.tarjeta,
         border = if (principal) null else BorderStroke(1.dp, paleta.bordeControl),
         modifier = Modifier
-            .entradaEnCascada()
             .fillMaxWidth()
             .height(TokeMedidas.BotonAltura)
             .then(pulso.modificador),
@@ -340,7 +338,7 @@ fun AvisoAcceso(paleta: TokePaleta, titulo: String, texto: String) {
         shape = RoundedCornerShape(18.dp),
         color = paleta.tarjeta,
         border = BorderStroke(1.dp, paleta.borde),
-        modifier = Modifier.fillMaxWidth().entradaEnCascada(),
+        modifier = Modifier.fillMaxWidth(),
     ) {
         Column(modifier = Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Text(

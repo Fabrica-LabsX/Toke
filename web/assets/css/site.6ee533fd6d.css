@@ -327,3 +327,5 @@ footer{border-top:1px solid var(--border);background:var(--card);padding:44px 0 
   .vtile,.vtag,.vtxt .n,.vtxt h3,.vtxt p{transition:none}
   .vslide.on .vring,.vhint{animation:none}
 }
+
+.legalgrid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));margin:18px 0}.legalgrid .box{display:block;text-decoration:none;color:inherit}.legalgrid .box:hover,.legalgrid .box:focus-visible{border-color:var(--green,#059669)}

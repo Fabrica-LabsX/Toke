@@ -3,11 +3,7 @@ package com.flabs.cobrate
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.scaleOut
-import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.fadeOut
@@ -583,12 +579,10 @@ fun CobrateApp() {
             // En Android 15+ la app se dibuja bajo la barra de estado: se deja ese espacio libre en todas las
             // pantallas. Las que ya lo reservaban no lo duplican (el espacio queda consumido aquí).
             modifier = Modifier.padding(innerPadding).statusBarsPadding(),
-            // Estilo Waze: la pantalla nueva entra desde la derecha con un resorte suave y una escala leve;
-            // la anterior se aleja un poco hacia la izquierda. Todo en la capa gráfica (liviano en gama baja).
-            enterTransition = { fadeIn(tween(220)) + slideInHorizontally(spring(dampingRatio = 0.85f, stiffness = 380f)) { it / 5 } + scaleIn(tween(260), initialScale = 0.96f) },
-            exitTransition = { fadeOut(tween(160)) + slideOutHorizontally(tween(260)) { -it / 12 } + scaleOut(tween(260), targetScale = 0.97f) },
-            popEnterTransition = { fadeIn(tween(220)) + slideInHorizontally(spring(dampingRatio = 0.85f, stiffness = 380f)) { -it / 12 } + scaleIn(tween(260), initialScale = 0.97f) },
-            popExitTransition = { fadeOut(tween(160)) + slideOutHorizontally(tween(240)) { it / 5 } + scaleOut(tween(240), targetScale = 0.96f) }
+            enterTransition = { fadeIn(tween(180)) + slideInHorizontally(tween(180)) { it / 14 } },
+            exitTransition = { fadeOut(tween(120)) },
+            popEnterTransition = { fadeIn(tween(180)) + slideInHorizontally(tween(180)) { -it / 14 } },
+            popExitTransition = { fadeOut(tween(120)) }
         ) {
             composable(Routes.ARRANQUE) {
                 ArranqueScreen()
