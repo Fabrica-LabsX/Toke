@@ -43,6 +43,10 @@ Deno.serve(async (req) => {
     return json({ error: "HAS_BUSINESSES", negocios: negocios!.length }, 409);
   }
 
+  // Los QR guardados no se borran en cascada (son archivos): se quitan primero.
+  const { data: archivos } = await admin.storage.from("metodos-qr").list(user.id, { limit: 1000 });
+  if (archivos?.length) await admin.storage.from("metodos-qr").remove(archivos.map((a) => `${user.id}/${a.name}`));
+
   // Borrar el usuario de Auth elimina en cascada cuenta, vínculos, dispositivos, plan y sesiones.
   const { error: derr } = await admin.auth.admin.deleteUser(user.id);
   if (derr && !/not.?found/i.test(derr.message)) return json({ error: "DELETE_FAILED" }, 500);

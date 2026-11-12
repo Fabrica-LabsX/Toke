@@ -3,17 +3,18 @@
 Estado del 2026-11-12. Los documentos de la web están en **versión 0.1, pendientes de revisión jurídica**. No se declara que un abogado los revisó.
 
 ## Decidido por el dueño (2026-11-12) y ya en la web
-- Responsable: solo el grupo "Fábrica Labs (FLABS)"; sin empresa, RUC ni domicilio.
-- Plazo de 30 días para borrar restos tras eliminar la cuenta, y ventana de 30 días para pedir reembolso.
-- Edad mínima 18 años. Precios con impuestos incluidos. Pro siempre mensual; sin renovación automática.
-- Pack Pro 3 meses por adelantado: se publicó S/ 54.70 (14.90 + 19.90 + 19.90). El dueño dijo "14.9+20+20" (=54.90): CONFIRMAR cifra.
-- Libro de Reclamaciones (`/libro-de-reclamaciones`): por correo/WhatsApp; sin RUC puede no cumplir la norma peruana, validar con asesoría.
-- Política de reembolsos: borrador (no activado, falla atribuible a TOKE, meses no iniciados del pack; 30 días): CONFIRMAR.
+- Los documentos 0.1 los redacta el propio equipo; no hay abogado ni empresa. La web lo dice así (no afirma revisión jurídica).
+- Responsable: solo el grupo "Fábrica Labs (FLABS)"; sin empresa, RUC ni domicilio. Edad mínima 18 años. Precios con impuestos incluidos.
+- Pro siempre mensual, sin renovación automática. Pack 3 meses por adelantado con 30 % de descuento: S/ 41.79 (3 x 19.90 x 0.70). CONFIRMAR la base de cálculo.
+- Reembolso: 7 días desde el pago si no estás satisfecho (Pro mensual y pack); pasado ese plazo no aplica.
+- Eliminación de cuenta: se borra todo de inmediato (cascada en la base + QR en Storage, función `eliminar-cuenta` v2). Plan Free de Supabase sin copias de seguridad propias; cualquier resto de proveedor, máx. 30 días.
+- Libro de Reclamaciones: quitado temporalmente (sin RUC/empresa).
 
 ## Datos que aún faltan (no inventar)
-- Fecha de entrada en vigor de cada documento y revisión jurídica.
-- Registro del banco de datos personales ante la autoridad (consultar asesoría peruana).
-- Dónde se alojará el APK (ver CLAUDE.md, sección de releases) para completar Descargas.
+- Fecha de entrada en vigor de cada documento.
+- Registro del banco de datos personales ante la autoridad.
+- Dónde se alojará el APK (ver CLAUDE.md) para completar Descargas.
+- Si se pasa Supabase a plan Pro (trae copias diarias): actualizar la política de privacidad.
 
 ## Hecho en la web (2026-11-12)
 - Centro legal (`/legal`) y documentos: Términos, Privacidad, Cookies, Planes y pagos, Uso aceptable; eliminación de cuenta ampliada.
