@@ -91,7 +91,7 @@ function start() {
     });
 
     const fall = reduce ? 0 : Math.sin(t * 1.05);                              /* levitación leve */
-    pivot.position.set(0.3, fall * 0.05, 0);
+    pivot.position.set(0.3, 0.4 + fall * 0.05, 0);
     pivot.rotation.y = -0.42 + (reduce ? 0 : Math.sin(t * 0.55) * 0.045);
     pivot.rotation.x = 0.1 + (reduce ? 0 : Math.sin(t * 0.8 + 1) * 0.012);
     if (floor) floor.style.setProperty('--lift', (1 - fall * 0.05).toFixed(3));
