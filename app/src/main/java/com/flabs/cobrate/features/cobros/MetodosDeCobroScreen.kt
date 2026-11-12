@@ -78,7 +78,7 @@ fun MetodosDeCobroScreen(
             try {
                 businessViewModel.cargarMetodos()
             } catch (e: Exception) {
-                errorCarga = "Error al cargar métodos: ${e.message}"
+                errorCarga = com.flabs.cobrate.core.logic.ErrorMapper.amable(e, "No pudimos cargar tus métodos de cobro.")
             }
             cargando = false
         }

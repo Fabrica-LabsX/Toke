@@ -86,4 +86,12 @@ class LogSeguroTest {
         assertEquals(2, llamadas)
         assertTrue("Debe ser fallo", resultado.isFailure)
     }
+
+    @Test
+    fun testCodigoDeRegistroEsCortoYSinNombres() {
+        val c = LogSeguro.codigo("MetodoDeCobroRealtimeListener")
+        assertTrue(Regex("E-[0-9A-F]{4}").matches(c))
+        assertFalse(c.contains("Metodo", ignoreCase = true))
+        assertEquals(c, LogSeguro.codigo("MetodoDeCobroRealtimeListener"))
+    }
 }

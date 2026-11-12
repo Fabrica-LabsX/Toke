@@ -27,4 +27,5 @@ App Android lee notificaciones → filtra 13 apps de pago → normaliza → el d
 ## No verificado / riesgos
 - Cuerpos de las RPC (`reclamar_operacion`, `confirmar_pago`, etc.) y sus permisos de ejecución (ver avisos pendientes en `CLAUDE.md` §11).
 - Protección de contraseñas filtradas desactivada en Auth.
-- Ningún cambio se aplicó en Supabase: los arreglos 1–3 están solo propuestos (requieren tu autorización).
+- **Parche aplicado el 2026-11-12** (autorizado): hallazgos 1, 2 y 3 corregidos en Supabase (`supabase/migrations/20261112020000_parche_auditoria.sql`, `limpiar-qr` v2). Comprobado: la función sin secreto responde 401 y el cron con secreto responde 200.
+- Registro del teléfono: en la versión pública `LogSeguro` solo escribe `TOKE E-xxxx <ClaseDeExcepción>` (sin tablas, ids ni textos del servidor). Ver `docs/GLOSARIO_ERRORES.md`.

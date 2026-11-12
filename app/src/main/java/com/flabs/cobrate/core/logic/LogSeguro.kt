@@ -39,7 +39,18 @@ object LogSeguro {
     /** El mensaje de una excepción puede traer datos del usuario (filas, textos): solo se imprime en la versión de depuración. */
     private fun detalle(error: Throwable): String = if (BuildConfig.DEBUG) ": ${sanitizar(error.message)}" else ""
 
+    /** Código corto y estable de una etiqueta de registro: "E-3FA2" (el glosario de errores lo traduce). Sin nombres de tablas, rutas ni ids. */
+    internal fun codigo(tag: String): String = "E-" + "%04X".format(tag.hashCode() and 0xFFFF)
+
+    /** En la versión pública el registro solo lleva el código y la clase de la excepción: nada de tablas, ids ni textos del servidor. */
+    private fun publico(nivel: Int, tag: String, error: Throwable?) {
+        try {
+            Log.println(nivel, "TOKE", codigo(tag) + (error?.let { " " + it.javaClass.simpleName } ?: ""))
+        } catch (_: Throwable) { }
+    }
+
     fun e(tag: String, mensaje: String, error: Throwable? = null) {
+        if (!BuildConfig.DEBUG) { publico(Log.ERROR, tag, error); return }
         val errSimple = if (error != null) "${error.javaClass.simpleName}${detalle(error)}" else ""
         val textoFinal = if (errSimple.isNotEmpty()) "$mensaje | $errSimple" else mensaje
         try {
@@ -50,6 +61,7 @@ object LogSeguro {
     }
 
     fun w(tag: String, mensaje: String, error: Throwable? = null) {
+        if (!BuildConfig.DEBUG) { publico(Log.WARN, tag, error); return }
         val errSimple = if (error != null) "${error.javaClass.simpleName}${detalle(error)}" else ""
         val textoFinal = if (errSimple.isNotEmpty()) "$mensaje | $errSimple" else mensaje
         try {
