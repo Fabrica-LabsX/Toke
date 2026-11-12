@@ -1,6 +1,6 @@
 # Sesión única: una cuenta, un solo TOKE a la vez
 
-Estado: **diseño + migración escrita, sin aplicar**. Falta tu visto bueno para aplicarla y conectar la pantalla.
+Estado: **aplicada y en uso** (tabla `sesiones_activas`, RPC `reclamar_sesion`/`liberar_sesion`).
 
 ## Regla
 Una cuenta solo puede estar abierta en un celular. Si se abre en otro, se le pregunta a la persona qué hacer.

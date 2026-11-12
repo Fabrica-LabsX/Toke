@@ -179,7 +179,7 @@ fun TokeBottomBar(
                 .clip(RoundedCornerShape(12.dp))
                 .clickable(
                     interactionSource = interactionSource,
-                    indication = ripple(bounded = false),
+                    indication = null, // el botón Recibir ya se encoge solo (fabScale),
                     onClick = onRecibir,
                 ),
             shape = RoundedCornerShape(12.dp),
@@ -226,7 +226,7 @@ private fun BottomNavItem(
             .fillMaxHeight()
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
-                indication = ripple(bounded = false),
+                indication = androidx.compose.foundation.LocalIndication.current,
                 onClick = onClick,
             ),
         horizontalAlignment = Alignment.CenterHorizontally,

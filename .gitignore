@@ -19,3 +19,9 @@ app/google-services.json
 .idea/
 !.idea/.gitignore
 !.idea/jarRepositories.xml
+# Archivos locales de herramientas
+.artifacts/
+.cloudflare/
+.gradle_home/
+.wrangler/
+.kotlin/

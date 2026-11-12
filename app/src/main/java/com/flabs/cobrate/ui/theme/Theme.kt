@@ -25,10 +25,12 @@ fun CobrateTheme(
     themeMode: ThemeMode = ThemeMode.LIGHT,
     content: @Composable () -> Unit,
 ) {
-    MaterialTheme(
-        colorScheme = esquemaToke(themeMode == ThemeMode.DARK),
-        shapes = Shapes,
-        typography = Typography,
-        content = content,
-    )
+    androidx.compose.runtime.CompositionLocalProvider(androidx.compose.foundation.LocalIndication provides IndicacionToke) {
+        MaterialTheme(
+            colorScheme = esquemaToke(themeMode == ThemeMode.DARK),
+            shapes = Shapes,
+            typography = Typography,
+            content = content,
+        )
+    }
 }
