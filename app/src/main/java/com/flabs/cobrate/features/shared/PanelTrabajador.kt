@@ -211,11 +211,11 @@ private fun FichaPorReclamar(p: TokePaleta, pendientes: List<Operacion>, onClick
             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
                 Surface(
                     shape = RoundedCornerShape(10.dp),
-                    color = Color.Black.copy(alpha = 0.15f),
+                    color = p.ambarTexto,
                     modifier = Modifier.size(36.dp),
                 ) {
                     Box(contentAlignment = Alignment.Center) {
-                        Icon(painterResource(TokeIcons.Billetera), contentDescription = null, tint = p.ambarTexto, modifier = Modifier.size(16.dp))
+                        Icon(painterResource(TokeIcons.Billetera), contentDescription = null, tint = p.ambar, modifier = Modifier.size(16.dp))
                     }
                 }
                 Spacer(Modifier.weight(1f))

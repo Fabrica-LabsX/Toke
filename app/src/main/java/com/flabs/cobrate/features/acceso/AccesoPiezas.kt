@@ -116,7 +116,7 @@ fun LogoToke(paleta: TokePaleta, tamano: Int, descripcion: String, modifier: Mod
         modifier = modifier
             .size(tamano.dp)
             .clip(forma)
-            .background(paleta.verde.copy(alpha = 0.16f))
+            .background(paleta.tileFondo)
             .drawBehind {
                 val p = progreso.value
                 drawRect(paleta.verde, topLeft = Offset(0f, size.height * (1f - p)), size = Size(size.width, size.height * p))
@@ -127,7 +127,7 @@ fun LogoToke(paleta: TokePaleta, tamano: Int, descripcion: String, modifier: Mod
             painter = painterResource(id = R.drawable.ic_toke_logo),
             contentDescription = descripcion,
             modifier = Modifier
-                .size((tamano * 1.35f).dp)
+                .size((tamano * 0.85f).dp)
                 .graphicsLayer {
                     val p = ((progreso.value - 0.35f) / 0.65f).coerceIn(0f, 1f)
                     alpha = p
@@ -246,7 +246,7 @@ fun CampoAcceso(
                             Text(
                                 text = placeholder,
                                 style = TextStyle(fontFamily = PlusJakartaSans, fontSize = 16.sp),
-                                color = paleta.textoSecundario.copy(alpha = 0.75f),
+                                color = paleta.textoSecundario,
                                 maxLines = 1,
                             )
                         }
@@ -392,7 +392,7 @@ fun LogoTokeSuave(paleta: TokePaleta, tamano: Int, descripcion: String, modifier
             contentDescription = descripcion,
             colorFilter = ColorFilter.tint(paleta.verde),
             modifier = Modifier
-                .requiredSize((tamano * 2.1f).dp) // el dibujo ocupa solo el centro del archivo
+                .requiredSize((tamano * 1.1f).dp) // el símbolo ocupa ~70 % del archivo
                 .graphicsLayer {
                     alpha = (entrada.value * 2f).coerceAtMost(1f)
                     scaleX = escala.value

@@ -695,8 +695,8 @@ private fun ItemReclamarSheet(
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.15f)),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
     ) {
         Row(
             modifier = Modifier
@@ -1153,7 +1153,7 @@ private fun AlertasCard(alerta: Alerta) {
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.errorContainer,
         ),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.error.copy(alpha = 0.3f)),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.error),
     ) {
         Row(
             modifier = Modifier.padding(16.dp),
@@ -1161,7 +1161,7 @@ private fun AlertasCard(alerta: Alerta) {
         ) {
             Surface(
                 shape = RoundedCornerShape(10.dp),
-                color = MaterialTheme.colorScheme.error.copy(alpha = 0.15f),
+                color = MaterialTheme.colorScheme.errorContainer,
                 modifier = Modifier.size(36.dp),
             ) {
                 Box(contentAlignment = Alignment.Center) {

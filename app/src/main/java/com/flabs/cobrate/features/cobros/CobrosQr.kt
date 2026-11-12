@@ -146,7 +146,7 @@ fun QrAmpliadoDialogo(
             modifier = Modifier
                 .fillMaxSize()
                 .clickable(onClick = onCerrar),
-            color = Color.Black.copy(alpha = 0.92f),
+            color = Color.Black,
         ) {
             Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize().padding(24.dp)) {
                 QrImagen(

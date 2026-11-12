@@ -77,8 +77,8 @@ section{padding:88px 0}
 /* logo 3D + órbita */
 .stage{position:relative;width:100%;max-width:540px;aspect-ratio:1;margin-left:auto;align-self:end}
 .stage canvas{position:absolute;inset:0;width:100%;height:100%;z-index:2}
-.stage .floor{position:absolute;left:41%;bottom:12%;width:18%;height:2%;border-radius:50%;box-shadow:0 0 26px 14px rgba(15,23,42,.16);z-index:0;transform:scale(var(--lift,1))}
-:root[data-theme="dark"] .stage .floor{box-shadow:0 0 26px 14px rgba(0,0,0,.5)}
+.stage .floor{position:absolute;left:41%;bottom:12%;width:18%;height:2%;border-radius:50%;box-shadow:none;z-index:0;transform:scale(var(--lift,1))}
+:root[data-theme="dark"] .stage .floor{box-shadow:none}
 .stage .rings{position:absolute;inset:0;width:100%;height:100%;z-index:0;overflow:visible}
 .stage .rings ellipse{fill:none;stroke:var(--border);stroke-width:1.4;stroke-dasharray:3 7;vector-effect:non-scaling-stroke}
 .stage .still{display:none;position:absolute;left:19%;top:14%;width:62%;z-index:2}
@@ -265,13 +265,13 @@ footer{border-top:1px solid var(--border);background:var(--card);padding:44px 0 
 /* Capturas reales con iconos flotando */
 .shots{display:grid;grid-template-columns:repeat(3,1fr);gap:28px;margin-top:48px;align-items:end}
 .shot{position:relative;display:flex;flex-direction:column;align-items:center;padding-top:44px}
-.shot .phone{position:relative;width:100%;max-width:250px;border:7px solid var(--text);border-radius:34px;overflow:hidden;background:var(--card);box-shadow:0 26px 0 -14px var(--border),0 30px 36px -12px rgba(15,23,42,.28);transform:perspective(1100px) rotateY(var(--giro,0deg)) rotateX(4deg)}
+.shot .phone{position:relative;width:100%;max-width:250px;border:7px solid var(--text);border-radius:34px;overflow:hidden;background:var(--card);box-shadow:0 26px 0 -14px var(--border);transform:perspective(1100px) rotateY(var(--giro,0deg)) rotateX(4deg)}
 .shot .phone img{width:100%;height:auto;display:block}
 .shot.s1{--giro:12deg}.shot.s3{--giro:-12deg}.shot.s2{padding-top:0}
 .shot figcaption{margin-top:34px;text-align:center;max-width:260px}
 .shot figcaption b{display:block;font-size:1rem}
 .shot figcaption p{color:var(--muted);font-size:.95rem;margin-top:4px}
-.shot .chip{position:absolute;z-index:2;width:58px;height:58px;border-radius:18px;background:var(--card);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;box-shadow:0 14px 22px -10px rgba(15,23,42,.30);animation:flota 5s ease-in-out infinite}
+.shot .chip{position:absolute;z-index:2;width:58px;height:58px;border-radius:18px;background:var(--card);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;box-shadow:none;animation:flota 5s ease-in-out infinite}
 .shot .chip img{width:32px;height:32px;object-fit:contain}
 .shot .chip.brand{background:var(--brand)}
 .shot .c1{top:6px;left:2%}.shot .c2{top:62px;right:0;animation-delay:-1.8s}.shot .c3{top:210px;left:-4%;animation-delay:-3.2s}
@@ -349,7 +349,7 @@ footer{border-top:1px solid var(--border);background:var(--card);padding:44px 0 
 .ldoc-sec table{display:block;overflow-x:auto;max-width:100%}
 .ldoc-sec th,.ldoc-sec td{min-width:120px}
 .popmodal{margin:auto;border:1px solid var(--border);border-radius:var(--r);background:var(--card);color:var(--text);padding:24px;width:min(420px,calc(100vw - 32px))}
-.popmodal::backdrop{background:rgba(0,0,0,.45)}
+.popmodal::backdrop{background:#0F172A}
 .popmodal h3{margin:0 0 8px}
 .popmodal .actions{display:grid;gap:10px;margin-top:16px}
 button.btn{font:inherit;cursor:pointer}

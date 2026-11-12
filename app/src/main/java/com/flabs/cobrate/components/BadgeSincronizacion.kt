@@ -16,7 +16,7 @@ import com.flabs.cobrate.ui.theme.tokePaleta
 
 /**
  * Badge del estado del servicio de TOKE, junto al de conexión (mismo tamaño y forma):
- *  - [operativo]: fondo verde con el icono de sincronización y el check verde;
+ *  - [operativo]: fondo verde con el icono de sincronización (sin check);
  *  - si no: fondo rojo suave con el icono de sincronización en rojo, sin check.
  * Al tocarlo se abre la pantalla de permisos ([onClick]).
  */
@@ -45,13 +45,13 @@ fun BadgeSincronizacion(
     ) {
         Box(contentAlignment = Alignment.Center) {
             Icon(
-                painter = painterResource(id = if (operativo) TokeIcons.SyncOk else TokeIcons.SyncError),
+                painter = painterResource(id = TokeIcons.SyncError), // solo el icono de sincronización, sin check
                 contentDescription = if (operativo) {
                     "Servicio activo. Ver permisos"
                 } else {
                     "Servicio con problemas. Ver permisos"
                 },
-                tint = if (operativo) Color.Unspecified else Color.White,
+                tint = Color.White,
                 modifier = Modifier.size(20.dp),
             )
         }

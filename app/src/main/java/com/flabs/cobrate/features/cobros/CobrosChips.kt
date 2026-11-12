@@ -108,8 +108,8 @@ private fun Chip(
                     fontSize = 16.sp,
                 ),
                 colorNombre = if (elegido) Color.White else paleta.textoPrincipal,
-                colorMarca = if (elegido) Color.White.copy(alpha = 0.9f) else colorPlin,
-                colorBarrera = if (elegido) Color.White.copy(alpha = 0.55f) else paleta.bordeControl,
+                colorMarca = if (elegido) Color.White else colorPlin,
+                colorBarrera = if (elegido) Color.White else paleta.bordeControl,
             )
         }
     }

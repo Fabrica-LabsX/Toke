@@ -47,7 +47,7 @@ fun OperacionCard(
             .then(if (onClick != null) Modifier.clickable { onClick() } else Modifier),
         shape = RoundedCornerShape(8.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        border = BorderStroke(2.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.25f)),
+        border = BorderStroke(2.dp, MaterialTheme.colorScheme.outline),
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
     ) {
         Column(
@@ -191,13 +191,13 @@ private fun EstadoBadge(estado: EstadoOperacion) {
     val (bgColor, borderColor, textColor, label) = when (estado) {
         EstadoOperacion.SIN_ASIGNAR -> Quadruple(
             MaterialTheme.colorScheme.surfaceVariant,
-            MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
+            MaterialTheme.colorScheme.outline,
             MaterialTheme.colorScheme.onSurfaceVariant,
             "Sin asignar",
         )
         else -> Quadruple(
             MaterialTheme.colorScheme.primaryContainer,
-            MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
+            MaterialTheme.colorScheme.primary,
             MaterialTheme.colorScheme.primary,
             "Recibido",
         )

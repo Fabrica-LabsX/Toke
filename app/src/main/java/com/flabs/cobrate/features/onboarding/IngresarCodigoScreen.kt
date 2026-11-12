@@ -137,7 +137,7 @@ private fun CampoCodigoGrande(
                                 Text(
                                     text = placeholder,
                                     style = TextStyle(fontFamily = PlusJakartaSans, fontWeight = FontWeight.Bold, fontSize = 22.sp, letterSpacing = 4.sp, textAlign = TextAlign.Center),
-                                    color = paleta.textoSecundario.copy(alpha = 0.55f),
+                                    color = paleta.textoSecundario,
                                     maxLines = 1,
                                 )
                             }

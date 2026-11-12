@@ -194,7 +194,7 @@ private fun SelectorPeriodo(paleta: TokePaleta, actual: PeriodoReporte, bloquead
                     Text(
                         text = corto(p),
                         style = TextStyle(fontFamily = PlusJakartaSans, fontWeight = if (elegido) FontWeight.Bold else FontWeight.Medium, fontSize = 14.sp),
-                        color = if (elegido) paleta.seleccionTexto else if (bloqueado(p)) paleta.textoSecundario.copy(alpha = 0.55f) else paleta.textoSecundario,
+                        color = if (elegido) paleta.seleccionTexto else if (bloqueado(p)) paleta.bordeControl else paleta.textoSecundario,
                         maxLines = 1,
                     )
                 }

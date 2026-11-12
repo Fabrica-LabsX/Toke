@@ -114,7 +114,7 @@ private fun TarjetaPlanActual(paleta: TokePaleta, esPro: Boolean, proHasta: Long
         modifier = Modifier.fillMaxWidth(),
     ) {
         val textoFuerte = if (esPro) paleta.verdeTexto else paleta.textoPrincipal
-        val textoSuave = if (esPro) paleta.verdeTexto.copy(alpha = 0.85f) else paleta.textoSecundario
+        val textoSuave = if (esPro) paleta.verdeTexto else paleta.textoSecundario
         Column(modifier = Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(

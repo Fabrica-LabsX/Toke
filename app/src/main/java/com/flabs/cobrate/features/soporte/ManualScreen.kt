@@ -212,14 +212,14 @@ private fun Dedo(paleta: TokePaleta, latido: Float, modifier: Modifier) {
         modifier = modifier.size(30.dp).graphicsLayer { scaleX = 1.15f - 0.35f * latido; scaleY = 1.15f - 0.35f * latido },
         contentAlignment = Alignment.Center,
     ) {
-        Box(modifier = Modifier.size(30.dp).clip(CircleShape).background(paleta.textoPrincipal.copy(alpha = 0.16f)))
-        Box(modifier = Modifier.size(14.dp).clip(CircleShape).background(paleta.textoPrincipal.copy(alpha = 0.55f)))
+        Box(modifier = Modifier.size(30.dp).clip(CircleShape).background(paleta.borde))
+        Box(modifier = Modifier.size(14.dp).clip(CircleShape).background(paleta.textoSecundario))
     }
 }
 
 @Composable
 private fun Elemento(paleta: TokePaleta, el: ElementoMock, activo: Boolean, latido: Float) {
-    val borde = if (activo) BorderStroke(2.dp, paleta.verde.copy(alpha = 0.55f + 0.45f * latido)) else BorderStroke(1.dp, paleta.borde)
+    val borde = if (activo) BorderStroke(2.dp, paleta.verde) else BorderStroke(1.dp, paleta.borde)
     when (el) {
         is ElementoMock.Fila -> Surface(shape = RoundedCornerShape(14.dp), color = paleta.tarjeta, border = borde, modifier = Modifier.fillMaxWidth()) {
             Row(modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {

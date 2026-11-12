@@ -87,6 +87,7 @@
     <string name="nombre_acerca_soporte">Acerca de y soporte</string>
     <string name="url_eliminar_cuenta" translatable="false">https://tokelabs.pages.dev/eliminar-cuenta</string>
     <string name="url_seguridad" translatable="false">https://tokelabs.pages.dev/seguridad</string>
+    <string name="url_planes" translatable="false">https://tokelabs.pages.dev/planes-y-pagos</string>
     <string name="url_ayuda" translatable="false">https://tokelabs.pages.dev/ayuda</string>
 
     <!-- Mi cuenta -->

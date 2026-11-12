@@ -18,6 +18,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.Color
+import com.flabs.cobrate.ui.theme.tokePaleta
 import androidx.compose.ui.unit.dp
 
 /**
@@ -26,24 +27,7 @@ import androidx.compose.ui.unit.dp
  */
 @Composable
 fun FondoPanelBorroso() {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .then(
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                    Modifier.blur(20.dp)
-                } else Modifier
-            )
-    ) {
-        MaquetaDecorativaHome()
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color.Black.copy(alpha = 0.6f))
-            )
-        }
-    }
+    Box(modifier = Modifier.fillMaxSize().background(tokePaleta().fondo))
 }
 
 /**
