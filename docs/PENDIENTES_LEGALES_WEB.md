@@ -2,15 +2,18 @@
 
 Estado del 2026-11-12. Los documentos de la web están en **versión 0.1, pendientes de revisión jurídica**. No se declara que un abogado los revisó.
 
-## Datos que faltan para la versión definitiva (no inventar)
-- Identidad legal del responsable (nombre completo de la persona natural u operador, RUC si aplica, domicilio). Hoy se presenta FLABS como proyecto independiente unipersonal, sin sociedad.
-- Fecha de entrada en vigor de cada documento.
-- Plazos de conservación de operaciones, historial y copias de seguridad.
-- Edad mínima de uso y procedimiento para menores.
-- Política de reembolsos concreta y medios de pago aceptados (hoy: activación manual por WhatsApp, sin cobro automático).
-- Si el precio incluye impuestos y si el plan Pro es siempre mensual (la web dice: S/ 14.90 el primer mes, luego S/ 19.90).
-- Si corresponde el Libro de Reclamaciones y/o registro del banco de datos personales ante la autoridad (consultar con asesoría peruana).
-- Dónde se alojará el APK (ver CLAUDE.md, sección de releases) para completar la página de Descargas.
+## Decidido por el dueño (2026-11-12) y ya en la web
+- Responsable: solo el grupo "Fábrica Labs (FLABS)"; sin empresa, RUC ni domicilio.
+- Plazo de 30 días para borrar restos tras eliminar la cuenta, y ventana de 30 días para pedir reembolso.
+- Edad mínima 18 años. Precios con impuestos incluidos. Pro siempre mensual; sin renovación automática.
+- Pack Pro 3 meses por adelantado: se publicó S/ 54.70 (14.90 + 19.90 + 19.90). El dueño dijo "14.9+20+20" (=54.90): CONFIRMAR cifra.
+- Libro de Reclamaciones (`/libro-de-reclamaciones`): por correo/WhatsApp; sin RUC puede no cumplir la norma peruana, validar con asesoría.
+- Política de reembolsos: borrador (no activado, falla atribuible a TOKE, meses no iniciados del pack; 30 días): CONFIRMAR.
+
+## Datos que aún faltan (no inventar)
+- Fecha de entrada en vigor de cada documento y revisión jurídica.
+- Registro del banco de datos personales ante la autoridad (consultar asesoría peruana).
+- Dónde se alojará el APK (ver CLAUDE.md, sección de releases) para completar Descargas.
 
 ## Hecho en la web (2026-11-12)
 - Centro legal (`/legal`) y documentos: Términos, Privacidad, Cookies, Planes y pagos, Uso aceptable; eliminación de cuenta ampliada.
