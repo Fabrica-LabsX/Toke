@@ -19,6 +19,12 @@ class ErrorMapperAmableTest {
     }
 
     @Test
+    fun elTextoDelBloqueoPorIntentosSeMuestraTalCual() {
+        val m = "Demasiados intentos fallidos. Intenta de nuevo en 30s."
+        assertEquals(m, ErrorMapper.translate(Exception(m)))
+    }
+
+    @Test
     fun laRedTambienSeDetectaDentroDeUnaCausa() {
         val envuelto = RuntimeException("falló", UnknownHostException("host"))
         assertEquals(ErrorMapper.MENSAJE_SIN_RED, ErrorMapper.translate(envuelto))

@@ -75,6 +75,8 @@ object ErrorMapper {
         if (throwable is RestException) {
             com.flabs.cobrate.features.planes.PlanLogica
                 .mensajeDeLimite("${throwable.message} ${throwable.description}")?.let { return it }
+            val texto = "${throwable.error} ${throwable.message} ${throwable.description}"
+            if (texto.contains("invalid login", true) || texto.contains("invalid_credentials", true)) return "Correo o contraseña incorrectos."
             return when (throwable.statusCode) {
                 401 -> "Tu sesión expiró. Inicia sesión nuevamente. (Código 401)"
                 403 -> "No tienes permisos para realizar esta acción. (Código 403)"
@@ -95,6 +97,8 @@ object ErrorMapper {
 
         val msg = throwable.message ?: ""
         return when {
+            // Textos del bloqueo por intentos (los escribe AuthViewModel): ya son legibles.
+            msg.startsWith("Demasiados intentos") || msg.startsWith("Credenciales incorrectas") -> msg
             msg.contains("invalid login", ignoreCase = true) || msg.contains("invalid_credentials", ignoreCase = true) ->
                 "Correo o contraseña incorrectos."
             msg.contains("auth", ignoreCase = true) ->
