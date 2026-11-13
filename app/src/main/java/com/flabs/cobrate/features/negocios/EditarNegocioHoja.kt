@@ -63,7 +63,11 @@ fun EditarNegocioHoja(
     onDismiss: () -> Unit,
     asignacionInicial: Boolean = true,
     onAsignacion: (Boolean) -> Unit = {},
+    guardando: Boolean = false,
+    errorGuardado: String? = null,
 ) {
+    // Esta hoja es otra ventana: los avisos de la pantalla quedan debajo, así que los errores se muestran aquí mismo.
+    var errorLocal by remember { mutableStateOf<String?>(null) }
     var asignacion by remember { mutableStateOf(asignacionInicial) }
     var nombre by remember { mutableStateOf(negocio.nombre) }
     var tipo by remember { mutableStateOf(negocio.tipo) }
@@ -171,16 +175,29 @@ fun EditarNegocioHoja(
                 }
             }
 
+            (errorLocal ?: errorGuardado)?.let { mensaje ->
+                Surface(shape = RoundedCornerShape(14.dp), color = paleta.rojo, modifier = Modifier.fillMaxWidth()) {
+                    Text(
+                        text = mensaje,
+                        style = TextStyle(fontFamily = PlusJakartaSans, fontWeight = FontWeight.SemiBold, fontSize = 14.sp),
+                        color = androidx.compose.ui.graphics.Color.White,
+                        modifier = Modifier.padding(14.dp),
+                    )
+                }
+            }
             Spacer(modifier = Modifier.height(4.dp))
-            BotonAcceso(paleta, "Guardar cambios", principal = true) {
-                onAsignacion(asignacion)
+            BotonAcceso(paleta, if (guardando) "Guardando..." else "Guardar cambios", principal = !guardando) {
+                if (guardando) return@BotonAcceso
                 val errorNombre = NegocioEdicionLogica.errorNombre(nombre)
                 val (max, errorMax) = NegocioEdicionLogica.leerMax(maxTexto)
-                when {
-                    errorNombre != null -> FeedbackManager.showErrorMessage(errorNombre)
-                    errorMax != null -> FeedbackManager.showErrorMessage(errorMax)
-                    else -> onGuardar(nombre.trim(), tipo, color, max, max == null)
-                }
+                errorLocal = errorNombre ?: errorMax
+                if (errorLocal != null) return@BotonAcceso
+                val sinCambios = nombre.trim() == negocio.nombre &&
+                    CrearNegocioLogica.normalizar(tipo) == CrearNegocioLogica.normalizar(negocio.tipo) &&
+                    color == negocio.colorMarca && max == maxInicial && asignacion == asignacionInicial
+                if (sinCambios) { onDismiss(); return@BotonAcceso }
+                onAsignacion(asignacion)
+                onGuardar(nombre.trim(), tipo, color, max, max == null)
             }
             BotonBorrar(paleta, onBorrar)
             Spacer(modifier = Modifier.height(16.dp))

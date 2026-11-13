@@ -146,6 +146,8 @@ fun MisNegociosScreen(
             }
         }
     }
+    var guardandoNegocio by remember { mutableStateOf(false) }
+    var errorGuardadoNegocio by remember { mutableStateOf<String?>(null) }
     editando?.let { negocio ->
         EditarNegocioHoja(
             paleta = paleta,
@@ -158,15 +160,18 @@ fun MisNegociosScreen(
                 editando = null
                 onBorrarNegocio(negocio.id)
             },
+            guardando = guardandoNegocio,
+            errorGuardado = errorGuardadoNegocio,
             onGuardar = { nombre, tipo, color, max, limpiar ->
                 scope.launch {
-                    FeedbackManager.setLoading(true, "Guardando cambios...")
+                    guardandoNegocio = true
+                    errorGuardadoNegocio = null
                     val resultado = NegocioStore.editar(negocio.id, nombre, tipo, color, max, limpiar)
-                    FeedbackManager.setLoading(false)
+                    guardandoNegocio = false
                     resultado.onSuccess {
                         FeedbackManager.showSuccess("Cambios guardados.")
                         editando = null
-                    }.onFailure { FeedbackManager.showError(it) }
+                    }.onFailure { errorGuardadoNegocio = com.flabs.cobrate.core.logic.ErrorMapper.translate(it) }
                 }
             },
         )
