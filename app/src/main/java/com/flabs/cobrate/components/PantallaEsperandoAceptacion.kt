@@ -325,8 +325,7 @@ fun PantallaEsperandoAceptacion(
                         .fillMaxWidth()
                         .height(48.dp),
                     shape = RoundedCornerShape(12.dp),
-                    color = paleta.rojoFondo,
-                    border = BorderStroke(1.dp, paleta.rojoBorde)
+                    color = paleta.textoPrincipal,
                 ) {
                     Row(
                         modifier = Modifier.fillMaxSize(),
@@ -336,7 +335,7 @@ fun PantallaEsperandoAceptacion(
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.Logout,
                             contentDescription = null,
-                            tint = paleta.rojo,
+                            tint = paleta.fondo,
                             modifier = Modifier.size(16.dp)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
@@ -344,7 +343,7 @@ fun PantallaEsperandoAceptacion(
                             text = stringResource(R.string.dialogo_cerrar_confirmar),
                             fontSize = 13.sp,
                             fontWeight = FontWeight.Bold,
-                            color = paleta.rojo
+                            color = paleta.fondo
                         )
                     }
                 }

@@ -76,6 +76,7 @@ import com.flabs.cobrate.ui.theme.TokePaleta
 fun AccesoFondo(
     paleta: TokePaleta,
     horizontal: Alignment.Horizontal = Alignment.Start,
+    pie: (@Composable ColumnScope.() -> Unit)? = null, // botón fijo al pie, fuera del scroll
     contenido: @Composable ColumnScope.() -> Unit,
 ) {
     BoxWithConstraints(
@@ -86,15 +87,21 @@ fun AccesoFondo(
             .navigationBarsPadding()
             .imePadding(),
     ) {
-        Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .defaultMinSize(minHeight = this@BoxWithConstraints.maxHeight)
-                    .padding(horizontal = 20.dp, vertical = 16.dp),
-                horizontalAlignment = horizontal,
-                verticalArrangement = Arrangement.spacedBy(14.dp),
-                content = contenido,
+        Column(modifier = Modifier.fillMaxSize()) {
+            Column(modifier = Modifier.weight(1f).verticalScroll(rememberScrollState())) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .defaultMinSize(minHeight = if (pie == null) this@BoxWithConstraints.maxHeight else 0.dp)
+                        .padding(horizontal = 20.dp, vertical = 16.dp),
+                    horizontalAlignment = horizontal,
+                    verticalArrangement = Arrangement.spacedBy(14.dp),
+                    content = contenido,
+                )
+            }
+            if (pie != null) Column(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp).padding(top = 8.dp, bottom = 16.dp),
+                content = pie,
             )
         }
     }

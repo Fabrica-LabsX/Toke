@@ -160,7 +160,14 @@ fun PasoTipo(
     onCrear: () -> Unit,
     onAtras: () -> Unit,
 ) {
-    AccesoFondo(paleta = paleta) {
+    AccesoFondo(
+        paleta = paleta,
+        pie = {
+            BotonAcceso(paleta, "Crear mi negocio", principal = elegido != null && !ocupado) {
+                if (elegido != null && !ocupado) onCrear()
+            }
+        },
+    ) {
         CabeceraPaso(paleta, 2, onAtras)
         TituloAcceso(paleta, "¿Qué tipo de negocio tienes?", "Elige tu rubro para organizar tus cobros y ventas.")
         CrearNegocioLogica.tipos.forEach { op ->
@@ -206,10 +213,6 @@ fun PasoTipo(
                     }
                 }
             }
-        }
-        EspacioAcceso(4)
-        BotonAcceso(paleta, "Crear mi negocio", principal = elegido != null && !ocupado) {
-            if (elegido != null && !ocupado) onCrear()
         }
     }
 }

@@ -113,12 +113,10 @@ fun EmpezarScreen(
         }
 
         if (onCerrarSesion != null) {
-            val rojo = TokeRojo
             Surface(
                 onClick = onCerrarSesion,
                 shape = RoundedCornerShape(9999.dp),
-                color = paleta.tarjeta,
-                border = BorderStroke(1.dp, rojo.solidoSobre(paleta.fondo, 0.4f)),
+                color = paleta.textoPrincipal,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(TokeMedidas.BotonAltura),
@@ -131,13 +129,13 @@ fun EmpezarScreen(
                     Icon(
                         painter = painterResource(id = TokeIcons.CerrarSesion),
                         contentDescription = null,
-                        tint = rojo,
+                        tint = paleta.fondo,
                         modifier = Modifier.size(18.dp),
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
                         text = stringResource(R.string.dialogo_cerrar_confirmar),
-                        color = rojo,
+                        color = paleta.fondo,
                         fontWeight = FontWeight.Bold,
                     )
                 }

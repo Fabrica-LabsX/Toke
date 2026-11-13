@@ -318,15 +318,14 @@ private fun BotonPie(paleta: TokePaleta, texto: String, rojo: Boolean, habilitad
         enabled = habilitado,
         interactionSource = pulso.fuente,
         shape = RoundedCornerShape(9999.dp),
-        color = if (rojo) paleta.rojo else paleta.tarjeta,
-        border = if (rojo) null else BorderStroke(1.dp, paleta.bordeControl),
+        color = if (rojo) paleta.rojo else paleta.textoPrincipal,
         modifier = Modifier.fillMaxWidth().height(TokeMedidas.BotonAltura).then(pulso.modificador),
     ) {
         Box(contentAlignment = Alignment.Center) {
             Text(
                 text = texto,
                 style = TextStyle(fontFamily = PlusJakartaSans, fontWeight = FontWeight.Bold, fontSize = 16.sp),
-                color = if (rojo) androidx.compose.ui.graphics.Color.White else paleta.textoPrincipal,
+                color = if (rojo) androidx.compose.ui.graphics.Color.White else paleta.fondo,
                 maxLines = 1,
             )
         }
