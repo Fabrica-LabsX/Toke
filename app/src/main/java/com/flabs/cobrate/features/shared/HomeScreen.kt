@@ -1,5 +1,6 @@
 package com.flabs.cobrate.features.shared
 
+import com.flabs.cobrate.ui.theme.scrimSolido
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
@@ -643,6 +644,7 @@ private fun HomeScreenContent(
         if (mostrarSheetReclamar && esTrabajador) {
             ModalBottomSheet(
                 onDismissRequest = { mostrarSheetReclamar = false },
+                scrimColor = com.flabs.cobrate.ui.theme.tokePaleta().let { it.scrimSolido() },
                 containerColor = MaterialTheme.colorScheme.surface,
             ) {
                 Column(

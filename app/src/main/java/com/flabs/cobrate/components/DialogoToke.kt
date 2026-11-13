@@ -1,5 +1,9 @@
 package com.flabs.cobrate.components
 
+import com.flabs.cobrate.ui.theme.scrimSolido
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.background
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -63,8 +67,18 @@ fun DialogoToke(
 
     Dialog(
         onDismissRequest = { if (!cargando) onCancelar() },
-        properties = DialogProperties(dismissOnClickOutside = !cargando),
+        properties = DialogProperties(dismissOnClickOutside = false, usePlatformDefaultWidth = false),
     ) {
+        // Sin sombra translúcida del sistema: el fondo de la ventana es un gris sólido propio.
+        (androidx.compose.ui.platform.LocalView.current.parent as? androidx.compose.ui.window.DialogWindowProvider)?.window?.setDimAmount(0f)
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(paleta.scrimSolido())
+                .clickable(interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }, indication = null) { if (!cargando) onCancelar() }
+                .padding(horizontal = 24.dp),
+            contentAlignment = Alignment.Center,
+        ) {
         AnimatedVisibility(
             visible = visible,
             enter = fadeIn(tween(120)) + scaleIn(initialScale = 0.96f, animationSpec = tween(120)),
@@ -100,6 +114,7 @@ fun DialogoToke(
                     }
                 }
             }
+        }
         }
     }
 }
