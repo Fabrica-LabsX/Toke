@@ -52,6 +52,7 @@ import com.flabs.cobrate.features.reportes.ReportesLogica
 import com.flabs.cobrate.ui.theme.PlusJakartaSans
 import com.flabs.cobrate.ui.theme.TokeMedidas
 import com.flabs.cobrate.ui.theme.TokePaleta
+import com.flabs.cobrate.ui.theme.scrimSolido
 import com.flabs.cobrate.ui.theme.tokePaleta
 import java.util.Locale
 import kotlinx.coroutines.launch
@@ -239,6 +240,7 @@ private fun ElegirPeriodoHoja(
 ) {
     var elegido by remember { mutableStateOf(inicial) }
     ModalBottomSheet(
+        scrimColor = com.flabs.cobrate.ui.theme.tokePaleta().let { it.scrimSolido() },
         onDismissRequest = onDismiss,
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
         containerColor = paleta.fondo,

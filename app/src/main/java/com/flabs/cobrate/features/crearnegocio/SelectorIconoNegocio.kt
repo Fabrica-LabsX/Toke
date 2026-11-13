@@ -1,5 +1,6 @@
 package com.flabs.cobrate.features.crearnegocio
 
+import com.flabs.cobrate.ui.theme.scrimSolido
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -96,6 +97,7 @@ fun SelectorIconoNegocio(paleta: TokePaleta, elegido: TipoNegocio?, onElegir: (T
 @Composable
 fun HojaIconoNegocio(paleta: TokePaleta, elegido: TipoNegocio?, onElegir: (TipoNegocio) -> Unit, onDismiss: () -> Unit) {
     ModalBottomSheet(
+        scrimColor = com.flabs.cobrate.ui.theme.tokePaleta().let { it.scrimSolido() },
         onDismissRequest = onDismiss,
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
         containerColor = paleta.fondo,

@@ -93,7 +93,7 @@ fun FeedbackOverlay() {
                         Box(
                             modifier = Modifier
                                 .fillMaxSize()
-                                .background(Color.Black.copy(alpha = 0.35f))
+                                .background(paleta.fondo)
                                 .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) { },
                             contentAlignment = Alignment.Center,
                         ) {

@@ -1,4 +1,5 @@
 package com.flabs.cobrate.features.acceso
+import com.flabs.cobrate.ui.theme.solidoSobre
 import com.flabs.cobrate.ui.theme.TokeMedidas
 import com.flabs.cobrate.ui.theme.rememberPulsacion
 
@@ -387,7 +388,7 @@ fun LogoTokeSuave(paleta: TokePaleta, tamano: Int, descripcion: String, modifier
                 val t = entrada.value
                 if (t < 1f) {
                     drawCircle(
-                        color = paleta.verde.copy(alpha = 0.22f * (1f - t)),
+                        color = paleta.verde.solidoSobre(paleta.fondo, 0.22f * (1f - t)),
                         radius = size.minDimension / 2f * (0.55f + 0.45f * t),
                     )
                 }

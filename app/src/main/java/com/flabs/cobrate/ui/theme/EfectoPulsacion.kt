@@ -30,8 +30,7 @@ fun rememberPulsacion(): Pulsacion {
         animationSpec = if (presionado) tween(70) else spring(dampingRatio = 0.45f, stiffness = 650f),
         label = "pulsacion",
     )
-    val brillo by animateFloatAsState(if (presionado) 0.86f else 1f, tween(70), label = "pulsacionBrillo")
-    return Pulsacion(fuente, Modifier.graphicsLayer { scaleX = escala; scaleY = escala; alpha = brillo })
+    return Pulsacion(fuente, Modifier.graphicsLayer { scaleX = escala; scaleY = escala })
 }
 
 /** Cuánto se encoge un botón al pulsarlo (94 %). */

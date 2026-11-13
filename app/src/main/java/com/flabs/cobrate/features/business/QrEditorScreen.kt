@@ -212,7 +212,7 @@ fun QrEditorScreen(
 
                     // Línea técnica guía que dibuja la "Quiet Zone"
                     drawRect(
-                        color = Color.Green.copy(alpha = 0.8f),
+                        color = Color.Green,
                         topLeft = Offset(boxLeft, boxTop),
                         size = Size(boxSize, boxSize),
                         style = Stroke(width = 2.dp.toPx())
@@ -226,11 +226,7 @@ fun QrEditorScreen(
                     .fillMaxWidth()
                     .align(Alignment.BottomCenter)
                     .background(
-                        brush = Brush.verticalGradient(
-                            0f to Color.Transparent,
-                            0.3f to Color.Black.copy(alpha = 0.5f),
-                            1f to Color.Black.copy(alpha = 0.95f)
-                        )
+                        color = Color.Black
                     )
                     .padding(bottom = 32.dp, start = 24.dp, end = 24.dp, top = 60.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
@@ -239,7 +235,7 @@ fun QrEditorScreen(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(Color.Black.copy(alpha = 0.5f), RoundedCornerShape(16.dp))
+                        .background(Color.DarkGray, RoundedCornerShape(16.dp))
                         .padding(horizontal = 12.dp, vertical = 8.dp)
                 ) {
                     Row(
@@ -273,7 +269,7 @@ fun QrEditorScreen(
                             colors = SliderDefaults.colors(
                                 thumbColor = Color.White,
                                 activeTrackColor = MaterialTheme.colorScheme.primary,
-                                inactiveTrackColor = Color.Gray.copy(alpha = 0.5f)
+                                inactiveTrackColor = Color.Gray
                             )
                         )
                         
@@ -296,7 +292,7 @@ fun QrEditorScreen(
                 Text(
                     text = "Ajusta el QR dentro del recuadro verde",
                     style = MaterialTheme.typography.labelMedium,
-                    color = Color.White.copy(alpha = 0.7f),
+                    color = Color.LightGray,
                     fontWeight = FontWeight.Medium
                 )
                 

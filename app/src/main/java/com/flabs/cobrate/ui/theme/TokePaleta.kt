@@ -117,3 +117,6 @@ fun tokeEsOscuro(): Boolean {
 
 /** Mezcla este color sobre [base] y devuelve un color SÓLIDO (sin transparencia): los fondos y bordes suaves no deben dejar ver lo de atrás. */
 fun Color.solidoSobre(base: Color, intensidad: Float): Color = androidx.compose.ui.graphics.lerp(base, this.copy(alpha = 1f), intensidad)
+
+/** Fondo detrás de las hojas inferiores: un gris sólido (sin transparencia), un poco más oscuro que el fondo de la app. */
+fun TokePaleta.scrimSolido(): Color = Color.Black.solidoSobre(fondo, 0.4f)

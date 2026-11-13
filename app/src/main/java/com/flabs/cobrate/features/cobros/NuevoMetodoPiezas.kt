@@ -59,11 +59,9 @@ fun OpcionMetodoFila(
         onClick = onClick,
         enabled = habilitada,
         shape = RoundedCornerShape(18.dp),
-        color = paleta.tarjeta,
+        color = if (habilitada) paleta.tarjeta else paleta.tileFondo, // sin transparencia: el deshabilitado es un color sólido
         border = BorderStroke(1.dp, paleta.borde),
-        modifier = Modifier
-            .fillMaxWidth()
-            .alpha(if (habilitada) 1f else 0.55f),
+        modifier = Modifier.fillMaxWidth(),
     ) {
         Row(
             modifier = Modifier.padding(14.dp),

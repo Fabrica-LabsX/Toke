@@ -51,6 +51,7 @@ import com.flabs.cobrate.ui.theme.ThemeMode
 import com.flabs.cobrate.ui.theme.TokeMedidas
 import com.flabs.cobrate.ui.theme.TokePaleta
 import com.flabs.cobrate.ui.theme.rememberPulsacion
+import com.flabs.cobrate.ui.theme.scrimSolido
 import com.flabs.cobrate.ui.theme.tokePaleta
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.ensureActive
@@ -99,6 +100,7 @@ fun MasSheet(
     }
 
     ModalBottomSheet(
+        scrimColor = com.flabs.cobrate.ui.theme.tokePaleta().let { it.scrimSolido() },
         onDismissRequest = {
             if (!cerrando) {
                 cerrando = true

@@ -41,6 +41,7 @@ import com.flabs.cobrate.features.negocios.NegociosBotonesPie
 import com.flabs.cobrate.ui.theme.PlusJakartaSans
 import com.flabs.cobrate.ui.theme.TokePaleta
 import com.flabs.cobrate.ui.theme.tokeEsOscuro
+import com.flabs.cobrate.ui.theme.scrimSolido
 import com.flabs.cobrate.ui.theme.tokePaleta
 
 /**
@@ -70,6 +71,7 @@ fun CambiarNegocioBottomSheet(
     }
 
     ModalBottomSheet(
+        scrimColor = com.flabs.cobrate.ui.theme.tokePaleta().let { it.scrimSolido() },
         onDismissRequest = onDismiss,
         containerColor = paleta.tarjeta,
         shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),

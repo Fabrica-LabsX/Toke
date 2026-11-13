@@ -1,5 +1,6 @@
 package com.flabs.cobrate.features.negocios
 
+import com.flabs.cobrate.ui.theme.scrimSolido
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -70,6 +71,7 @@ fun EditarNegocioHoja(
     var maxTexto by remember(maxInicial) { mutableStateOf(maxInicial?.toString() ?: "") }
 
     ModalBottomSheet(
+        scrimColor = com.flabs.cobrate.ui.theme.tokePaleta().let { it.scrimSolido() },
         onDismissRequest = onDismiss,
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
         containerColor = paleta.fondo,

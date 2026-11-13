@@ -1,5 +1,6 @@
 package com.flabs.cobrate.features.auth
 
+import com.flabs.cobrate.ui.theme.solidoSobre
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloat
@@ -75,11 +76,11 @@ fun IlustracionBienvenida(paleta: TokePaleta, modifier: Modifier = Modifier) {
         Canvas(modifier = Modifier.matchParentSize()) {
             val centro = Offset(size.width / 2f, size.height / 2f)
             listOf(64.dp to 0.10f, RADIO_ORBITA to 0.16f, 150.dp to 0.06f).forEach { (radio, alfa) ->
-                drawCircle(paleta.verde.copy(alpha = alfa), radius = radio.toPx(), center = centro, style = Stroke(1.5.dp.toPx()))
+                drawCircle(paleta.verde.solidoSobre(paleta.fondo, alfa), radius = radio.toPx(), center = centro, style = Stroke(1.5.dp.toPx()))
             }
             // Onda que sale del logo y se desvanece.
             drawCircle(
-                color = paleta.verde.copy(alpha = 0.20f * (1f - onda)),
+                color = paleta.verde.solidoSobre(paleta.fondo, 0.20f * (1f - onda)),
                 radius = (46.dp.toPx()) + (RADIO_ORBITA.toPx() - 46.dp.toPx()) * onda,
                 center = centro,
             )

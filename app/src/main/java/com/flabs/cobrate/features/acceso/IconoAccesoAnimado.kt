@@ -1,5 +1,6 @@
 package com.flabs.cobrate.features.acceso
 
+import com.flabs.cobrate.ui.theme.solidoSobre
 import androidx.annotation.DrawableRes
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -54,7 +55,7 @@ fun IconoAccesoAnimado(
             .drawBehind {
                 // Aro que sale de la loseta y se desvanece.
                 drawCircle(
-                    color = paleta.verde.copy(alpha = 0.22f * (1f - aro)),
+                    color = paleta.verde.solidoSobre(paleta.fondo, 0.22f * (1f - aro)),
                     radius = size.minDimension / 2f * (0.55f + 0.45f * aro),
                     center = Offset(size.width / 2f, size.height / 2f),
                 )

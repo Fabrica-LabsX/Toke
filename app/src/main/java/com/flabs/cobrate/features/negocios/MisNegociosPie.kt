@@ -98,8 +98,7 @@ fun MisNegociosPie(
     onCrearNegocio: () -> Unit,
 ) {
     Surface(
-        color = paleta.tarjeta,
-        border = BorderStroke(1.dp, paleta.borde),
+        color = paleta.fondo,
         modifier = Modifier.fillMaxWidth(),
     ) {
         Box(modifier = Modifier.navigationBarsPadding()) {

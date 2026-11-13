@@ -1,4 +1,5 @@
 package com.flabs.cobrate.features.cobros
+import com.flabs.cobrate.ui.theme.scrimSolido
 import com.flabs.cobrate.ui.theme.TokeMedidas
 
 import androidx.activity.compose.BackHandler
@@ -80,6 +81,7 @@ fun NuevoMetodoHoja(
     BackHandler(enabled = paso != PasoNuevoMetodo.ELEGIR) { atras() }
 
     ModalBottomSheet(
+        scrimColor = com.flabs.cobrate.ui.theme.tokePaleta().let { it.scrimSolido() },
         onDismissRequest = onDismiss,
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
         containerColor = paleta.fondo,
