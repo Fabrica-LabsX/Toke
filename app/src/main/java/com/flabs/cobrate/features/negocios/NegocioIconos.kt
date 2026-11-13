@@ -8,10 +8,13 @@ import com.flabs.cobrate.core.model.TipoNegocio
 @DrawableRes
 fun iconoDeNegocio(tipo: TipoNegocio): Int = when (tipo) {
     TipoNegocio.RESTAURANTE -> TokeIcons.Hamburguesa
-    TipoNegocio.MARISQUERIA -> TokeIcons.Recibo
+    TipoNegocio.MARISQUERIA -> TokeIcons.Hamburguesa
     TipoNegocio.ABARROTES -> TokeIcons.Canasta
-    TipoNegocio.ROPA -> TokeIcons.Carrito
-    TipoNegocio.ELECTRODOMESTICOS -> TokeIcons.Herramienta
+    TipoNegocio.ROPA -> TokeIcons.Camiseta
+    TipoNegocio.ELECTRODOMESTICOS -> TokeIcons.Celular
+    TipoNegocio.FERRETERIA -> TokeIcons.Herramienta
     TipoNegocio.SERVICIOS -> TokeIcons.Maletin
+    TipoNegocio.SALUD -> TokeIcons.Salud
+    TipoNegocio.TRANSPORTE -> TokeIcons.Auto
     TipoNegocio.OTRO -> TokeIcons.Tienda
 }

@@ -10,7 +10,8 @@ import org.junit.Test
 class CrearNegocioLogicaTest {
     @Test
     fun cadaRubroTieneUnaOpcionYElColorPorDefectoEstaEnLaLista() {
-        assertEquals(TipoNegocio.values().toSet(), CrearNegocioLogica.tipos.map { it.tipo }.toSet())
+        // MARISQUERIA ya no se ofrece: es un rubro antiguo que se muestra como Restaurante.
+        assertEquals(TipoNegocio.values().toSet() - TipoNegocio.MARISQUERIA, CrearNegocioLogica.tipos.map { it.tipo }.toSet())
         assertTrue(CrearNegocioLogica.colores.any { it.hex == CrearNegocioLogica.COLOR_POR_DEFECTO })
     }
 
@@ -22,8 +23,15 @@ class CrearNegocioLogicaTest {
 
     @Test
     fun tituloDeTipoNuncaMuestraElNombreInternoDelEnum() {
-        assertEquals("Marisquería & Cevichería", CrearNegocioLogica.tituloDeTipo(TipoNegocio.MARISQUERIA))
-        assertEquals("Otro tipo de negocio", CrearNegocioLogica.tituloDeTipo(null))
+        assertEquals("Restaurante o comida", CrearNegocioLogica.tituloDeTipo(TipoNegocio.MARISQUERIA))
+        assertEquals("Otro negocio", CrearNegocioLogica.tituloDeTipo(null))
+        assertEquals("Atuendos o ropa", CrearNegocioLogica.tituloDeTipo(TipoNegocio.ROPA))
+    }
+
+    @Test
+    fun cadaRubroOfrecidoTieneNombreUnico() {
+        val nombres = CrearNegocioLogica.tipos.map { it.titulo }
+        assertEquals(nombres.size, nombres.toSet().size)
     }
 
     @Test

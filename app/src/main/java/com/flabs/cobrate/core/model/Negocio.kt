@@ -19,13 +19,16 @@ data class Negocio(
     val colorMarca: String? = null
 )
 
-/** Rubro/tipo del negocio. */
+/** Rubro general del negocio; su icono es el icono del negocio. MARISQUERIA se conserva solo para negocios antiguos (se ve como Restaurante). */
 enum class TipoNegocio {
     RESTAURANTE,
     MARISQUERIA,
     ABARROTES,
     ROPA,
     ELECTRODOMESTICOS,
+    FERRETERIA,
     SERVICIOS,
+    SALUD,
+    TRANSPORTE,
     OTRO
 }

@@ -36,6 +36,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.flabs.cobrate.components.TokeIcons
@@ -94,9 +95,12 @@ fun PasoNombreYColor(
     onNombre: (String) -> Unit,
     colorHex: String?,
     onColor: (String?) -> Unit,
+    tipo: TipoNegocio?,
+    onTipo: (TipoNegocio) -> Unit,
     onContinuar: () -> Unit,
     onAtras: () -> Unit,
 ) {
+    var hojaIcono by remember { mutableStateOf(false) }
     AccesoFondo(paleta = paleta) {
         CabeceraPaso(paleta, 1, onAtras)
         TituloAcceso(paleta, "¿Cómo se llama tu negocio?", "Elige el nombre y el color que verá tu equipo.")
@@ -116,18 +120,23 @@ fun PasoNombreYColor(
                 )
                 SelectorColorMarca(paleta, colorHex, onColor)
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Surface(shape = RoundedCornerShape(12.dp), color = colorDe(colorHex), modifier = Modifier.size(44.dp)) {
+                    Surface(
+                        onClick = { hojaIcono = true },
+                        shape = RoundedCornerShape(12.dp),
+                        color = colorDe(colorHex),
+                        modifier = Modifier.size(44.dp),
+                    ) {
                         Box(contentAlignment = Alignment.Center) {
                             Icon(
-                                painter = painterResource(id = TokeIcons.Tienda),
-                                contentDescription = null,
+                                painter = painterResource(id = iconoDeTipo(CrearNegocioLogica.normalizar(tipo))),
+                                contentDescription = "Cambiar el icono del negocio",
                                 tint = Color.White,
                                 modifier = Modifier.size(22.dp),
                             )
                         }
                     }
                     Spacer(modifier = Modifier.width(12.dp))
-                    Column {
+                    Column(modifier = Modifier.weight(1f)) {
                         Text(
                             text = "Así se verá tu negocio",
                             style = TextStyle(fontFamily = PlusJakartaSans, fontSize = 12.sp),
@@ -139,6 +148,26 @@ fun PasoNombreYColor(
                             color = paleta.textoPrincipal,
                         )
                     }
+                    Surface(
+                        onClick = { hojaIcono = true },
+                        shape = RoundedCornerShape(9999.dp),
+                        color = paleta.tileFondo,
+                    ) {
+                        Row(modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                painter = painterResource(id = TokeIcons.Editar),
+                                contentDescription = null,
+                                tint = paleta.textoPrincipal,
+                                modifier = Modifier.size(14.dp),
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text(
+                                text = "Icono",
+                                style = TextStyle(fontFamily = PlusJakartaSans, fontWeight = FontWeight.Bold, fontSize = 12.5.sp),
+                                color = paleta.textoPrincipal,
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -148,9 +177,10 @@ fun PasoNombreYColor(
             if (CrearNegocioLogica.nombreValido(nombre)) onContinuar()
         }
     }
+    if (hojaIcono) HojaIconoNegocio(paleta, tipo, onTipo) { hojaIcono = false }
 }
 
-/** Paso 2: rubro del negocio. Al continuar se crea el negocio. */
+/** Paso 2: rubro del negocio, en iconos con su nombre. Al continuar se crea el negocio. */
 @Composable
 fun PasoTipo(
     paleta: TokePaleta,
@@ -169,132 +199,96 @@ fun PasoTipo(
         },
     ) {
         CabeceraPaso(paleta, 2, onAtras)
-        TituloAcceso(paleta, "¿Qué tipo de negocio tienes?", "Elige tu rubro para organizar tus cobros y ventas.")
-        CrearNegocioLogica.tipos.forEach { op ->
-            val activo = elegido == op.tipo
-            Surface(
-                onClick = { onElegir(op.tipo) },
-                shape = RoundedCornerShape(18.dp),
-                color = paleta.tarjeta,
-                border = BorderStroke(if (activo) 2.dp else 1.dp, if (activo) paleta.verde else paleta.borde),
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                Row(modifier = Modifier.padding(14.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Surface(shape = RoundedCornerShape(12.dp), color = paleta.tileFondo, modifier = Modifier.size(44.dp)) {
-                        Box(contentAlignment = Alignment.Center) {
-                            Icon(
-                                painter = painterResource(id = iconoDeTipo(op.tipo)),
-                                contentDescription = null,
-                                tint = paleta.textoPrincipal,
-                                modifier = Modifier.size(22.dp),
-                            )
-                        }
-                    }
-                    Spacer(modifier = Modifier.width(14.dp))
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = op.titulo,
-                            style = TextStyle(fontFamily = PlusJakartaSans, fontWeight = FontWeight.ExtraBold, fontSize = 16.sp),
-                            color = paleta.textoPrincipal,
-                        )
-                        Text(
-                            text = op.descripcion,
-                            style = TextStyle(fontFamily = PlusJakartaSans, fontWeight = FontWeight.Medium, fontSize = 13.sp),
-                            color = paleta.textoSecundario,
-                        )
-                    }
-                    if (activo) {
-                        Icon(
-                            painter = painterResource(id = TokeIcons.CheckVerde),
-                            contentDescription = "Elegido",
-                            tint = Color.Unspecified,
-                            modifier = Modifier.size(24.dp),
-                        )
-                    }
-                }
-            }
-        }
+        TituloAcceso(paleta, "¿A qué se dedica tu negocio?", "Elige el rubro que más se parezca. Podrás cambiar el icono cuando quieras.")
+        SelectorIconoNegocio(paleta, elegido, onElegir)
     }
 }
 
-/** Resumen del negocio ya creado: tarjeta con su nombre. */
+/** Paso 4: el negocio ya está creado. Pantalla para el dueño: su icono y color, lo que quedó hecho y a dónde ir. */
 @Composable
-private fun ColumnScope.TarjetaNegocioCreado(paleta: TokePaleta, nombre: String, detalle: String?) {
-    Surface(
-        shape = RoundedCornerShape(24.dp),
-        color = paleta.tarjeta,
-        border = BorderStroke(1.dp, paleta.borde),
-        modifier = Modifier.fillMaxWidth(),
-    ) {
-        Row(modifier = Modifier.padding(18.dp), verticalAlignment = Alignment.CenterVertically) {
-            Surface(shape = RoundedCornerShape(14.dp), color = paleta.tileFondo, modifier = Modifier.size(52.dp)) {
-                Box(contentAlignment = Alignment.Center) {
-                    Icon(
-                        painter = painterResource(id = TokeIcons.Tienda),
-                        contentDescription = null,
-                        tint = paleta.textoPrincipal,
-                        modifier = Modifier.size(26.dp),
-                    )
-                }
-            }
-            Spacer(modifier = Modifier.width(14.dp))
-            Column {
-                Text(
-                    text = nombre,
-                    style = TextStyle(fontFamily = PlusJakartaSans, fontWeight = FontWeight.ExtraBold, fontSize = 18.sp),
-                    color = paleta.textoPrincipal,
-                )
-                if (detalle != null) {
-                    Text(
-                        text = detalle,
-                        style = TextStyle(fontFamily = PlusJakartaSans, fontWeight = FontWeight.Medium, fontSize = 13.sp),
-                        color = paleta.textoSecundario,
-                    )
-                }
-            }
-        }
-    }
-}
-
-/** Conexión exitosa: el negocio ya existe; se elige a dónde ir primero. */
-@Composable
-fun PasoConexion(
-    paleta: TokePaleta,
-    nombreNegocio: String,
-    onRecibirCobros: () -> Unit,
-    onMiNegocio: () -> Unit,
-    onEntrar: () -> Unit,
-) {
-    AccesoFondo(paleta = paleta) {
-        EspacioAcceso(24)
-        TituloAcceso(paleta, "¡TOKE está listo!", "Tu cuenta ya está conectada a este negocio.")
-        TarjetaNegocioCreado(paleta, nombreNegocio, "Ya eres parte de este negocio")
-        BotonAcceso(paleta, "Cargar mi QR para recibir cobros", principal = false, onClick = onRecibirCobros)
-        BotonAcceso(paleta, "Ver mi negocio", principal = false, onClick = onMiNegocio)
-        EspacioAcceso(4)
-        BotonAcceso(paleta, "Entrar a TOKE", principal = true, onClick = onEntrar)
-    }
-}
-
-/** Confirmación final: resumen del negocio y lo que ya queda activo. */
-@Composable
-fun PasoFinal(
+fun PasoListo(
     paleta: TokePaleta,
     nombreNegocio: String,
     tipo: TipoNegocio?,
+    colorHex: String?,
+    metodos: List<MetodoDeCobro>,
+    onCargarQr: () -> Unit,
     onEntrar: () -> Unit,
 ) {
-    AccesoFondo(paleta = paleta) {
+    AccesoFondo(
+        paleta = paleta,
+        horizontal = Alignment.CenterHorizontally,
+        pie = { BotonAcceso(paleta, "Entrar a mi negocio", principal = true, onClick = onEntrar) },
+    ) {
         CabeceraPaso(paleta, 4, null)
-        TituloAcceso(paleta, "¡Tu negocio está listo!", "Ya puedes recibir y organizar tus pagos al instante.")
-        TarjetaNegocioCreado(paleta, nombreNegocio, CrearNegocioLogica.tituloDeTipo(tipo))
-        AvisoAcceso(
-            paleta = paleta,
-            titulo = "Ya está activo",
-            texto = "Alertas al instante de tus pagos por Yape y Plin, y avisos de voz automáticos.",
+        Spacer(modifier = Modifier.size(8.dp))
+        Surface(shape = RoundedCornerShape(30.dp), color = colorDe(colorHex), modifier = Modifier.size(96.dp)) {
+            Box(contentAlignment = Alignment.Center) {
+                Icon(
+                    painter = painterResource(id = iconoDeTipo(CrearNegocioLogica.normalizar(tipo))),
+                    contentDescription = null,
+                    tint = Color.White,
+                    modifier = Modifier.size(46.dp),
+                )
+            }
+        }
+        Text(
+            text = "¡Tu negocio está listo!",
+            style = TextStyle(fontFamily = PlusJakartaSans, fontWeight = FontWeight.ExtraBold, fontSize = 26.sp, textAlign = TextAlign.Center),
+            color = paleta.textoPrincipal,
         )
-        EspacioAcceso(4)
-        BotonAcceso(paleta, "Entrar a mi negocio", principal = true, onClick = onEntrar)
+        Text(
+            text = "$nombreNegocio ya puede recibir cobros y avisar a tu equipo al instante.",
+            style = TextStyle(fontFamily = PlusJakartaSans, fontWeight = FontWeight.Medium, fontSize = 15.sp, lineHeight = 21.sp, textAlign = TextAlign.Center),
+            color = paleta.textoSecundario,
+        )
+        Surface(
+            shape = RoundedCornerShape(20.dp),
+            color = paleta.tarjeta,
+            border = BorderStroke(1.dp, paleta.borde),
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
+                FilaListo(paleta, "Negocio creado", CrearNegocioLogica.tituloDeTipo(tipo), hecho = true)
+                FilaListo(
+                    paleta,
+                    "Método de cobro",
+                    if (metodos.isEmpty()) "Aún no vinculaste ninguno" else metodos.joinToString { MetodosCobroLogica.nombreLegible(it.tipo) },
+                    hecho = metodos.isNotEmpty(),
+                )
+            }
+        }
+        BotonAcceso(
+            paleta,
+            if (metodos.isEmpty()) "Vincular un método de cobro" else "Cargar mi QR para recibir cobros",
+            principal = false,
+            onClick = onCargarQr,
+        )
+    }
+}
+
+@Composable
+private fun FilaListo(paleta: TokePaleta, titulo: String, detalle: String, hecho: Boolean) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Icon(
+            painter = painterResource(id = if (hecho) TokeIcons.CheckVerde else TokeIcons.Advertencia),
+            contentDescription = if (hecho) "Hecho" else "Pendiente",
+            tint = if (hecho) Color.Unspecified else paleta.ambar,
+            modifier = Modifier.size(24.dp),
+        )
+        Spacer(modifier = Modifier.width(12.dp))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = titulo,
+                style = TextStyle(fontFamily = PlusJakartaSans, fontWeight = FontWeight.ExtraBold, fontSize = 15.sp),
+                color = paleta.textoPrincipal,
+            )
+            Text(
+                text = detalle,
+                style = TextStyle(fontFamily = PlusJakartaSans, fontWeight = FontWeight.Medium, fontSize = 13.sp),
+                color = paleta.textoSecundario,
+            )
+        }
     }
 }
 

@@ -55,6 +55,9 @@ object TokeIcons {
     @DrawableRes val FlechaAdelante = R.drawable.ic_flecha_adelante
     @DrawableRes val FlechaAtras = R.drawable.ic_flecha_atras
     @DrawableRes val Hamburguesa = R.drawable.ic_hamburguesa
+    @DrawableRes val Camiseta = R.drawable.ic_camiseta
+    @DrawableRes val Salud = R.drawable.ic_salud
+    @DrawableRes val Auto = R.drawable.ic_auto
     @DrawableRes val Herramienta = R.drawable.ic_herramienta
     @DrawableRes val Intercambiar = R.drawable.ic_intercambiar
     @DrawableRes val LimpiarCampo = R.drawable.ic_limpiar_campo

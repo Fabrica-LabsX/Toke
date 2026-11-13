@@ -42,7 +42,7 @@ import com.flabs.cobrate.core.model.Negocio
 import com.flabs.cobrate.core.model.TipoNegocio
 import com.flabs.cobrate.features.crearnegocio.CrearNegocioLogica
 import com.flabs.cobrate.features.crearnegocio.SelectorColorMarca
-import com.flabs.cobrate.features.crearnegocio.iconoDeTipo
+import com.flabs.cobrate.features.crearnegocio.SelectorIconoNegocio
 import com.flabs.cobrate.features.acceso.BotonAcceso
 import com.flabs.cobrate.features.acceso.CampoAcceso
 import com.flabs.cobrate.ui.theme.PlusJakartaSans
@@ -91,7 +91,7 @@ fun EditarNegocioHoja(
                         color = paleta.textoPrincipal,
                     )
                     Text(
-                        text = "Cambia nombre, rubro, color o tope de trabajadores",
+                        text = "Cambia nombre, icono, color o tope",
                         style = TextStyle(fontFamily = PlusJakartaSans, fontWeight = FontWeight.Medium, fontSize = 14.sp),
                         color = paleta.textoSecundario,
                     )
@@ -116,36 +116,11 @@ fun EditarNegocioHoja(
 
             CampoAcceso(paleta, "Nombre del negocio", nombre, "Ej: Mi Bodeguita", { nombre = it })
             Text(
-                text = "Rubro",
+                text = "Icono de tu negocio",
                 style = TextStyle(fontFamily = PlusJakartaSans, fontWeight = FontWeight.SemiBold, fontSize = 13.sp),
                 color = paleta.textoSecundario,
             )
-            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                CrearNegocioLogica.tipos.forEach { op ->
-                    val activo = op.tipo == tipo
-                    Surface(
-                        onClick = { tipo = op.tipo },
-                        shape = RoundedCornerShape(9999.dp),
-                        color = if (activo) paleta.seleccionFondo else paleta.tarjeta,
-                        border = BorderStroke(1.dp, if (activo) paleta.seleccionFondo else paleta.bordeControl),
-                    ) {
-                        Row(modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                painter = painterResource(id = iconoDeTipo(op.tipo)),
-                                contentDescription = null,
-                                tint = if (activo) paleta.seleccionTexto else paleta.textoPrincipal,
-                                modifier = Modifier.size(18.dp),
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(
-                                text = op.titulo,
-                                style = TextStyle(fontFamily = PlusJakartaSans, fontWeight = FontWeight.Bold, fontSize = 13.sp),
-                                color = if (activo) paleta.seleccionTexto else paleta.textoPrincipal,
-                            )
-                        }
-                    }
-                }
-            }
+            SelectorIconoNegocio(paleta, tipo) { tipo = it }
             Text(
                 text = "Color de tu marca",
                 style = TextStyle(fontFamily = PlusJakartaSans, fontWeight = FontWeight.SemiBold, fontSize = 13.sp),

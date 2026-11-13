@@ -14,8 +14,7 @@ import com.flabs.cobrate.core.logic.FeedbackManager
 import com.flabs.cobrate.core.model.Negocio
 import com.flabs.cobrate.core.model.TipoNegocio
 import com.flabs.cobrate.features.crearnegocio.CrearNegocioLogica
-import com.flabs.cobrate.features.crearnegocio.PasoConexion
-import com.flabs.cobrate.features.crearnegocio.PasoFinal
+import com.flabs.cobrate.features.crearnegocio.PasoListo
 import com.flabs.cobrate.features.crearnegocio.PasoMediosCobro
 import com.flabs.cobrate.features.crearnegocio.PasoNombreYColor
 import com.flabs.cobrate.features.crearnegocio.PasoTipo
@@ -26,8 +25,7 @@ private enum class PasoWizard {
     PASO_1_NOMBRE_Y_COLOR,
     PASO_2_TIPO_NEGOCIO,
     PASO_3_MEDIOS_COBRO,
-    CONEXION_EXITOSA,
-    PASO_4_FINALIZADO
+    PASO_4_LISTO
 }
 
 /**
@@ -72,6 +70,8 @@ fun CrearNegocioScreen(
             onNombre = { nombreComercial = it },
             colorHex = colorHexSeleccionado,
             onColor = { colorHexSeleccionado = it },
+            tipo = tipoSeleccionado,
+            onTipo = { tipoSeleccionado = it },
             onContinuar = { paso = PasoWizard.PASO_2_TIPO_NEGOCIO },
             onAtras = { onVolver?.invoke() },
         )
@@ -96,7 +96,7 @@ fun CrearNegocioScreen(
                     result.onSuccess { neg ->
                         negocioCreado = neg
                         FeedbackManager.showSuccess("¡Listo! Negocio creado.")
-                        paso = if (businessViewModel != null) PasoWizard.PASO_3_MEDIOS_COBRO else PasoWizard.CONEXION_EXITOSA
+                        paso = if (businessViewModel != null) PasoWizard.PASO_3_MEDIOS_COBRO else PasoWizard.PASO_4_LISTO
                     }.onFailure { err ->
                         val limite = com.flabs.cobrate.features.planes.PlanLogica
                             .mensajeDeLimite("${err.message} ${(err as? io.github.jan.supabase.exceptions.RestException)?.description}")
@@ -111,21 +111,16 @@ fun CrearNegocioScreen(
             paleta = paleta,
             existentes = metodosDelNegocio,
             onVincular = { tipo, dato, titular -> businessViewModel?.crearMetodo(tipo, dato, titular) },
-            onContinuar = { paso = PasoWizard.CONEXION_EXITOSA },
+            onContinuar = { paso = PasoWizard.PASO_4_LISTO },
         )
 
-        PasoWizard.CONEXION_EXITOSA -> PasoConexion(
-            paleta = paleta,
-            nombreNegocio = negocioCreado?.nombre ?: nombreComercial,
-            onRecibirCobros = { onIrAMisQRs?.invoke() ?: onCreado() },
-            onMiNegocio = { paso = PasoWizard.PASO_4_FINALIZADO },
-            onEntrar = onCreado,
-        )
-
-        PasoWizard.PASO_4_FINALIZADO -> PasoFinal(
+        PasoWizard.PASO_4_LISTO -> PasoListo(
             paleta = paleta,
             nombreNegocio = negocioCreado?.nombre ?: nombreComercial,
             tipo = tipoSeleccionado,
+            colorHex = colorHexSeleccionado,
+            metodos = metodosDelNegocio,
+            onCargarQr = { onIrAMisQRs?.invoke() ?: onCreado() },
             onEntrar = onCreado,
         )
     }
