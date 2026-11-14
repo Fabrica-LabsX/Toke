@@ -1,35 +1,39 @@
 import React from 'react';
 import { interpolate, spring, staticFile, useCurrentFrame, useVideoConfig } from 'remotion';
 import { Audio } from 'remotion';
-import { SPRING_BOUNCY, SPRING_EXTRA_BOUNCY, TOKE_COLORS } from '../theme';
+import { SPRING_IMPACT_BOUNCE, SPRING_SMOOTH, TOKE_COLORS } from '../theme';
 
 export const Scene3Demo: React.FC = () => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
-  // Entradas con rebote
-  const leftPanelSpring = spring({ frame, fps, config: SPRING_BOUNCY });
-  const rightPanelSpring = spring({ frame: frame - 15, fps, config: SPRING_BOUNCY });
+  // Entradas suaves de paneles
+  const topPanelSpring = spring({ frame, fps, config: SPRING_SMOOTH });
+  const bottomPanelSpring = spring({ frame: frame - 10, fps, config: SPRING_SMOOTH });
 
-  // Notificación bancaria entrante con caída elástica
-  const notifSpring = spring({ frame: frame - 40, fps, config: SPRING_EXTRA_BOUNCY });
-  const notifY = interpolate(notifSpring, [0, 1], [-60, 0]);
+  // Notificación del dueño (deslizamiento directo, sin rebote innecesario)
+  const notifY = interpolate(frame, [25, 45], [-30, 0], { extrapolateRight: 'clamp' });
+  const notifOpacity = interpolate(frame, [25, 40], [0, 1], { extrapolateRight: 'clamp' });
 
-  // Transmisión de datos
-  const beamProgress = interpolate(frame, [80, 140], [0, 100], {
+  // Transmisión de datos hacia abajo
+  const beamProgress = interpolate(frame, [50, 95], [0, 100], {
     extrapolateLeft: 'clamp',
     extrapolateRight: 'clamp',
   });
-  const beamOpacity = interpolate(frame, [80, 90, 130, 140], [0, 1, 1, 0], {
+  const beamOpacity = interpolate(frame, [50, 60, 85, 95], [0, 1, 1, 0], {
     extrapolateLeft: 'clamp',
     extrapolateRight: 'clamp',
   });
 
-  // Notificación del trabajador con rebote
-  const workerNotifSpring = spring({ frame: frame - 130, fps, config: SPRING_EXTRA_BOUNCY });
+  // MOMENTO DE IMPACTO BOUNCY 1: La llegada del pago confirmado al trabajador
+  const workerNotifSpring = spring({
+    frame: frame - 90,
+    fps,
+    config: SPRING_IMPACT_BOUNCE, // Rebote elástico justificado en la confirmación de pago
+  });
 
   // Ondas de voz animadas
-  const wavePulse = (Math.sin((frame - 140) * 0.3) + 1) / 2;
+  const wavePulse = (Math.sin((frame - 100) * 0.3) + 1) / 2;
 
   // Desvanecimiento de salida
   const exitOpacity = interpolate(frame, [420, 440], [1, 0], {
@@ -40,7 +44,8 @@ export const Scene3Demo: React.FC = () => {
   return (
     <div
       style={{
-        flex: 1,
+        width: 1080,
+        height: 1920,
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
@@ -48,7 +53,8 @@ export const Scene3Demo: React.FC = () => {
         backgroundColor: TOKE_COLORS.fondo,
         opacity: exitOpacity,
         fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
-        padding: '0 60px',
+        padding: '0 50px',
+        boxSizing: 'border-box',
         position: 'relative',
       }}
     >
@@ -56,87 +62,86 @@ export const Scene3Demo: React.FC = () => {
       <Audio src={staticFile('audio/scene3_demo.mp3')} />
 
       {/* Cabecera */}
-      <div style={{ textAlign: 'center', marginBottom: 35 }}>
+      <div style={{ textAlign: 'center', marginBottom: 35, maxWidth: 960 }}>
         <div
           style={{
             color: TOKE_COLORS.verdeMarca,
-            fontSize: 16,
+            fontSize: 20,
             fontWeight: 800,
             letterSpacing: '2px',
             textTransform: 'uppercase',
-            marginBottom: 8,
+            marginBottom: 10,
           }}
         >
-          Flujo Automático en Vivo
+          Flujo en Vivo
         </div>
         <h2
           style={{
-            fontSize: 46,
+            fontSize: 54,
             fontWeight: 900,
             color: TOKE_COLORS.textoPrincipal,
             margin: 0,
-            letterSpacing: '-1px',
+            lineHeight: 1.2,
+            letterSpacing: '-1.5px',
           }}
         >
           El cliente paga por QR, el equipo lo sabe en 1 segundo
         </h2>
       </div>
 
-      {/* Dispositivos Frente a Frente (Diseño Sólido, Sin Glassmorphism) */}
+      {/* Dispositivos Apilados Verticalmente (Formato 9:16) */}
       <div
         style={{
           display: 'flex',
+          flexDirection: 'column',
           alignItems: 'center',
-          justifyContent: 'center',
-          gap: 50,
+          gap: 20,
           width: '100%',
-          maxWidth: 1200,
+          maxWidth: 960,
         }}
       >
-        {/* PANEL IZQUIERDO: Celular Dueño */}
+        {/* PANEL SUPERIOR: Celular del Dueño */}
         <div
           style={{
-            flex: 1,
-            transform: `scale(${leftPanelSpring})`,
+            width: '100%',
+            transform: `scale(${topPanelSpring})`,
             background: TOKE_COLORS.tarjeta,
             border: `2px solid ${TOKE_COLORS.borde}`,
             borderRadius: 28,
-            padding: 30,
+            padding: '24px 30px',
             boxShadow: '0 8px 24px rgba(15, 23, 42, 0.08)',
             display: 'flex',
             flexDirection: 'column',
-            minHeight: 380,
+            gap: 14,
           }}
         >
-          {/* Header Dispositivo */}
           <div
             style={{
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
               borderBottom: `1.5px solid ${TOKE_COLORS.borde}`,
-              paddingBottom: 16,
-              marginBottom: 20,
+              paddingBottom: 12,
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <img src={staticFile('celular.png')} style={{ width: 28, height: 28 }} alt="Móvil" />
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <img src={staticFile('celular.png')} style={{ width: 30, height: 30 }} alt="Móvil" />
               <div>
-                <div style={{ color: TOKE_COLORS.textoPrincipal, fontWeight: 800, fontSize: 18 }}>
+                <div style={{ color: TOKE_COLORS.textoPrincipal, fontWeight: 800, fontSize: 22 }}>
                   Celular del Dueño
                 </div>
-                <div style={{ color: TOKE_COLORS.textoSecundario, fontSize: 13 }}>
+                <div style={{ color: TOKE_COLORS.textoSecundario, fontSize: 15 }}>
                   Recibe pagos de Yape / Plin
                 </div>
               </div>
             </div>
             <span
               style={{
-                fontSize: 12,
+                fontSize: 14,
                 background: TOKE_COLORS.tarjetaSecundaria,
                 color: TOKE_COLORS.textoPrincipal,
                 fontWeight: 700,
-                padding: '4px 10px',
+                padding: '4px 12px',
                 borderRadius: 8,
                 border: `1px solid ${TOKE_COLORS.borde}`,
               }}
@@ -145,177 +150,135 @@ export const Scene3Demo: React.FC = () => {
             </span>
           </div>
 
-          {/* Notificación Bancaria que Cae con Rebote */}
+          {/* Notificación Bancaria */}
           <div
             style={{
-              transform: `translateY(${notifY}px) scale(${notifSpring})`,
-              opacity: notifSpring > 0.05 ? 1 : 0,
+              transform: `translateY(${notifY}px)`,
+              opacity: notifOpacity,
               background: '#FDF4FF',
               border: `2px solid ${TOKE_COLORS.yapeMorado}`,
               borderRadius: 20,
-              padding: 20,
-              boxShadow: '0 8px 20px rgba(116, 34, 132, 0.15)',
+              padding: '16px 22px',
               display: 'flex',
               flexDirection: 'column',
-              gap: 10,
+              gap: 8,
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <img src={staticFile('yape.png')} style={{ width: 28, height: 28 }} alt="Yape" />
-              <span style={{ color: TOKE_COLORS.yapeMorado, fontWeight: 900, fontSize: 15 }}>
+              <img src={staticFile('yape.png')} style={{ width: 30, height: 30 }} alt="Yape" />
+              <span style={{ color: TOKE_COLORS.yapeMorado, fontWeight: 900, fontSize: 18 }}>
                 Yape! Notificación Bancaria
               </span>
-              <span style={{ marginLeft: 'auto', color: '#9333EA', fontSize: 12 }}>Ahora</span>
+              <span style={{ marginLeft: 'auto', color: '#9333EA', fontSize: 14 }}>Ahora</span>
             </div>
-            <div style={{ color: TOKE_COLORS.textoPrincipal, fontSize: 20, fontWeight: 800 }}>
+            <div style={{ color: TOKE_COLORS.textoPrincipal, fontSize: 24, fontWeight: 800 }}>
               ¡Recibiste S/ 45.00 de Mariana Gómez!
             </div>
             <div
               style={{
-                fontSize: 13,
+                fontSize: 14,
                 color: TOKE_COLORS.verdeMarca,
                 background: TOKE_COLORS.verdeFondoSolido,
                 padding: '4px 12px',
                 borderRadius: 8,
                 alignSelf: 'flex-start',
                 fontWeight: 700,
-                border: `1px solid ${TOKE_COLORS.verdeBordeSolido}`,
               }}
             >
               ⚡ TOKE detectó la notificación
             </div>
           </div>
-
-          <div
-            style={{
-              marginTop: 'auto',
-              color: TOKE_COLORS.textoSecundario,
-              fontSize: 14,
-              textAlign: 'center',
-              fontWeight: 500,
-            }}
-          >
-            🔒 Seguro: El dueño no comparte contraseñas.
-          </div>
         </div>
 
-        {/* NODO CENTRAL: Nube Supabase & Flecha */}
+        {/* NODO CENTRAL: Flecha Vertical y Nube */}
         <div
           style={{
             display: 'flex',
-            flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: 12,
-            width: 140,
+            gap: 20,
+            padding: '4px 0',
           }}
         >
           <div
             style={{
               background: TOKE_COLORS.tarjeta,
               border: `1.5px solid ${TOKE_COLORS.verdeMarca}`,
-              borderRadius: 16,
-              padding: '12px 18px',
-              textAlign: 'center',
-              boxShadow: '0 4px 16px rgba(0, 166, 81, 0.15)',
+              borderRadius: 14,
+              padding: '8px 20px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 10,
+              boxShadow: '0 4px 12px rgba(0, 166, 81, 0.15)',
             }}
           >
-            <div style={{ fontSize: 20 }}>☁️</div>
-            <div style={{ color: TOKE_COLORS.verdeMarca, fontWeight: 900, fontSize: 13 }}>
-              Supabase
-            </div>
-            <div style={{ color: TOKE_COLORS.textoSecundario, fontSize: 11, fontWeight: 600 }}>
-              &lt; 100 ms
-            </div>
+            <span style={{ fontSize: 20 }}>☁️</span>
+            <span style={{ color: TOKE_COLORS.verdeMarca, fontWeight: 900, fontSize: 16 }}>
+              Supabase Realtime &lt; 100 ms
+            </span>
           </div>
-
-          <div
-            style={{
-              width: '100%',
-              height: 6,
-              background: TOKE_COLORS.borde,
-              borderRadius: 999,
-              position: 'relative',
-              overflow: 'hidden',
-            }}
-          >
-            <div
-              style={{
-                position: 'absolute',
-                top: 0,
-                left: `${beamProgress - 40}%`,
-                width: '40%',
-                height: '100%',
-                background: TOKE_COLORS.verdeMarca,
-                opacity: beamOpacity,
-              }}
-            />
-          </div>
-          <span style={{ fontSize: 24, color: TOKE_COLORS.verdeMarca, fontWeight: 900 }}>➔</span>
+          <span style={{ fontSize: 28, color: TOKE_COLORS.verdeMarca, fontWeight: 900 }}>↓</span>
         </div>
 
-        {/* PANEL DERECHO: Celular Trabajador */}
+        {/* PANEL INFERIOR: Celular del Trabajador */}
         <div
           style={{
-            flex: 1,
-            transform: `scale(${rightPanelSpring})`,
+            width: '100%',
+            transform: `scale(${bottomPanelSpring})`,
             background: TOKE_COLORS.tarjeta,
             border: `2px solid ${TOKE_COLORS.borde}`,
             borderRadius: 28,
-            padding: 30,
+            padding: '24px 30px',
             boxShadow: '0 8px 24px rgba(15, 23, 42, 0.08)',
             display: 'flex',
             flexDirection: 'column',
-            minHeight: 380,
+            gap: 14,
           }}
         >
-          {/* Header Dispositivo */}
           <div
             style={{
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
               borderBottom: `1.5px solid ${TOKE_COLORS.borde}`,
-              paddingBottom: 16,
-              marginBottom: 20,
+              paddingBottom: 12,
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <span style={{ fontSize: 24 }}>🧑‍🍳</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <span style={{ fontSize: 28 }}>🧑‍🍳</span>
               <div>
-                <div style={{ color: TOKE_COLORS.textoPrincipal, fontWeight: 800, fontSize: 18 }}>
+                <div style={{ color: TOKE_COLORS.textoPrincipal, fontWeight: 800, fontSize: 22 }}>
                   Celular del Trabajador
                 </div>
-                <div style={{ color: TOKE_COLORS.textoSecundario, fontSize: 13 }}>
+                <div style={{ color: TOKE_COLORS.textoSecundario, fontSize: 15 }}>
                   Caja 1 / Mozo / Despacho
                 </div>
               </div>
             </div>
             <span
               style={{
-                fontSize: 12,
+                fontSize: 14,
                 background: TOKE_COLORS.verdeFondoSolido,
                 color: TOKE_COLORS.verdeMarca,
                 fontWeight: 800,
-                padding: '4px 10px',
+                padding: '4px 12px',
                 borderRadius: 8,
-                border: `1px solid ${TOKE_COLORS.verdeBordeSolido}`,
               }}
             >
               ● Conectado
             </span>
           </div>
 
-          {/* Tarjeta de Cobro Confirmado con Bouncy Pop */}
+          {/* Tarjeta de Cobro Confirmado con REBOTE BOUNCY DE IMPACTO */}
           <div
             style={{
               transform: `scale(${workerNotifSpring})`,
               opacity: workerNotifSpring > 0.05 ? 1 : 0,
               background: TOKE_COLORS.verdeFondoSolido,
-              border: `2px solid ${TOKE_COLORS.verdeMarca}`,
-              borderRadius: 20,
-              padding: 20,
-              boxShadow: '0 8px 20px rgba(0, 166, 81, 0.2)',
+              border: `2.5px solid ${TOKE_COLORS.verdeMarca}`,
+              borderRadius: 22,
+              padding: '18px 24px',
+              boxShadow: '0 10px 25px rgba(0, 166, 81, 0.25)',
               display: 'flex',
               flexDirection: 'column',
               gap: 8,
@@ -326,21 +289,21 @@ export const Scene3Demo: React.FC = () => {
                 style={{
                   color: TOKE_COLORS.verdeMarca,
                   fontWeight: 900,
-                  fontSize: 13,
+                  fontSize: 16,
                   textTransform: 'uppercase',
                   letterSpacing: '1px',
                 }}
               >
                 ✓ Cobro Confirmado
               </span>
-              <span style={{ color: TOKE_COLORS.textoSecundario, fontSize: 12, fontWeight: 700 }}>
+              <span style={{ color: TOKE_COLORS.textoSecundario, fontSize: 14, fontWeight: 700 }}>
                 Al instante
               </span>
             </div>
-            <div style={{ color: TOKE_COLORS.textoPrincipal, fontSize: 32, fontWeight: 900 }}>
+            <div style={{ color: TOKE_COLORS.textoPrincipal, fontSize: 38, fontWeight: 900 }}>
               + S/ 45.00
             </div>
-            <div style={{ color: TOKE_COLORS.textoSecundario, fontSize: 15, fontWeight: 600 }}>
+            <div style={{ color: TOKE_COLORS.textoSecundario, fontSize: 18, fontWeight: 600 }}>
               Mariana Gómez · Yape · Asignado a Caja 1
             </div>
 
@@ -350,40 +313,28 @@ export const Scene3Demo: React.FC = () => {
                 marginTop: 6,
                 display: 'flex',
                 alignItems: 'center',
-                gap: 8,
+                gap: 12,
                 background: TOKE_COLORS.tarjeta,
-                padding: '6px 14px',
+                padding: '8px 16px',
                 borderRadius: 12,
                 border: `1px solid ${TOKE_COLORS.verdeBordeSolido}`,
               }}
             >
-              <span style={{ fontSize: 18 }}>🗣️</span>
-              <span style={{ color: TOKE_COLORS.textoPrincipal, fontSize: 13, fontWeight: 700 }}>
+              <span style={{ fontSize: 22 }}>🗣️</span>
+              <span style={{ color: TOKE_COLORS.textoPrincipal, fontSize: 16, fontWeight: 700 }}>
                 Voz: "¡Pago de 45 soles recibido!"
               </span>
               <div
                 style={{
                   marginLeft: 'auto',
-                  width: 10,
-                  height: 10,
+                  width: 12,
+                  height: 12,
                   borderRadius: '50%',
                   background: TOKE_COLORS.verdeMarca,
                   transform: `scale(${1 + wavePulse * 0.5})`,
                 }}
               />
             </div>
-          </div>
-
-          <div
-            style={{
-              marginTop: 'auto',
-              color: TOKE_COLORS.verdeMarca,
-              fontSize: 14,
-              fontWeight: 800,
-              textAlign: 'center',
-            }}
-          >
-            ✓ Sin interrumpir al dueño ni pedir capturas.
           </div>
         </div>
       </div>

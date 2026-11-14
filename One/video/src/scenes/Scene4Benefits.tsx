@@ -1,20 +1,26 @@
 import React from 'react';
 import { interpolate, spring, staticFile, useCurrentFrame, useVideoConfig } from 'remotion';
 import { Audio } from 'remotion';
-import { SPRING_BOUNCY, SPRING_EXTRA_BOUNCY, TOKE_COLORS } from '../theme';
+import { SPRING_SMOOTH, TOKE_COLORS } from '../theme';
 
 export const Scene4Benefits: React.FC = () => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
-  // Entradas escalonadas con rebote
-  const headerSpring = spring({ frame, fps, config: SPRING_BOUNCY });
-  const card1Spring = spring({ frame: frame - 15, fps, config: SPRING_EXTRA_BOUNCY });
-  const card2Spring = spring({ frame: frame - 35, fps, config: SPRING_EXTRA_BOUNCY });
-  const card3Spring = spring({ frame: frame - 55, fps, config: SPRING_EXTRA_BOUNCY });
+  // Entradas suaves
+  const headerSpring = spring({ frame, fps, config: SPRING_SMOOTH });
+
+  const card1Y = interpolate(frame, [15, 35], [30, 0], { extrapolateRight: 'clamp' });
+  const card1Opacity = interpolate(frame, [15, 30], [0, 1], { extrapolateRight: 'clamp' });
+
+  const card2Y = interpolate(frame, [35, 55], [30, 0], { extrapolateRight: 'clamp' });
+  const card2Opacity = interpolate(frame, [35, 50], [0, 1], { extrapolateRight: 'clamp' });
+
+  const card3Y = interpolate(frame, [55, 75], [30, 0], { extrapolateRight: 'clamp' });
+  const card3Opacity = interpolate(frame, [55, 70], [0, 1], { extrapolateRight: 'clamp' });
 
   // Desvanecimiento de salida
-  const exitOpacity = interpolate(frame, [260, 280], [1, 0], {
+  const exitOpacity = interpolate(frame, [270, 290], [1, 0], {
     extrapolateLeft: 'clamp',
     extrapolateRight: 'clamp',
   });
@@ -22,7 +28,8 @@ export const Scene4Benefits: React.FC = () => {
   return (
     <div
       style={{
-        flex: 1,
+        width: 1080,
+        height: 1920,
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
@@ -30,7 +37,8 @@ export const Scene4Benefits: React.FC = () => {
         backgroundColor: TOKE_COLORS.fondo,
         opacity: exitOpacity,
         fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
-        padding: '0 80px',
+        padding: '0 60px',
+        boxSizing: 'border-box',
       }}
     >
       {/* Audio Narrado de la Escena 4 */}
@@ -42,150 +50,206 @@ export const Scene4Benefits: React.FC = () => {
           transform: `scale(${headerSpring})`,
           textAlign: 'center',
           marginBottom: 45,
+          maxWidth: 960,
         }}
       >
         <div
           style={{
             color: TOKE_COLORS.verdeMarca,
-            fontSize: 16,
+            fontSize: 20,
             fontWeight: 800,
             letterSpacing: '2px',
             textTransform: 'uppercase',
-            marginBottom: 8,
+            marginBottom: 12,
           }}
         >
           Ventajas Exclusivas
         </div>
         <h2
           style={{
-            fontSize: 50,
+            fontSize: 58,
             fontWeight: 900,
             color: TOKE_COLORS.textoPrincipal,
             margin: 0,
-            letterSpacing: '-1.5px',
+            lineHeight: 1.2,
+            letterSpacing: '-2px',
           }}
         >
           Atención rápida, transparente y 100% segura
         </h2>
       </div>
 
-      {/* Grid de 3 Tarjetas Bento (Colores sólidos, sin glassmorphism) */}
+      {/* 3 Tarjetas Bento Apiladas Verticalmente (9:16) */}
       <div
         style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(3, 1fr)',
-          gap: 30,
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 24,
           width: '100%',
-          maxWidth: 1200,
+          maxWidth: 920,
         }}
       >
         {/* Tarjeta 1: Rapidez */}
         <div
           style={{
-            transform: `scale(${card1Spring})`,
+            transform: `translateY(${card1Y}px)`,
+            opacity: card1Opacity,
             background: TOKE_COLORS.tarjeta,
             border: `2px solid ${TOKE_COLORS.borde}`,
-            borderRadius: 24,
-            padding: '36px 28px',
-            boxShadow: '0 8px 24px rgba(15, 23, 42, 0.07)',
+            borderRadius: 26,
+            padding: '28px 32px',
+            boxShadow: '0 8px 24px rgba(15, 23, 42, 0.06)',
             display: 'flex',
-            flexDirection: 'column',
-            gap: 16,
+            alignItems: 'center',
+            gap: 24,
           }}
         >
           <div
             style={{
-              width: 58,
-              height: 58,
-              borderRadius: 18,
+              width: 72,
+              height: 72,
+              borderRadius: 22,
               background: TOKE_COLORS.verdeFondoSolido,
-              border: `1.5px solid ${TOKE_COLORS.verdeBordeSolido}`,
+              border: `2px solid ${TOKE_COLORS.verdeBordeSolido}`,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
+              flexShrink: 0,
             }}
           >
-            <img src={staticFile('tienda.png')} style={{ width: 32, height: 32 }} alt="Tienda" />
+            <img src={staticFile('tienda.png')} style={{ width: 40, height: 40 }} alt="Tienda" />
           </div>
-          <h3 style={{ color: TOKE_COLORS.textoPrincipal, fontSize: 24, fontWeight: 800, margin: 0 }}>
-            Atención 3x más rápida
-          </h3>
-          <p style={{ color: TOKE_COLORS.textoSecundario, fontSize: 16, lineHeight: 1.5, margin: 0 }}>
-            Cero colas en mostrador. Tu equipo despacha pedidos al segundo sin esperar al dueño.
-          </p>
+          <div>
+            <h3
+              style={{
+                color: TOKE_COLORS.textoPrincipal,
+                fontSize: 28,
+                fontWeight: 800,
+                margin: '0 0 6px 0',
+              }}
+            >
+              Atención 3x más rápida
+            </h3>
+            <p
+              style={{
+                color: TOKE_COLORS.textoSecundario,
+                fontSize: 20,
+                lineHeight: 1.4,
+                margin: 0,
+              }}
+            >
+              Cero colas en caja. Tu equipo despacha pedidos al segundo sin esperar al dueño.
+            </p>
+          </div>
         </div>
 
         {/* Tarjeta 2: Voz */}
         <div
           style={{
-            transform: `scale(${card2Spring})`,
+            transform: `translateY(${card2Y}px)`,
+            opacity: card2Opacity,
             background: TOKE_COLORS.tarjeta,
             border: `2px solid ${TOKE_COLORS.verdeBordeSolido}`,
-            borderRadius: 24,
-            padding: '36px 28px',
+            borderRadius: 26,
+            padding: '28px 32px',
             boxShadow: '0 8px 24px rgba(0, 166, 81, 0.12)',
             display: 'flex',
-            flexDirection: 'column',
-            gap: 16,
+            alignItems: 'center',
+            gap: 24,
           }}
         >
           <div
             style={{
-              width: 58,
-              height: 58,
-              borderRadius: 18,
+              width: 72,
+              height: 72,
+              borderRadius: 22,
               background: TOKE_COLORS.verdeFondoSolido,
-              border: `1.5px solid ${TOKE_COLORS.verdeMarca}`,
+              border: `2px solid ${TOKE_COLORS.verdeMarca}`,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
+              flexShrink: 0,
             }}
           >
-            <img src={staticFile('campana.png')} style={{ width: 32, height: 32 }} alt="Campana" />
+            <img src={staticFile('campana.png')} style={{ width: 40, height: 40 }} alt="Campana" />
           </div>
-          <h3 style={{ color: TOKE_COLORS.textoPrincipal, fontSize: 24, fontWeight: 800, margin: 0 }}>
-            Aviso por voz al local
-          </h3>
-          <p style={{ color: TOKE_COLORS.textoSecundario, fontSize: 16, lineHeight: 1.5, margin: 0 }}>
-            La app canta el cobro por el parlante de tu tienda: manos libres para no parar de trabajar.
-          </p>
+          <div>
+            <h3
+              style={{
+                color: TOKE_COLORS.textoPrincipal,
+                fontSize: 28,
+                fontWeight: 800,
+                margin: '0 0 6px 0',
+              }}
+            >
+              Aviso por voz al local
+            </h3>
+            <p
+              style={{
+                color: TOKE_COLORS.textoSecundario,
+                fontSize: 20,
+                lineHeight: 1.4,
+                margin: 0,
+              }}
+            >
+              La app canta el cobro en el parlante: manos libres para seguir atendiendo.
+            </p>
+          </div>
         </div>
 
         {/* Tarjeta 3: Seguridad */}
         <div
           style={{
-            transform: `scale(${card3Spring})`,
+            transform: `translateY(${card3Y}px)`,
+            opacity: card3Opacity,
             background: TOKE_COLORS.tarjeta,
             border: `2px solid ${TOKE_COLORS.borde}`,
-            borderRadius: 24,
-            padding: '36px 28px',
-            boxShadow: '0 8px 24px rgba(15, 23, 42, 0.07)',
+            borderRadius: 26,
+            padding: '28px 32px',
+            boxShadow: '0 8px 24px rgba(15, 23, 42, 0.06)',
             display: 'flex',
-            flexDirection: 'column',
-            gap: 16,
+            alignItems: 'center',
+            gap: 24,
           }}
         >
           <div
             style={{
-              width: 58,
-              height: 58,
-              borderRadius: 18,
+              width: 72,
+              height: 72,
+              borderRadius: 22,
               background: TOKE_COLORS.ambarFondoSolido,
-              border: `1.5px solid ${TOKE_COLORS.ambarBordeSolido}`,
+              border: `2px solid ${TOKE_COLORS.ambarBordeSolido}`,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              fontSize: 28,
+              fontSize: 36,
+              flexShrink: 0,
             }}
           >
             🛡️
           </div>
-          <h3 style={{ color: TOKE_COLORS.textoPrincipal, fontSize: 24, fontWeight: 800, margin: 0 }}>
-            Cero acceso a bancos
-          </h3>
-          <p style={{ color: TOKE_COLORS.textoSecundario, fontSize: 16, lineHeight: 1.5, margin: 0 }}>
-            Sin ingresar contraseñas bancarias ni vincular cuentas. Tu dinero permanece 100% seguro.
-          </p>
+          <div>
+            <h3
+              style={{
+                color: TOKE_COLORS.textoPrincipal,
+                fontSize: 28,
+                fontWeight: 800,
+                margin: '0 0 6px 0',
+              }}
+            >
+              Cero acceso a bancos
+            </h3>
+            <p
+              style={{
+                color: TOKE_COLORS.textoSecundario,
+                fontSize: 20,
+                lineHeight: 1.4,
+                margin: 0,
+              }}
+            >
+              Sin ingresar claves bancarias ni cuentas. Tu dinero permanece 100% seguro.
+            </p>
+          </div>
         </div>
       </div>
     </div>

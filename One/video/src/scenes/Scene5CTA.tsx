@@ -1,231 +1,161 @@
 import React from 'react';
-import { interpolate, spring, staticFile, useCurrentFrame, useVideoConfig } from 'remotion';
+import { interpolate, interpolateColors, spring, staticFile, useCurrentFrame, useVideoConfig } from 'remotion';
 import { Audio } from 'remotion';
-import { SPRING_BOUNCY, SPRING_EXTRA_BOUNCY, TOKE_COLORS } from '../theme';
+import { SPRING_IMPACT_BOUNCE, SPRING_SMOOTH, TOKE_COLORS } from '../theme';
 
 export const Scene5CTA: React.FC = () => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
-  // Entrada inicial del logo con resorte
-  const logoSpring = spring({ frame, fps, config: SPRING_EXTRA_BOUNCY });
+  // Entrada inicial del logo
+  const logoEntrance = spring({ frame, fps, config: SPRING_SMOOTH });
 
-  // Dinámica de Contorno y Transición de Color:
-  // Del frame 0 al 70: Color alternativo (#6366F1 Indigo)
-  // Del frame 70 al 130: El contorno se traza y el color muta dinámicamente al Verde Oficial TOKE (#00A651 / #00C853)
-  const morphProgress = interpolate(frame, [70, 120], [0, 1], {
-    extrapolateLeft: 'clamp',
-    extrapolateRight: 'clamp',
-  });
+  // REQUERIMIENTO ESPECÍFICO: EL CAMBIO DE COLOR ES DEL FONDO (NO DE LOS BORDES)
+  // Del frame 0 al 60: Fondo alternativo (#312E81 Índigo)
+  // Del frame 60 al 120: El FONDO cambia dinámicamente al color Verde Oficial TOKE (#00A651)
+  const currentBgColor = interpolateColors(
+    frame,
+    [60, 115],
+    [TOKE_COLORS.fondoAlternativoFinal, TOKE_COLORS.fondoOriginalFinal]
+  );
 
-  // Trazado del contorno dinámico (stroke dashoffset)
-  const strokeProgress = interpolate(frame, [65, 115], [380, 0], {
-    extrapolateLeft: 'clamp',
-    extrapolateRight: 'clamp',
-  });
-
-  // Rebote elástico cuando el contorno se completa y bloquea el color oficial (frame 115)
-  const lockSpring = spring({
+  // MOMENTO DE IMPACTO BOUNCY 2: Rebote elástico del logo cuando el fondo completa su color oficial
+  const logoBounceWhenBgSettles = spring({
     frame: frame - 115,
     fps,
-    config: SPRING_EXTRA_BOUNCY,
+    config: SPRING_IMPACT_BOUNCE,
   });
 
-  // Interpolación de colores entre Alternativo e Identidad Original TOKE
-  // 0 = Alternativo (#6366F1), 1 = Verde TOKE (#00A651)
-  const borderColor = morphProgress < 0.5 ? '#6366F1' : TOKE_COLORS.verdeMarca;
-  const shadowColor =
-    morphProgress < 0.5 ? 'rgba(99, 102, 241, 0.3)' : 'rgba(0, 166, 81, 0.35)';
-
-  // Entradas de textos y botón CTA
-  const titleSpring = spring({ frame: frame - 30, fps, config: SPRING_BOUNCY });
-  const buttonSpring = spring({ frame: frame - 125, fps, config: SPRING_EXTRA_BOUNCY });
-  const badgeSpring = spring({ frame: frame - 145, fps, config: SPRING_BOUNCY });
-
-  // Pulso sutil continuo después del asentamiento
-  const idlePulse = Math.sin((frame - 130) * 0.12) * 0.03;
+  // Entradas de textos y botón
+  const titleSpring = spring({ frame: frame - 25, fps, config: SPRING_SMOOTH });
+  const buttonSpring = spring({ frame: frame - 120, fps, config: SPRING_SMOOTH });
+  const badgeSpring = spring({ frame: frame - 135, fps, config: SPRING_SMOOTH });
 
   return (
     <div
       style={{
-        flex: 1,
+        width: 1080,
+        height: 1920,
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: TOKE_COLORS.fondo,
+        // EL FONDO MUTANDO DINÁMICAMENTE (Sin afectar los bordes de la tarjeta)
+        backgroundColor: currentBgColor,
         fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
-        padding: '0 80px',
+        padding: '0 60px',
+        boxSizing: 'border-box',
         textAlign: 'center',
         position: 'relative',
+        transition: 'background-color 0.1s linear',
       }}
     >
       {/* Audio Narrado de la Escena 5 */}
       <Audio src={staticFile('audio/scene5_cta.mp3')} />
 
-      {/* CONTENEDOR DEL LOGO CON CONTORNO DINÁMICO Y TRANSFORMACIÓN DE COLOR */}
-      <div style={{ position: 'relative', width: 140, height: 140, marginBottom: 28 }}>
-        {/* SVG de Contorno Dinámico que se traza alrededor del logo */}
-        <svg
-          style={{
-            position: 'absolute',
-            top: -6,
-            left: -6,
-            width: 152,
-            height: 152,
-            pointerEvents: 'none',
-            zIndex: 10,
-          }}
-        >
-          <rect
-            x="4"
-            y="4"
-            width="144"
-            height="144"
-            rx="40"
-            fill="none"
-            stroke={morphProgress > 0.5 ? TOKE_COLORS.verdeMarca : '#6366F1'}
-            strokeWidth="5"
-            strokeDasharray="400"
-            strokeDashoffset={strokeProgress}
-            strokeLinecap="round"
-          />
-        </svg>
-
-        {/* Tarjeta del Logo con Morph de Color */}
-        <div
-          style={{
-            transform: `scale(${logoSpring + (frame > 120 ? lockSpring * 0.08 + idlePulse : 0)})`,
-            width: 140,
-            height: 140,
-            borderRadius: 38,
-            background: TOKE_COLORS.tarjeta,
-            border: `3.5px solid ${borderColor}`,
-            boxShadow: `0 14px 35px ${shadowColor}`,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            transition: 'border-color 0.2s ease, box-shadow 0.2s ease',
-          }}
-        >
-          <img
-            src={staticFile('logo.png')}
-            style={{
-              width: 90,
-              height: 90,
-              objectFit: 'contain',
-              // Filtro dinámico: inicia con tono índigo/alternativo y transiciona al color natural
-              filter:
-                morphProgress < 1
-                  ? `hue-rotate(${(1 - morphProgress) * 140}deg) saturate(${1 + (1 - morphProgress) * 0.5})`
-                  : 'none',
-            }}
-            alt="TOKE Logo"
-          />
-        </div>
-
-        {/* Etiqueta animada de Contorno Dinámico */}
-        {frame > 65 && frame < 130 && (
-          <div
-            style={{
-              position: 'absolute',
-              bottom: -24,
-              left: '50%',
-              transform: 'translateX(-50%)',
-              background: TOKE_COLORS.tarjeta,
-              border: `1px solid ${borderColor}`,
-              color: borderColor,
-              fontSize: 11,
-              fontWeight: 800,
-              padding: '2px 10px',
-              borderRadius: 999,
-              whiteSpace: 'nowrap',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
-            }}
-          >
-            {morphProgress < 0.9 ? 'Contorneando identidad...' : '✓ Verde Original TOKE'}
-          </div>
-        )}
+      {/* Tarjeta Sólida del Logo TOKE con Rebote de Remate cuando el fondo muta */}
+      <div
+        style={{
+          transform: `scale(${logoEntrance + (frame > 115 ? logoBounceWhenBgSettles * 0.1 : 0)})`,
+          width: 180,
+          height: 180,
+          borderRadius: 48,
+          background: TOKE_COLORS.tarjeta,
+          border: '4px solid #FFFFFF',
+          boxShadow: '0 20px 50px rgba(0, 0, 0, 0.25)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          marginBottom: 40,
+        }}
+      >
+        <img
+          src={staticFile('logo.png')}
+          style={{ width: 115, height: 115, objectFit: 'contain' }}
+          alt="TOKE Logo"
+        />
       </div>
 
       {/* Titulares de Llamado a la Acción */}
       <div
         style={{
           transform: `scale(${titleSpring})`,
-          marginBottom: 30,
+          marginBottom: 45,
+          maxWidth: 960,
         }}
       >
         <h2
           style={{
-            fontSize: 54,
+            fontSize: 72,
             fontWeight: 900,
-            color: TOKE_COLORS.textoPrincipal,
-            margin: '0 0 14px 0',
-            letterSpacing: '-1.5px',
+            color: '#FFFFFF',
+            margin: '0 0 18px 0',
+            letterSpacing: '-2.5px',
+            lineHeight: 1.15,
           }}
         >
           ¡Moderniza los cobros de tu negocio hoy!
         </h2>
         <p
           style={{
-            fontSize: 24,
-            color: TOKE_COLORS.textoSecundario,
+            fontSize: 32,
+            color: '#E0E7FF',
             margin: 0,
-            maxWidth: 780,
             fontWeight: 500,
+            lineHeight: 1.35,
           }}
         >
-          Únete a los comercios en Perú que ya cobran sin interrupciones, sin llamadas y en tiempo real.
+          Únete a los comercios en Perú que ya cobran en tiempo real, sin interrupciones ni capturas.
         </p>
       </div>
 
-      {/* Botón CTA Sólido con Rebote */}
+      {/* Botón CTA Blanco Sólido de Gran Impacto */}
       <div
         style={{
           transform: `scale(${buttonSpring})`,
-          marginBottom: 25,
+          marginBottom: 35,
+          width: '100%',
+          maxWidth: 820,
         }}
       >
         <div
           style={{
-            background: TOKE_COLORS.verdeMarca,
-            color: TOKE_COLORS.textoBlanco,
-            padding: '18px 46px',
-            borderRadius: 22,
-            fontSize: 24,
+            background: '#FFFFFF',
+            color: TOKE_COLORS.verdeMarca,
+            padding: '24px 44px',
+            borderRadius: 26,
+            fontSize: 30,
             fontWeight: 900,
-            boxShadow: '0 10px 25px rgba(0, 166, 81, 0.35)',
+            boxShadow: '0 16px 40px rgba(0, 0, 0, 0.2)',
             display: 'flex',
             alignItems: 'center',
-            gap: 14,
+            justifyContent: 'center',
+            gap: 16,
             letterSpacing: '-0.5px',
-            border: '2px solid #00B44A',
           }}
         >
-          <span>🤖</span>
+          <span style={{ fontSize: 34 }}>🤖</span>
           <span>Descargar App Android Gratis</span>
         </div>
       </div>
 
-      {/* Enlace Web & Badge Perú */}
+      {/* Badges de Enlace Web y País */}
       <div
         style={{
           transform: `scale(${badgeSpring})`,
           display: 'flex',
-          alignItems: 'center',
-          gap: 16,
+          gap: 20,
         }}
       >
         <div
           style={{
-            background: TOKE_COLORS.tarjeta,
-            border: `1.5px solid ${TOKE_COLORS.verdeBordeSolido}`,
-            padding: '10px 24px',
-            borderRadius: 14,
-            color: TOKE_COLORS.verdeMarca,
-            fontSize: 19,
+            background: 'rgba(255, 255, 255, 0.15)',
+            border: '2px solid rgba(255, 255, 255, 0.4)',
+            padding: '14px 28px',
+            borderRadius: 18,
+            color: '#FFFFFF',
+            fontSize: 24,
             fontWeight: 800,
-            boxShadow: '0 4px 12px rgba(15, 23, 42, 0.05)',
           }}
         >
           🌐 tokelabs.pages.dev
@@ -233,17 +163,16 @@ export const Scene5CTA: React.FC = () => {
 
         <div
           style={{
-            background: TOKE_COLORS.tarjeta,
-            border: `1.5px solid ${TOKE_COLORS.borde}`,
-            padding: '10px 20px',
-            borderRadius: 14,
-            color: TOKE_COLORS.textoPrincipal,
-            fontSize: 16,
+            background: 'rgba(255, 255, 255, 0.15)',
+            border: '2px solid rgba(255, 255, 255, 0.4)',
+            padding: '14px 28px',
+            borderRadius: 18,
+            color: '#FFFFFF',
+            fontSize: 22,
             fontWeight: 700,
-            boxShadow: '0 4px 12px rgba(15, 23, 42, 0.05)',
           }}
         >
-          🇵🇪 Hecho a la medida de Perú
+          🇵🇪 Hecho para Perú
         </div>
       </div>
     </div>
