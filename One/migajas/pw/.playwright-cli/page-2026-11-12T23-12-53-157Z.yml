@@ -1,0 +1,322 @@
+- generic [active] [ref=f9e1]:
+  - link "Saltar al contenido" [ref=f9e3] [cursor=pointer]:
+    - /url: "#contenido"
+  - banner [ref=f9e4]:
+    - generic [ref=f9e5]:
+      - link "Toke, inicio" [ref=f9e6] [cursor=pointer]:
+        - /url: /
+        - generic [ref=f9e7]:
+          - text: Toke
+          - generic [ref=f9e8]: por Fábrica Labs
+      - navigation "Principal" [ref=f9e9]:
+        - link "Cómo funciona" [ref=f9e10] [cursor=pointer]:
+          - /url: /#como-funciona
+        - link "Seguridad" [ref=f9e11] [cursor=pointer]:
+          - /url: /seguridad
+        - link "Planes" [ref=f9e12] [cursor=pointer]:
+          - /url: /#planes
+        - link "Ayuda" [ref=f9e13] [cursor=pointer]:
+          - /url: /ayuda
+        - link "Descargas" [ref=f9e14] [cursor=pointer]:
+          - /url: /descargas
+      - generic [ref=f9e15]:
+        - button "Cambiar a modo oscuro" [ref=f9e16] [cursor=pointer]
+        - link "Descargar" [ref=f9e19] [cursor=pointer]:
+          - /url: /descargas
+  - main [ref=f9e20]:
+    - generic [ref=f9e22]:
+      - generic [ref=f9e23]:
+        - heading [level=1] [ref=f9e24]:
+          - text: La app estrella para tu negocio, tu equipo y tu
+          - emphasis [ref=f9e25]: billetera digital
+          - text: .
+        - paragraph [ref=f9e26]: Registra tus cobros y envíalos a tu equipo de inmediato.
+        - generic [ref=f9e27]:
+          - link "Descargar la app" [ref=f9e28] [cursor=pointer]:
+            - /url: /descargas
+          - link "Ver planes" [ref=f9e29] [cursor=pointer]:
+            - /url: "#planes"
+      - img "Logo de Toke en 3D con Yape y Plin en órbita" [ref=f9e30]:
+        - img "Logo de Toke en 3D" [ref=f9e35]
+        - img "Yape" [ref=f9e37]
+        - img "Tienda" [ref=f9e39]
+        - img "Plin" [ref=f9e41]
+        - img "Código QR" [ref=f9e43]
+    - generic [ref=f9e45]:
+      - generic [ref=f9e46]: La app
+      - heading "Así se ve Toke." [level=2] [ref=f9e47]
+      - paragraph [ref=f9e48]: Capturas de la app real.
+      - generic [ref=f9e49]:
+        - figure "Tus cobros Cada pago de Yape o Plin, con su hora y su monto." [ref=f9e50]:
+          - img "Pantalla Operaciones de Toke con un cobro de Yape" [ref=f9e55]
+          - generic [ref=f9e56]:
+            - generic [ref=f9e57]: Tus cobros
+            - paragraph [ref=f9e58]: Cada pago de Yape o Plin, con su hora y su monto.
+        - figure "Reportes El total del día, de la semana, del mes o del año." [ref=f9e59]:
+          - img "Pantalla Reportes de Toke con el total del día" [ref=f9e63]
+          - generic [ref=f9e64]:
+            - generic [ref=f9e65]: Reportes
+            - paragraph [ref=f9e66]: El total del día, de la semana, del mes o del año.
+        - figure "Todo tu negocio Equipo, QRs y aviso en voz alta, en un solo lugar." [ref=f9e67]:
+          - img "Menú Más de Toke con equipo, QRs y aviso en voz alta" [ref=f9e72]
+          - generic [ref=f9e73]:
+            - generic [ref=f9e74]: Todo tu negocio
+            - paragraph [ref=f9e75]: Equipo, QRs y aviso en voz alta, en un solo lugar.
+    - generic [ref=f9e77]:
+      - generic [ref=f9e78]:
+        - generic [ref=f9e79]: El problema
+        - heading "El pago llega a un celular. Tu equipo no se entera." [level=2] [ref=f9e80]
+      - generic [ref=f9e81]:
+        - paragraph [ref=f9e82]: Cuando te pagan por Yape o Plin, el aviso aparece solo en el celular donde recibes. Quien atiende en el mostrador tiene que preguntarte, o esperar a que se lo digas, para saber si el pago entró.
+        - paragraph [ref=f9e83]: Toke lee ese aviso y se lo cuenta al instante a tu negocio y a tu equipo, sin que tengas que tocar el teléfono ni dictar montos.
+    - generic [ref=f9e85]:
+      - generic [ref=f9e86]: Cómo funciona
+      - heading "Detecta, avisa y reparte tus cobros al instante." [level=2] [ref=f9e87]
+      - generic [ref=f9e88]:
+        - region "Pasos de Toke. Desliza hacia arriba para ver el siguiente." [ref=f9e89]:
+          - article [ref=f9e90]:
+            - generic [ref=f9e91]:
+              - img "Yape" [ref=f9e94]
+              - generic [ref=f9e95]: Pago recibido
+            - generic [ref=f9e96]:
+              - text: Paso 1 de 3
+              - heading "Te pagan" [level=3] [ref=f9e97]
+              - paragraph [ref=f9e98]: Tu cliente paga por Yape o Plin y el aviso llega a tu celular, como siempre.
+          - article [ref=f9e99]:
+            - generic [ref=f9e100]:
+              - img "Toke" [ref=f9e103]
+              - generic [ref=f9e104]: Cobro registrado
+            - generic [ref=f9e105]:
+              - text: Paso 2 de 3
+              - heading "Toke lo detecta" [level=3] [ref=f9e106]
+              - paragraph [ref=f9e107]: Toke lee ese aviso, revisa que sea de verdad y lo registra en tu negocio.
+          - article [ref=f9e108]:
+            - generic [ref=f9e109]:
+              - img "Equipo" [ref=f9e112]
+              - generic [ref=f9e113]: Aviso al equipo
+            - generic [ref=f9e114]:
+              - text: Paso 3 de 3
+              - heading "Tu equipo se entera" [level=3] [ref=f9e115]
+              - paragraph [ref=f9e116]: El celular de tu equipo suena y muestra el cobro. Sin llamadas ni mensajes.
+        - generic [ref=f9e117]:
+          - list "Ir a un paso" [ref=f9e118]:
+            - listitem [ref=f9e119]:
+              - button "Paso 1" [ref=f9e120] [cursor=pointer]
+            - listitem [ref=f9e121]:
+              - button "Paso 2" [ref=f9e122] [cursor=pointer]
+            - listitem [ref=f9e123]:
+              - button "Paso 3" [ref=f9e124] [cursor=pointer]
+          - generic [ref=f9e125]: Desliza
+    - generic [ref=f9e127]:
+      - generic [ref=f9e128]: Por qué Toke
+      - heading "¿Por qué elegirnos?" [level=2] [ref=f9e129]
+      - paragraph [ref=f9e130]: Toke te ofrece funciones para tu negocio sin complicarte.
+      - generic [ref=f9e131]:
+        - generic [ref=f9e132]:
+          - heading "Aviso en voz alta" [level=3] [ref=f9e133]
+          - paragraph [ref=f9e134]: Tu celular dice “Pago confirmado” cuando entra un cobro. Con el plan Pro también dice la billetera y el monto.
+        - generic [ref=f9e135]:
+          - heading "Tu equipo, con un código" [level=3] [ref=f9e136]
+          - paragraph [ref=f9e137]: Invitas a cada persona con un código de 6 letras. Tú decides si aprobarla antes de que entre, pausarla o sacarla.
+        - generic [ref=f9e138]:
+          - heading "Cobros asignados" [level=3] [ref=f9e139]
+          - paragraph [ref=f9e140]: Con 2 o más trabajadores, cada cobro lo reclama uno de ellos. Si no lo necesitas, lo apagas.
+        - generic [ref=f9e141]:
+          - heading "Mis QRs" [level=3] [ref=f9e142]
+          - paragraph [ref=f9e143]: Vincula tu billetera o banco y muestra tu código QR desde la app.
+        - generic [ref=f9e144]:
+          - heading "Reportes y Excel Plan Pro" [level=3] [ref=f9e145]:
+            - text: Reportes y Excel
+            - generic [ref=f9e146]: Plan Pro
+          - paragraph [ref=f9e147]: Mira tus cobros por día, semana, mes o año y expórtalos a Excel para compartirlos.
+        - generic [ref=f9e148]:
+          - heading "Sin internet, no se pierde nada" [level=3] [ref=f9e149]
+          - paragraph [ref=f9e150]: Si se va la señal, Toke guarda el cobro y lo envía cuando vuelve. Verás “Esperando red”.
+        - generic [ref=f9e151]:
+          - heading "Una cuenta, un celular" [level=3] [ref=f9e152]
+          - paragraph [ref=f9e153]: Por seguridad, tu cuenta funciona en un solo celular a la vez.
+    - generic [ref=f9e155]:
+      - generic [ref=f9e156]:
+        - generic [ref=f9e157]: Seguridad y permisos
+        - heading "Preparado para cualquier engaño." [level=2] [ref=f9e158]
+        - paragraph [ref=f9e159]: Toke usa filtros que evitan los engaños más comunes al recibir tus cobros, como mensajes que imitan un pago.
+        - paragraph [ref=f9e160]: Toke no lee tus chats de WhatsApp ni tus SMS. Solo cuenta el aviso de pago de Yape o de tu banco.
+        - generic [ref=f9e161]:
+          - paragraph [ref=f9e166]: No entra a tus billeteras. Solo lee el aviso que ya te llega al celular. No ve tus claves ni tu saldo.
+          - paragraph [ref=f9e171]: No mueve tu dinero. No puede enviar, pedir ni retirar. Solo te avisa cuando alguien te paga.
+          - paragraph [ref=f9e176]: Pide un permiso. El acceso a notificaciones, para enterarse de los pagos. Lo activas tú en “Más” > “Permisos”.
+        - paragraph [ref=f9e177]:
+          - link "Ver más sobre seguridad" [ref=f9e178] [cursor=pointer]:
+            - /url: /seguridad
+      - generic "Ejemplo de qué avisos cuenta Toke" [ref=f9e184]:
+        - generic [ref=f9e185]:
+          - generic [ref=f9e189]:
+            - generic [ref=f9e190]: WhatsApp
+            - text: “Te han yapeado”
+          - generic [ref=f9e191]: No cuenta
+        - generic [ref=f9e194]:
+          - generic [ref=f9e199]:
+            - generic [ref=f9e200]: SMS
+            - text: “Pago recibido”
+          - generic [ref=f9e201]: No cuenta
+        - generic [ref=f9e204]:
+          - generic [ref=f9e205]:
+            - generic [ref=f9e206]: Aviso de pago de Yape
+            - text: Llega al celular donde recibes
+          - generic [ref=f9e207]: Se cuenta
+    - generic [ref=f9e211]:
+      - generic [ref=f9e212]: Planes y precios
+      - heading "Elige cómo empezar." [level=2] [ref=f9e213]
+      - paragraph [ref=f9e214]: Precios pensados para negocios pequeños.
+      - generic [ref=f9e215]:
+        - article [ref=f9e216]:
+          - generic [ref=f9e217]: Free
+          - generic [ref=f9e218]: S/ 0
+          - list [ref=f9e219]:
+            - listitem [ref=f9e220]: 20 avisos al día, que se renuevan cada día y se comparten entre tus negocios
+            - listitem [ref=f9e221]: Aviso en voz alta “Cauteloso”
+            - listitem [ref=f9e222]: Sin tarjeta
+          - link "Al crear cuenta" [ref=f9e223] [cursor=pointer]:
+            - /url: /descargas
+        - article [ref=f9e224]:
+          - generic [ref=f9e225]: Pro
+          - generic [ref=f9e226]:
+            - text: S/ 14.90
+            - generic [ref=f9e227]: por 1 mesluego S/ 19.90
+          - list [ref=f9e228]:
+            - listitem [ref=f9e229]: Avisos sin límite, se reinician cada día
+            - listitem [ref=f9e230]: "Aviso en voz alta “Básico”: dice la billetera y el monto"
+            - listitem [ref=f9e231]: Exportar tus cobros a Excel
+          - paragraph [ref=f9e232]: "Pack 3 meses: S/ 40 en un solo pago. No se renueva solo."
+          - paragraph [ref=f9e233]: El plan Pro se consulta y se activa por contacto.
+          - button "Contáctanos" [ref=f9e234] [cursor=pointer]
+        - article [ref=f9e235]:
+          - generic [ref=f9e236]: Empresas
+          - generic [ref=f9e237]: A medida
+          - list [ref=f9e238]:
+            - listitem [ref=f9e239]: Para cadenas y varios locales
+            - listitem [ref=f9e240]: Cuéntanos qué necesitas y lo vemos juntos
+          - link "Contáctanos" [ref=f9e241] [cursor=pointer]:
+            - /url: /contacto
+      - paragraph [ref=f9e245]: Tu equipo no paga Pro. Si alguien se une a tu negocio con plan Pro, puede usar la app en Free sin problemas.
+      - paragraph [ref=f9e246]:
+        - text: Al registrarte, comprar un plan o iniciar sesión aceptas los
+        - link "Términos y Condiciones" [ref=f9e247] [cursor=pointer]:
+          - /url: /terminos
+        - text: de Fábrica Labs.
+    - generic [ref=f9e249]:
+      - generic [ref=f9e250]:
+        - generic [ref=f9e251]: Compatibilidad
+        - heading "Para celulares Android." [level=2] [ref=f9e252]
+        - paragraph [ref=f9e253]: Toke funciona en Android 7.0 o superior. Se instala desde el archivo .APK de esta página.
+      - generic [ref=f9e254]:
+        - list [ref=f9e255]:
+          - listitem [ref=f9e256]:
+            - generic [ref=f9e257]: Descarga el archivo .APKEs el instalador oficial de Toke, solo desde esta página.
+          - listitem [ref=f9e258]:
+            - generic [ref=f9e259]: Permite instalar desde tu navegadorAndroid te pedirá activar “Fuentes desconocidas” o “Instalar apps desconocidas” para tu navegador. Es normal en las apps que se instalan fuera de Play Store.
+          - listitem [ref=f9e260]:
+            - generic [ref=f9e261]: "Toca Instalar y abre TokeSi Play Protect te muestra un aviso, es porque la app pide un permiso sensible: elige “Instalar de todos modos”."
+        - paragraph [ref=f9e262]:
+          - text: Toke pide acceso a notificaciones solo para ver tus avisos de pago. Revisa el SHA-256 del archivo en
+          - link "Descargas" [ref=f9e263] [cursor=pointer]:
+            - /url: /descargas
+          - text: si quieres comprobar que es el original.
+    - generic [ref=f9e265]:
+      - heading "¿Te interesa Toke?" [level=2] [ref=f9e266]
+      - paragraph [ref=f9e267]: Descarga la app y aprovecha todo lo que te espera.
+      - link "Descargar en web (.APK)" [ref=f9e269] [cursor=pointer]:
+        - /url: /descargas
+    - generic [ref=f9e273]:
+      - generic [ref=f9e274]: Preguntas frecuentes
+      - heading "Lo que más nos preguntan." [level=2] [ref=f9e275]
+      - generic [ref=f9e276]:
+        - group [ref=f9e277]:
+          - generic "¿TOKE tiene acceso a mis billeteras? +" [ref=f9e278] [cursor=pointer]
+        - group [ref=f9e279]:
+          - generic "¿TOKE puede mover o cobrar mi dinero? +" [ref=f9e280] [cursor=pointer]
+        - group [ref=f9e281]:
+          - generic "¿Necesito internet? +" [ref=f9e282] [cursor=pointer]
+        - group [ref=f9e283]:
+          - generic "¿Mis trabajadores ven todo mi negocio? +" [ref=f9e284] [cursor=pointer]
+        - group [ref=f9e285]:
+          - generic "¿Cuántos avisos tengo en el plan Free? +" [ref=f9e286] [cursor=pointer]
+        - group [ref=f9e287]:
+          - generic "¿Qué billeteras y bancos detecta? +" [ref=f9e288] [cursor=pointer]
+      - paragraph [ref=f9e289]:
+        - link "Ver el manual y todas las preguntas" [ref=f9e290] [cursor=pointer]:
+          - /url: /ayuda
+    - article [ref=f9e293]:
+      - heading "Cambios en los términos" [level=3] [ref=f9e294]
+      - paragraph [ref=f9e295]: Si cambian los Términos y Condiciones, te avisamos en la app o por un canal disponible, y cuando haga falta tu aceptación te la pedimos.
+  - contentinfo [ref=f9e296]:
+    - generic [ref=f9e297]:
+      - generic [ref=f9e298]:
+        - generic [ref=f9e299]:
+          - link "Toke" [ref=f9e300] [cursor=pointer]:
+            - /url: /
+          - paragraph [ref=f9e302]: Un producto de Fábrica Labs.
+        - generic [ref=f9e303]:
+          - heading "Producto" [level=4] [ref=f9e304]
+          - list [ref=f9e305]:
+            - listitem [ref=f9e306]:
+              - link "Cómo funciona" [ref=f9e307] [cursor=pointer]:
+                - /url: /#como-funciona
+            - listitem [ref=f9e308]:
+              - link "Planes" [ref=f9e309] [cursor=pointer]:
+                - /url: /#planes
+            - listitem [ref=f9e310]:
+              - link "Descargas" [ref=f9e311] [cursor=pointer]:
+                - /url: /descargas
+            - listitem [ref=f9e312]:
+              - link "Novedades" [ref=f9e313] [cursor=pointer]:
+                - /url: /novedades
+        - generic [ref=f9e314]:
+          - heading "Ayuda" [level=4] [ref=f9e315]
+          - list [ref=f9e316]:
+            - listitem [ref=f9e317]:
+              - link "Manual y preguntas" [ref=f9e318] [cursor=pointer]:
+                - /url: /ayuda
+            - listitem [ref=f9e319]:
+              - link "Seguridad" [ref=f9e320] [cursor=pointer]:
+                - /url: /seguridad
+            - listitem [ref=f9e321]:
+              - link "Eliminar mi cuenta" [ref=f9e322] [cursor=pointer]:
+                - /url: /eliminar-cuenta
+            - listitem [ref=f9e323]:
+              - link "Contacto" [ref=f9e324] [cursor=pointer]:
+                - /url: /contacto
+        - generic [ref=f9e325]:
+          - heading "Legal" [level=4] [ref=f9e326]
+          - list [ref=f9e327]:
+            - listitem [ref=f9e328]:
+              - link "Centro legal" [ref=f9e329] [cursor=pointer]:
+                - /url: /legal
+            - listitem [ref=f9e330]:
+              - link "Términos y condiciones" [ref=f9e331] [cursor=pointer]:
+                - /url: /terminos
+            - listitem [ref=f9e332]:
+              - link "Privacidad" [ref=f9e333] [cursor=pointer]:
+                - /url: /privacidad
+            - listitem [ref=f9e334]:
+              - link "Cookies" [ref=f9e335] [cursor=pointer]:
+                - /url: /cookies
+            - listitem [ref=f9e336]:
+              - link "Planes y pagos" [ref=f9e337] [cursor=pointer]:
+                - /url: /planes-y-pagos
+            - listitem [ref=f9e338]:
+              - link "Eliminar cuenta" [ref=f9e339] [cursor=pointer]:
+                - /url: /eliminar-cuenta
+            - listitem [ref=f9e340]:
+              - link "Seguridad y uso aceptable" [ref=f9e341] [cursor=pointer]:
+                - /url: /seguridad
+            - listitem [ref=f9e342]:
+              - link "Licencias" [ref=f9e343] [cursor=pointer]:
+                - /url: /licencias
+      - paragraph [ref=f9e344]:
+        - text: "Sitio oficial de Toke:"
+        - strong [ref=f9e345]: tokelabs.pages.dev
+        - text: . Toke solo se descarga desde aquí. No te dejes engañar por páginas parecidas en otras redes.
+      - generic [ref=f9e346]:
+        - generic [ref=f9e347]: © 2026 Fábrica Labs. Todos los derechos reservados.
+        - generic [ref=f9e348]: Yape y Plin son marcas de sus titulares. Toke no está afiliada, respaldada ni representa a dichas marcas.
