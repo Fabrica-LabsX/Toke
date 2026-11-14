@@ -63,7 +63,7 @@ object ConstructorDetalleOperacion {
                     ),
                 )
             }
-            add(FilaDetalle(IconoFila.ID, "ID Operación", "#" + operacion.id.takeLast(6)))
+            // Sin código ni ID de operación en cobros detectados (eliminado por no ser de utilidad).
         }
 
         return DetalleOperacion(

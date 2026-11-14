@@ -57,12 +57,12 @@ class ConstructorDetalleOperacionTest {
     fun filasEnOrdenYSinNegocioSiNoSeConoce() {
         val conNegocio = ConstructorDetalleOperacion.construir(op(), "Mi Negocio", null, 0, null)
         assertEquals(
-            listOf(IconoFila.NEGOCIO, IconoFila.FECHA, IconoFila.HORA, IconoFila.PAGADOR, IconoFila.ID),
+            listOf(IconoFila.NEGOCIO, IconoFila.FECHA, IconoFila.HORA, IconoFila.PAGADOR),
             iconos(conNegocio),
         )
         val sinNegocio = ConstructorDetalleOperacion.construir(op(), "  ", null, 0, null)
         assertEquals(
-            listOf(IconoFila.FECHA, IconoFila.HORA, IconoFila.PAGADOR, IconoFila.ID),
+            listOf(IconoFila.FECHA, IconoFila.HORA, IconoFila.PAGADOR),
             iconos(sinNegocio),
         )
     }
@@ -91,8 +91,8 @@ class ConstructorDetalleOperacionTest {
     }
 
     @Test
-    fun idMuestraLosUltimosSeisCaracteresComoEnLaLista() {
+    fun sinCodigoDeOperacionEnDetalle() {
         val d = ConstructorDetalleOperacion.construir(op(id = "abcdefghijklmnopqrstuvwxyz"), null, null, 0, null)
-        assertEquals("#uvwxyz", d.filas.last { it.icono == IconoFila.ID }.valor)
+        assertFalse(d.filas.any { it.icono == IconoFila.ID })
     }
 }

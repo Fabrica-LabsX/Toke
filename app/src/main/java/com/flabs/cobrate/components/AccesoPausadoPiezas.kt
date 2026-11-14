@@ -1,5 +1,4 @@
 package com.flabs.cobrate.components
-import com.flabs.cobrate.ui.theme.solidoSobre
 import com.flabs.cobrate.ui.theme.TokeMedidas
 import com.flabs.cobrate.ui.theme.TokeRojo
 import com.flabs.cobrate.ui.theme.TokeAmbarTexto
@@ -42,7 +41,8 @@ fun AccesoPausadoIcono(paleta: TokePaleta) {
     Box(modifier = Modifier.size(104.dp)) {
         Surface(
             shape = RoundedCornerShape(22.dp),
-            color = RojoPausa.solidoSobre(paleta.fondo, 0.12f),
+            color = paleta.rojoFondo,
+            border = BorderStroke(1.dp, paleta.rojoBorde),
             modifier = Modifier
                 .align(Alignment.Center)
                 .size(92.dp),

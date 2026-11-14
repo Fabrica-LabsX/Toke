@@ -43,6 +43,7 @@ fun MetodosDeCobroScreen(
     businessViewModel: BusinessViewModel,
     soloLectura: Boolean = false,
     onBack: (() -> Unit)? = null,
+    onIrAPlanes: () -> Unit = {},
 ) {
     val paleta = tokePaleta()
     val esOscuro = tokeEsOscuro()
@@ -53,10 +54,13 @@ fun MetodosDeCobroScreen(
     val metodosPorNegocio by MetodoDeCobroStore.metodosPorNegocio.collectAsState()
     val etapaSubidaTexto by businessViewModel.uploadStage.collectAsState()
     val qrCache by businessViewModel.qrCache.collectAsState()
+    val planEstado by com.flabs.cobrate.features.planes.PlanStore.estado.collectAsState()
+    val esPro = planEstado?.plan == com.flabs.cobrate.features.planes.Plan.PRO
 
     val metodos = remember(negocioId, metodosPorNegocio) {
         negocioId?.let { metodosPorNegocio[it] } ?: emptyList()
     }
+    val puedeVincularOtro = esPro || metodos.size < com.flabs.cobrate.features.planes.PlanLogica.MAX_METODOS_FREE
     val etapaSubida = remember(etapaSubidaTexto) {
         etapaSubidaTexto?.let { runCatching { QrUploadStage.valueOf(it) }.getOrNull() }
     }
@@ -174,12 +178,20 @@ fun MetodosDeCobroScreen(
                 }
                 if (puedeEditar) {
                     item {
-                        CobrosBoton(
-                            paleta = paleta,
-                            texto = "+ Vincular otro método de cobro",
-                            principal = false,
-                            onClick = { mostrarCrear = true },
-                        )
+                        if (puedeVincularOtro) {
+                            CobrosBoton(
+                                paleta = paleta,
+                                texto = "+ Vincular otro método de cobro",
+                                principal = false,
+                                onClick = { mostrarCrear = true },
+                            )
+                        } else {
+                            com.flabs.cobrate.components.BotonProBloqueado(
+                                paleta = paleta,
+                                texto = "Vincular otro método (Máx 1 en Free)",
+                                onClick = onIrAPlanes,
+                            )
+                        }
                     }
                 }
             }
@@ -201,7 +213,11 @@ fun MetodosDeCobroScreen(
             existentes = metodos,
             onDismiss = { mostrarCrear = false },
             onConfirm = { tipo, dato, titular ->
-                businessViewModel.crearMetodo(tipo, dato, titular)
+                if (!puedeVincularOtro) {
+                    onIrAPlanes()
+                } else {
+                    businessViewModel.crearMetodo(tipo, dato, titular)
+                }
                 mostrarCrear = false
             },
         )

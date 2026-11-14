@@ -1,5 +1,4 @@
 package com.flabs.cobrate.features.cobros
-import com.flabs.cobrate.ui.theme.solidoSobre
 import com.flabs.cobrate.ui.theme.TokeRojo
 import com.flabs.cobrate.ui.theme.TokeAmbarTexto
 
@@ -141,8 +140,8 @@ fun AvisoPlin(paleta: TokePaleta) {
     val ambar = TokeAmbarTexto
     Surface(
         shape = RoundedCornerShape(18.dp),
-        color = paleta.ambar.solidoSobre(paleta.fondo, 0.14f),
-        border = BorderStroke(1.dp, paleta.ambar.solidoSobre(paleta.fondo, 0.4f)),
+        color = paleta.ambarFondo,
+        border = BorderStroke(1.dp, paleta.ambarBorde),
         modifier = Modifier.fillMaxWidth(),
     ) {
         Row(modifier = Modifier.padding(14.dp), verticalAlignment = Alignment.Top) {

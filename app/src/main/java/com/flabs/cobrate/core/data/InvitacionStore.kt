@@ -23,7 +23,8 @@ object InvitacionStore {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     private const val LARGO_CODIGO = 6
-    private const val MINUTOS_VALIDEZ = 20L
+    private const val MINUTOS_VALIDEZ = 5L
+    const val RETENCION_POST_VENCIMIENTO_MS = 60 * 60 * 1000L // 1 hora como revocado, luego se elimina definitivo
 
     // Caracteres legibles (sin 0/O, 1/I, etc.) para evitar confusiones al leerlos.
     private val CARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789".toCharArray()

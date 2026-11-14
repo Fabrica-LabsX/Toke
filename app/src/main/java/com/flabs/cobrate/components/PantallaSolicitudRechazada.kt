@@ -1,6 +1,7 @@
 package com.flabs.cobrate.components
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -35,8 +36,11 @@ fun PantallaSolicitudRechazada(
     onEntendido: () -> Unit
 ) {
     val paleta = tokePaleta()
-    Box(modifier = Modifier.fillMaxSize()) {
-        FondoPanelBorroso()
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(paleta.fondo)
+    ) {
         Box(
             modifier = Modifier.fillMaxSize().padding(horizontal = TokeMedidas.MargenLateral),
             contentAlignment = Alignment.Center,

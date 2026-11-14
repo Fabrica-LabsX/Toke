@@ -20,8 +20,9 @@ class ActualizacionLogicaTest {
     }
 
     @Test
-    fun opcionalCuandoHayNuevaPeroSigueAdmitida() {
-        assertTrue(ActualizacionLogica.decidir(7, m(10, 5), 0, 0) is EstadoActualizacion.Opcional)
+    fun obligatoriaCuandoDejaDeSerLaUltima() {
+        // Al detectar una nueva versión se bloquea directamente como obligatoria
+        assertTrue(ActualizacionLogica.decidir(7, m(10, 5), 0, 0) is EstadoActualizacion.Obligatoria)
     }
 
     @Test
@@ -42,10 +43,10 @@ class ActualizacionLogicaTest {
     }
 
     @Test
-    fun laObligatoriaGuardadaSigueBloqueandoSinRedPeroLaOpcionalVencidaNo() {
+    fun laObligatoriaGuardadaSigueBloqueando() {
         val vieja = ActualizacionLogica.TOLERANCIA_OPCIONAL_MS + 1
         assertTrue(ActualizacionLogica.decidir(4, m(10, 5), 0, vieja) is EstadoActualizacion.Obligatoria)
-        assertEquals(EstadoActualizacion.AlDia, ActualizacionLogica.decidir(7, m(10, 5), 0, vieja))
+        assertTrue(ActualizacionLogica.decidir(7, m(10, 5), 0, vieja) is EstadoActualizacion.Obligatoria)
     }
 
     @Test

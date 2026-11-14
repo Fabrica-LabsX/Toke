@@ -74,13 +74,17 @@ object OperacionPendienteStore {
     
     private val json = Json { ignoreUnknownKeys = true }
     private val repository = OperacionRepository()
+    @Volatile
+    private var inicializado = false
 
     /**
      * Inicializa el store y gestiona la transición de sesión y monitoreo de red mediante un único colector.
      */
     fun init(context: Context) {
+        if (inicializado) return
         val ctx = context.applicationContext
         appContext = ctx
+        inicializado = true
         
         // 1. Único colector de transición de sesión con protección contra carreras A -> B
         scope.launch {

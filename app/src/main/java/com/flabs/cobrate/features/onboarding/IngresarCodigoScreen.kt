@@ -60,14 +60,14 @@ fun IngresarCodigoScreen(
     val scope = rememberCoroutineScope()
     val paleta = tokePaleta()
 
-    AccesoFondo(paleta = paleta) {
+    AccesoFondo(paleta = paleta, esDesplazable = false) {
         BotonAtras(paleta, onVolver)
         Column(
             modifier = Modifier.fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(10.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            IconoAccesoAnimado(paleta, TokeIcons.Llave, tamano = 84, balanceo = true)
+            IconoAccesoAnimado(paleta, TokeIcons.Llave, tamano = 72, balanceo = true)
             TituloAcceso(
                 paleta = paleta,
                 titulo = stringResource(R.string.unirse_invitacion_titulo),
@@ -75,7 +75,7 @@ fun IngresarCodigoScreen(
                 centrado = true,
             )
         }
-        // El cuadro del código va abajo, al alcance del pulgar.
+        // El cuadro del código va abajo, al alcance del pulgar en 9:16 sin scroll
         Spacer(modifier = Modifier.weight(1f))
         CampoCodigoGrande(
             paleta = paleta,
@@ -84,7 +84,12 @@ fun IngresarCodigoScreen(
             placeholder = stringResource(R.string.empezar_placeholder_codigo),
             onCambia = { codigo = it.uppercase().filter { c -> !c.isWhitespace() }.take(12) },
         )
-        BotonAcceso(paleta, stringResource(R.string.empezar_unirme), principal = codigo.isNotBlank()) {
+        BotonAcceso(
+            paleta = paleta,
+            texto = stringResource(R.string.empezar_unirme),
+            principal = codigo.isNotBlank(),
+            altura = 44.dp,
+        ) {
             if (codigo.isNotBlank()) {
                 scope.launch { validarCodigoInvitacion(codigo.trim())?.let(onCodigoValido) }
             }

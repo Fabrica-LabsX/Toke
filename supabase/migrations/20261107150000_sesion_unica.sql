@@ -62,18 +62,21 @@ begin
 end;
 $$;
 
--- Al cerrar sesión a propósito se libera, solo si el celular que cierra es el activo.
-create or replace function public.liberar_sesion(p_dispositivo_id text) returns void
+-- Al cerrar sesión a propósito se libera la cuenta de forma definitiva.
+create or replace function public.liberar_sesion(p_dispositivo_id text default null) returns void
 language plpgsql
 security definer
 set search_path = public
 as $$
 begin
   if auth.uid() is null then
-    raise exception 'No autenticado';
+    return;
   end if;
-  delete from public.sesiones_activas
-   where cuenta_id = auth.uid() and dispositivo_id = p_dispositivo_id;
+  if p_dispositivo_id is null or btrim(p_dispositivo_id) = '' then
+    delete from public.sesiones_activas where cuenta_id = auth.uid();
+  else
+    delete from public.sesiones_activas where cuenta_id = auth.uid() and dispositivo_id = p_dispositivo_id;
+  end if;
 end;
 $$;
 

@@ -34,14 +34,16 @@ sealed class AvisoSesion {
     /** La cuenta ya está abierta en otro celular: preguntar si se usa aquí. */
     data class Ocupada(val dispositivoNombre: String, val iniciadaEn: Long) : AvisoSesion()
 
-    /** Otro celular tomó la cuenta: este se cierra. */
-    data object Desplazada : AvisoSesion()
+    /** Otro celular tomó la cuenta: este se desplaza y permite retomar con "Usar aquí" o cerrar sesión. */
+    data class Desplazada(val dispositivoNombre: String? = null) : AvisoSesion()
 }
 
 /**
- * Sesión única: una cuenta solo puede estar abierta en un celular. Habla con `reclamar_sesion` y
- * `liberar_sesion` (migración 20261107150000). Si el servidor no responde o la función no existe, no
- * bloquea nada: los pagos detectados no pueden interrumpirse.
+ * Sesión única: una cuenta solo puede estar abierta en un celular a la vez (estilo WhatsApp Web).
+ * - Al iniciar sesión en este celular, reclama el control y desplaza a cualquier otro celular.
+ * - Si otro celular reclama la cuenta, este celular recibe el aviso de desplazamiento con opción de "Usar aquí".
+ * - Si cualquiera de los dos celulares cierra sesión, ambos cierran sesión de inmediato.
+ * - Cerrar sesión y volver a entrar en el mismo celular NUNCA muestra el aviso de sesión ocupada.
  */
 object SesionUnicaStore {
     private const val TAG = "SesionUnica"
@@ -54,8 +56,13 @@ object SesionUnicaStore {
     private var canal: RealtimeChannel? = null
     private var uidEscuchado: String? = null
 
+    /** Callback ejecutado cuando el otro celular cierra sesión remotamente. */
+    var onCerrarSesionRemoto: (() -> Unit)? = null
+
     fun init(context: Context) {
-        if (prefs == null) prefs = context.applicationContext.getSharedPreferences("sesion_unica", Context.MODE_PRIVATE)
+        if (prefs == null) {
+            prefs = context.applicationContext.getSharedPreferences("sesion_unica", Context.MODE_PRIVATE)
+        }
     }
 
     private fun dispositivoId(): String {
@@ -83,13 +90,28 @@ object SesionUnicaStore {
                 json["dispositivo_nombre"]?.jsonPrimitive?.contentOrNull ?: "Otro celular",
                 json["iniciada_en"]?.jsonPrimitive?.longOrNull ?: System.currentTimeMillis(),
             )
-        } else RespuestaSesion.Libre
+        } else {
+            RespuestaSesion.Libre
+        }
     } catch (e: Exception) {
         LogSeguro.w(TAG, "No se pudo consultar la sesión única; se continúa sin bloquear", e)
         RespuestaSesion.SinRespuesta
     }
 
-    /** Pregunta al servidor si este celular puede usar la cuenta abierta. Llamar al iniciar sesión y al volver a la app. */
+    /**
+     * Llamar al autenticarse explícitamente (Login o Registro exitoso):
+     * Toma el control inmediato de la sesión para este celular (forzar = true)
+     * para que jamás bloquee al usuario que acaba de autenticarse.
+     */
+    suspend fun reclamarAlLogin() {
+        val uid = CuentaStore.sesionActual.value?.id ?: return
+        llamar(forzar = true)
+        prefs?.edit()?.putBoolean(claveReclamada(uid), true)?.apply()
+        _aviso.value = null
+        escuchar(uid)
+    }
+
+    /** Pregunta al servidor si este celular puede usar la cuenta abierta. Llamar al volver a la app. */
     suspend fun verificar() {
         val uid = CuentaStore.sesionActual.value?.id ?: return
         if (_aviso.value != null) return
@@ -99,14 +121,12 @@ object SesionUnicaStore {
                 escuchar(uid)
             }
             is AccionSesion.Preguntar -> {
-                // Si yo tenía la cuenta y ahora está ocupada, otro celular me la quitó.
-                _aviso.value = if (prefs?.getBoolean(claveReclamada(uid), false) == true) AvisoSesion.Desplazada
-                else AvisoSesion.Ocupada(accion.dispositivoNombre, accion.iniciadaEn)
+                _aviso.value = AvisoSesion.Desplazada(accion.dispositivoNombre)
             }
         }
     }
 
-    /** "Usar aquí": este celular pasa a ser el activo. */
+    /** "Usar aquí": este celular pasa a ser el activo nuevamente (takeover estilo WhatsApp Web). */
     suspend fun usarAqui() {
         val uid = CuentaStore.sesionActual.value?.id ?: return
         llamar(forzar = true)
@@ -115,7 +135,7 @@ object SesionUnicaStore {
         escuchar(uid)
     }
 
-    /** Se cierra la sesión (a propósito o desplazada): libera la cuenta si era de este celular. */
+    /** Se cierra la sesión (a propósito o desplazada): libera la cuenta en Supabase. */
     suspend fun liberar(uid: String?) {
         detener()
         _aviso.value = null
@@ -137,7 +157,7 @@ object SesionUnicaStore {
         if (c != null) scope.launch { runCatching { c.unsubscribe() } }
     }
 
-    /** Escucha en tiempo real si otro celular toma la cuenta. */
+    /** Escucha en tiempo real si otro celular toma la cuenta o si se cierra sesión remotamente. */
     private fun escuchar(uid: String) {
         if (uidEscuchado == uid) return
         detener()
@@ -151,14 +171,25 @@ object SesionUnicaStore {
                         table = "sesiones_activas"
                         filter("cuenta_id", FilterOperator.EQ, uid)
                     }.collect { accion ->
-                        val record = when (accion) {
-                            is PostgresAction.Insert -> accion.record
-                            is PostgresAction.Update -> accion.record
-                            else -> null
-                        }
-                        val activo = record?.get("dispositivo_id")?.jsonPrimitive?.contentOrNull
-                        if (SesionUnicaLogica.meSacaron(dispositivoId(), activo)) {
-                            _aviso.value = AvisoSesion.Desplazada
+                        when (accion) {
+                            is PostgresAction.Insert, is PostgresAction.Update -> {
+                                val record = (accion as? PostgresAction.Insert)?.record
+                                    ?: (accion as? PostgresAction.Update)?.record
+                                val activo = record?.get("dispositivo_id")?.jsonPrimitive?.contentOrNull
+                                val nombre = record?.get("dispositivo_nombre")?.jsonPrimitive?.contentOrNull
+                                if (SesionUnicaLogica.meSacaron(dispositivoId(), activo)) {
+                                    _aviso.value = AvisoSesion.Desplazada(nombre)
+                                }
+                            }
+                            is PostgresAction.Delete -> {
+                                // Si se cerró la sesión remotamente, cerrar sesión de inmediato en este celular
+                                LogSeguro.d(TAG, "Sesión cerrada remotamente; cerrando sesión local de inmediato")
+                                _aviso.value = null
+                                launch(Dispatchers.Main) {
+                                    onCerrarSesionRemoto?.invoke()
+                                }
+                            }
+                            else -> Unit
                         }
                     }
                 }.onFailure { LogSeguro.w(TAG, "Error en la escucha de la sesión única", it) }

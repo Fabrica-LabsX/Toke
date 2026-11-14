@@ -34,6 +34,7 @@ class AuthViewModel : ViewModel() {
         val result = SupabaseAuthBridge.iniciarSesionDueño(email, password)
         if (result.isSuccess) {
             LoginRateLimiter.registrarExito(email)
+            runCatching { com.flabs.cobrate.core.data.SesionUnicaStore.reclamarAlLogin() }
         } else {
             val ex = result.exceptionOrNull()
             val msg = ex?.message?.lowercase() ?: ""
@@ -75,7 +76,11 @@ class AuthViewModel : ViewModel() {
 
     /** Paso 4 & 5 de Registro: establece nombre y contraseña elegida. */
     suspend fun completarRegistro(nombre: String, passwordElegida: String): Result<Unit> {
-        return SupabaseAuthBridge.completarRegistro(nombre, passwordElegida)
+        val result = SupabaseAuthBridge.completarRegistro(nombre, passwordElegida)
+        if (result.isSuccess) {
+            runCatching { com.flabs.cobrate.core.data.SesionUnicaStore.reclamarAlLogin() }
+        }
+        return result
     }
 
     /** La cuenta ya fue eliminada en el servidor: se borra todo lo local y se vuelve al acceso (sin llamar a la red). */

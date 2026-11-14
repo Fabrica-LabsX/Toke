@@ -26,7 +26,10 @@ import androidx.compose.ui.unit.sp
 import com.flabs.cobrate.ui.theme.PlusJakartaSans
 import com.flabs.cobrate.ui.theme.TokePaleta
 
-/** Tarjeta de una opción de inicio: icono, etiqueta, título, explicación y su contenido. */
+/**
+ * Tarjeta de opción de inicio: expandida y rica en información ("llena"), pero proporcionalmente
+ * escalada para resolución 9:16 sin desbordar ni requerir scroll.
+ */
 @Composable
 fun TarjetaOpcionAcceso(
     paleta: TokePaleta,
@@ -37,48 +40,73 @@ fun TarjetaOpcionAcceso(
     contenido: @Composable ColumnScope.() -> Unit,
 ) {
     Surface(
-        shape = RoundedCornerShape(24.dp),
+        shape = RoundedCornerShape(18.dp),
         color = paleta.tarjeta,
         border = BorderStroke(1.dp, paleta.borde),
         modifier = Modifier.fillMaxWidth(),
     ) {
-        Column(modifier = Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Surface(shape = RoundedCornerShape(12.dp), color = paleta.tileFondo, modifier = Modifier.size(42.dp)) {
+        Column(
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Surface(
+                    shape = RoundedCornerShape(10.dp),
+                    color = paleta.tileFondo,
+                    modifier = Modifier.size(34.dp),
+                ) {
                     Box(contentAlignment = Alignment.Center) {
                         Icon(
                             painter = painterResource(id = icono),
                             contentDescription = null,
                             tint = paleta.textoPrincipal,
-                            modifier = Modifier.size(22.dp),
+                            modifier = Modifier.size(18.dp),
                         )
                     }
                 }
-                Spacer(modifier = Modifier.weight(1f).width(8.dp))
-                Surface(shape = RoundedCornerShape(9999.dp), color = paleta.tileFondo) {
+                Spacer(modifier = Modifier.width(10.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = titulo,
+                        style = TextStyle(
+                            fontFamily = PlusJakartaSans,
+                            fontWeight = FontWeight.ExtraBold,
+                            fontSize = 15.sp,
+                        ),
+                        color = paleta.textoPrincipal,
+                    )
+                }
+                Surface(
+                    shape = RoundedCornerShape(9999.dp),
+                    color = paleta.tileFondo,
+                ) {
                     Text(
                         text = etiqueta,
-                        style = TextStyle(fontFamily = PlusJakartaSans, fontWeight = FontWeight.Bold, fontSize = 12.sp),
+                        style = TextStyle(
+                            fontFamily = PlusJakartaSans,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 10.5.sp,
+                        ),
                         color = paleta.enlaceVerde,
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 5.dp),
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
                     )
                 }
             }
-            Text(
-                text = titulo,
-                style = TextStyle(fontFamily = PlusJakartaSans, fontWeight = FontWeight.ExtraBold, fontSize = 19.sp),
-                color = paleta.textoPrincipal,
-            )
+
             Text(
                 text = texto,
                 style = TextStyle(
                     fontFamily = PlusJakartaSans,
                     fontWeight = FontWeight.Medium,
-                    fontSize = 14.sp,
-                    lineHeight = 20.sp,
+                    fontSize = 12.sp,
+                    lineHeight = 16.sp,
                 ),
                 color = paleta.textoSecundario,
             )
+
             contenido()
         }
     }

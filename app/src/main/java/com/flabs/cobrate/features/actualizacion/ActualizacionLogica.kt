@@ -46,8 +46,8 @@ object ActualizacionLogica {
     /**
      * Compara números de versión (nunca texto).
      * - Sin datos verificados: no se bloquea a nadie.
-     * - Instalada < mínima: obligatoria. Aplica aunque la respuesta sea guardada: la mínima solo sube.
-     * - Instalada < última: opcional (si la respuesta guardada no es demasiado vieja).
+     * - Si la versión instalada deja de ser la más reciente (instalado < latestVersionCode):
+     *   se bloquea directamente como Obligatoria hasta que el usuario actualice.
      */
     fun decidir(
         instalado: Int,
@@ -57,8 +57,7 @@ object ActualizacionLogica {
         tolerancia: Long = TOLERANCIA_OPCIONAL_MS,
     ): EstadoActualizacion = when {
         m == null -> EstadoActualizacion.AlDia
-        instalado < m.minSupportedVersionCode -> EstadoActualizacion.Obligatoria(m)
-        instalado < m.latestVersionCode && ahora - verificadoEn <= tolerancia -> EstadoActualizacion.Opcional(m)
+        instalado < m.latestVersionCode -> EstadoActualizacion.Obligatoria(m)
         else -> EstadoActualizacion.AlDia
     }
 

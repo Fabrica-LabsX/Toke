@@ -35,6 +35,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import java.util.Collections
 
@@ -83,6 +85,19 @@ class BusinessViewModel : ViewModel() {
                 }
             }
         }
+        viewModelScope.launch {
+            while (isActive) {
+                delay(3000L)
+                val actuales = _codigosActivos.value
+                if (actuales.isNotEmpty()) {
+                    val ahora = System.currentTimeMillis()
+                    val vigentes = SolicitudesIngreso.codigosVigentes(actuales, ahora)
+                    if (vigentes.size != actuales.size) {
+                        _codigosActivos.value = vigentes
+                    }
+                }
+            }
+        }
     }
 
     /** Solicitudes de ingreso pendientes (CAPA 45) */
@@ -110,7 +125,7 @@ class BusinessViewModel : ViewModel() {
             val cuenta = cuentasCheadas.find { it.id == rel.cuentaId }
             val nombreFinal = when {
                 !nombrePropuesto.isNullOrBlank() -> nombrePropuesto
-                !cuenta?.username.isNullOrBlank() -> cuenta!!.username
+                !cuenta?.username.isNullOrBlank() -> cuenta.username
                 else -> "Trabajador nuevo"
             }
 
@@ -322,6 +337,13 @@ class BusinessViewModel : ViewModel() {
             FeedbackManager.showErrorMessage("Esta billetera ya está activa en otro negocio tuyo")
             return
         }
+        val plan = com.flabs.cobrate.features.planes.PlanStore.plan
+        val esPro = plan == com.flabs.cobrate.features.planes.Plan.PRO
+        val metodosActuales = MetodoDeCobroStore.obtenerPorNegocio(id).size
+        if (!esPro && metodosActuales >= com.flabs.cobrate.features.planes.PlanLogica.MAX_METODOS_FREE) {
+            FeedbackManager.showErrorMessage("El plan Free solo permite 1 método de cobro. Pásate a Pro para vincular más.")
+            return
+        }
         viewModelScope.launch {
             FeedbackManager.setLoading(true, "Creando método...")
             MetodoDeCobroStore.crear(id, tipo, dato, nombre).onSuccess {
@@ -421,12 +443,14 @@ class BusinessViewModel : ViewModel() {
     fun revocarCodigo(codigo: String) {
         viewModelScope.launch {
             FeedbackManager.setLoading(true, "Revocando...")
+            _codigosActivos.value = _codigosActivos.value.filter { it.codigo != codigo }
             invitacionRepo.revocar(codigo).onSuccess { res ->
                 cargarEquipoDelNegocio()
                 cargarCodigosActivos()
                 FeedbackManager.setLoading(false)
                 FeedbackManager.showSuccess(res.mensaje)
             }.onFailure { err ->
+                cargarCodigosActivos()
                 FeedbackManager.setLoading(false)
                 FeedbackManager.showErrorMessage(com.flabs.cobrate.core.logic.ErrorMapper.amable(err, "Error al revocar el código"))
             }
@@ -438,8 +462,25 @@ class BusinessViewModel : ViewModel() {
      * la lista de códigos activos y conciliando en segundo plano.
      */
     suspend fun crearInvitacion(negocioId: String, requiereAprobacion: Boolean = true): Result<InvitacionTrabajador> {
-        val max = NegocioStore.maxTrabajadores(negocioId)
+        val plan = com.flabs.cobrate.features.planes.PlanStore.plan
+        val esPro = plan == com.flabs.cobrate.features.planes.Plan.PRO
+        val codigosActivos = _codigosActivos.value.size
         val actuales = trabajadoresReales.value.size
+
+        if (codigosActivos >= com.flabs.cobrate.features.planes.PlanLogica.MAX_CODIGOS_ACTIVOS_GLOBAL) {
+            return Result.failure(Exception("Llegaste al límite máximo de 5 códigos activos a la vez. Espera a que uno expire, se use o sea revocado."))
+        }
+
+        if (!esPro) {
+            if (actuales >= com.flabs.cobrate.features.planes.PlanLogica.MAX_TRABAJADORES_FREE) {
+                return Result.failure(Exception("PLAN_REQUERIDO: Tu plan Free solo permite hospedar 1 trabajador. Pásate a Pro para invitar a más colaboradores."))
+            }
+            if (codigosActivos >= com.flabs.cobrate.features.planes.PlanLogica.MAX_CODIGOS_ACTIVOS_FREE) {
+                return Result.failure(Exception("PLAN_REQUERIDO: Tu plan Free solo permite 1 código de invitación activo. Pásate a Pro para generar más."))
+            }
+        }
+
+        val max = NegocioStore.maxTrabajadores(negocioId)
         if (!com.flabs.cobrate.features.negocios.NegocioEdicionLogica.puedeInvitar(max, actuales)) {
             return Result.failure(Exception("Llegaste al máximo de $max trabajadores de tu negocio."))
         }
@@ -467,9 +508,7 @@ class BusinessViewModel : ViewModel() {
 
         val resCodigos = runCatching { invitacionRepo.codigosActivos(negocioId) }.getOrNull()
         resCodigos?.onSuccess { lista ->
-            val combinada = (_codigosActivos.value + lista)
-                .filter { it.negocioId == negocioId && it.estado == EstadoInvitacion.PENDIENTE }
-            val vigentes = SolicitudesIngreso.codigosVigentes(combinada, System.currentTimeMillis())
+            val vigentes = SolicitudesIngreso.codigosVigentes(lista, System.currentTimeMillis())
                 .distinctBy { it.codigo }
                 .sortedBy { it.expiracion }
             _codigosActivos.value = vigentes

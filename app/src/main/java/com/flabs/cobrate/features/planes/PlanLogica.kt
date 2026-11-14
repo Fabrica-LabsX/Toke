@@ -38,6 +38,11 @@ object PlanLogica {
     const val ROJO_PORCIENTO = 32
     const val DIAS_HISTORIAL_FREE = 30
     const val MAX_NEGOCIOS_FREE = 1
+    const val MAX_METODOS_FREE = 1
+    const val MAX_TRABAJADORES_FREE = 1
+    const val MAX_CODIGOS_ACTIVOS_GLOBAL = 5
+    const val MAX_CODIGOS_ACTIVOS_FREE = 1
+    const val MAX_EXPORTES_SEMANALES_FREE = 3
 
     fun aEstado(dto: EstadoPlanDto): EstadoPlan = EstadoPlan(
         plan = if (dto.plan.equals("PRO", ignoreCase = true)) Plan.PRO else Plan.FREE,
@@ -80,6 +85,22 @@ object PlanLogica {
     fun puedeVerPeriodo(plan: Plan?, periodo: PeriodoReporte) = !esFree(plan) || periodo == PeriodoReporte.DIA
 
     fun puedeCrearOtroNegocio(plan: Plan?, negociosPropios: Int) = !esFree(plan) || negociosPropios < MAX_NEGOCIOS_FREE
+
+    fun puedeAgregarMetodo(plan: Plan?, metodosActuales: Int) = !esFree(plan) || metodosActuales < MAX_METODOS_FREE
+
+    /**
+     * Regla de invitaciones:
+     * - Universal: aforo máximo de 5 códigos activos a la vez.
+     * - Free: máximo 1 trabajador hospedado y 1 código activo a la vez.
+     */
+    fun puedeCrearCodigoInvitacion(plan: Plan?, trabajadoresActuales: Int, codigosActivos: Int): Boolean {
+        if (codigosActivos >= MAX_CODIGOS_ACTIVOS_GLOBAL) return false
+        if (esFree(plan)) {
+            if (trabajadoresActuales >= MAX_TRABAJADORES_FREE) return false
+            if (codigosActivos >= MAX_CODIGOS_ACTIVOS_FREE) return false
+        }
+        return true
+    }
 
     /** Desde cuándo (milisegundos) se ven las operaciones: Free ve los últimos 30 días; Pro, todo. */
     fun desdeHistorial(plan: Plan?, ahora: Long): Long =

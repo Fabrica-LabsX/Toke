@@ -63,7 +63,8 @@ import kotlinx.coroutines.launch
 @Composable
 fun InvitarTrabajadorScreen(
     businessViewModel: BusinessViewModel,
-    onCerrar: () -> Unit
+    onCerrar: () -> Unit,
+    onIrAPlanes: () -> Unit = {},
 ) {
     val paleta = tokePaleta()
     var invitacionActiva by remember { mutableStateOf<InvitacionTrabajador?>(null) }
@@ -75,6 +76,10 @@ fun InvitarTrabajadorScreen(
     val relaciones by RelacionCuentaNegocioStore.relaciones.collectAsState()
     val negocios by NegocioStore.negocios.collectAsState()
     val negocioActivoId by NegocioStore.negocioActivoId.collectAsState()
+    val planEstado by com.flabs.cobrate.features.planes.PlanStore.estado.collectAsState()
+    val esPro = planEstado?.plan == com.flabs.cobrate.features.planes.Plan.PRO
+    val trabajadores by businessViewModel.trabajadoresReales.collectAsState()
+    val codigosActivos by businessViewModel.codigosActivos.collectAsState()
 
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -147,29 +152,51 @@ fun InvitarTrabajadorScreen(
             if (negocioActual != null) {
                 FilaAprobacion(paleta, requiereAprobacion) { requiereAprobacion = it }
 
-                BotonAcceso(
-                    paleta = paleta,
-                    texto = when {
-                        creandoInvitacion -> "Generando..."
-                        invitacionActiva == null -> "Generar código"
-                        else -> "Generar otro código"
-                    },
-                    principal = !creandoInvitacion,
-                ) {
-                    if (creandoInvitacion) return@BotonAcceso
-                    creandoInvitacion = true
-                    scope.launch {
-                        try {
-                            businessViewModel.crearInvitacion(negocioActual.id, requiereAprobacion).onSuccess {
-                                invitacionActiva = it
-                                if (requiereAprobacion) {
-                                    FeedbackManager.showSuccess("Código creado. Quien lo use deberá esperar tu aprobación.")
+                val puedeCrear = esPro || (trabajadores.size < com.flabs.cobrate.features.planes.PlanLogica.MAX_TRABAJADORES_FREE && codigosActivos.size < com.flabs.cobrate.features.planes.PlanLogica.MAX_CODIGOS_ACTIVOS_FREE)
+                val aforoLleno = codigosActivos.size >= com.flabs.cobrate.features.planes.PlanLogica.MAX_CODIGOS_ACTIVOS_GLOBAL
+
+                if (aforoLleno) {
+                    BotonAcceso(
+                        paleta = paleta,
+                        texto = "Aforo máximo de 5 códigos alcanzado",
+                        principal = false,
+                        onClick = {},
+                    )
+                } else if (!puedeCrear) {
+                    com.flabs.cobrate.components.BotonProBloqueado(
+                        paleta = paleta,
+                        texto = if (trabajadores.size >= 1) "Máx 1 colaborador en Free (Ver planes)" else "Máx 1 código en Free (Ver planes)",
+                        onClick = onIrAPlanes,
+                    )
+                } else {
+                    BotonAcceso(
+                        paleta = paleta,
+                        texto = when {
+                            creandoInvitacion -> "Generando..."
+                            invitacionActiva == null -> "Generar código"
+                            else -> "Generar otro código"
+                        },
+                        principal = !creandoInvitacion,
+                    ) {
+                        if (creandoInvitacion) return@BotonAcceso
+                        creandoInvitacion = true
+                        scope.launch {
+                            try {
+                                businessViewModel.crearInvitacion(negocioActual.id, requiereAprobacion).onSuccess {
+                                    invitacionActiva = it
+                                    if (requiereAprobacion) {
+                                        FeedbackManager.showSuccess("Código creado. Quien lo use deberá esperar tu aprobación.")
+                                    }
+                                }.onFailure { err ->
+                                    if (err.message?.contains("PLAN_REQUERIDO") == true) {
+                                        onIrAPlanes()
+                                    } else {
+                                        FeedbackManager.showErrorMessage(com.flabs.cobrate.core.logic.ErrorMapper.amable(err, "Error al crear invitación"))
+                                    }
                                 }
-                            }.onFailure { err ->
-                                FeedbackManager.showErrorMessage(com.flabs.cobrate.core.logic.ErrorMapper.amable(err, "Error al crear invitación"))
+                            } finally {
+                                creandoInvitacion = false
                             }
-                        } finally {
-                            creandoInvitacion = false
                         }
                     }
                 }

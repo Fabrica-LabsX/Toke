@@ -167,6 +167,7 @@ import kotlinx.coroutines.delay
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+        requestedOrientation = android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
         val splashStartTime = System.currentTimeMillis()
         val splashScreen = installSplashScreen()
 
@@ -178,9 +179,9 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         // Inicialización del monitor de red (CAPA TAREA E-1)
-        NetworkMonitor.init(this)
+        NetworkMonitor.init(applicationContext)
         // Inicialización de la cola offline (CAPA TAREA E-2)
-        OperacionPendienteStore.init(this)
+        OperacionPendienteStore.init(applicationContext)
         // Carga las operaciones persistidas al iniciar la app.
         InMemoryOperationStore.init(applicationContext)
         // Carga las cuentas persistidas y restaura la última sesión activa.
@@ -200,6 +201,7 @@ class MainActivity : ComponentActivity() {
         // Carga las preferencias de la app (C8 - Tema)
         PreferenciasAppStore.init(applicationContext)
         com.flabs.cobrate.features.planes.PlanStore.init(applicationContext)
+        com.flabs.cobrate.features.reportes.ExportQuotaStore.init(applicationContext)
         com.flabs.cobrate.core.data.SesionUnicaStore.init(applicationContext)
         com.flabs.cobrate.features.operaciones.AsignacionPreferencia.init(applicationContext)
         // Carga el estado operativo global (CAPA 57)
@@ -260,6 +262,11 @@ fun CobrateApp() {
     // Sesión única: al abrir sesión en este celular se comprueba que la cuenta no esté abierta en otro.
     LaunchedEffect(sesionActual?.id) {
         if (sesionActual?.id != null) com.flabs.cobrate.core.data.SesionUnicaStore.verificar()
+    }
+    LaunchedEffect(Unit) {
+        com.flabs.cobrate.core.data.SesionUnicaStore.onCerrarSesionRemoto = {
+            authViewModel.cerrarSesion()
+        }
     }
     com.flabs.cobrate.features.acceso.SesionUnicaAviso(authViewModel)
 
@@ -334,7 +341,7 @@ fun CobrateApp() {
     val negocioExpulsado by negocioViewModel.negocioExpulsado.collectAsState()
     val misNegocios by negocioViewModel.misNegocios.collectAsState()
     val negocioSeleccionado = remember(negocioSeleccionadoId, misNegocios) { misNegocios.find { it.id == negocioSeleccionadoId } }
-    val esDuenoReal = negocioSeleccionado != null && sesionActual != null && negocioSeleccionado?.dueñoCuentaId == sesionActual?.id
+    val esDuenoReal = negocioSeleccionado != null && sesionActual != null && negocioSeleccionado.dueñoCuentaId == sesionActual?.id
 
     val context = LocalContext.current
     val estadoOperativoEncendido by EstadoOperativoStore.encendido.collectAsState()
@@ -663,21 +670,34 @@ fun CobrateApp() {
 
             // ---- Crear negocio (CAPA 3) ----
             composable(Routes.CREAR_NEGOCIO) {
-                CrearNegocioScreen(
-                    negocioViewModel = negocioViewModel,
-                    businessViewModel = businessViewModel,
-                    onIrAMisQRs = {
-                        navController.navigate(Routes.INICIO) {
-                            popUpTo(Routes.INICIO) { inclusive = true }
-                        }
-                        navController.irADetalle(Routes.METODOS_COBRO_DUENO)
-                    },
-                    onCreado = {
-                        navController.navigate(Routes.INICIO) {
-                            popUpTo(Routes.INICIO) { inclusive = true }
+                val misNegocios by NegocioStore.negocios.collectAsState()
+                val planEstado by com.flabs.cobrate.features.planes.PlanStore.estado.collectAsState()
+                val esPro = planEstado?.plan == com.flabs.cobrate.features.planes.Plan.PRO
+
+                // Barrera infranqueable anti-bypass: Plan Free solo permite 1 negocio
+                if (misNegocios.isNotEmpty() && !esPro) {
+                    LaunchedEffect(Unit) {
+                        navController.navigate(Routes.PLAN_FACTURACION_DUENO) {
+                            popUpTo(Routes.CREAR_NEGOCIO) { inclusive = true }
                         }
                     }
-                )
+                } else {
+                    CrearNegocioScreen(
+                        negocioViewModel = negocioViewModel,
+                        businessViewModel = businessViewModel,
+                        onIrAMisQRs = {
+                            navController.navigate(Routes.INICIO) {
+                                popUpTo(Routes.INICIO) { inclusive = true }
+                            }
+                            navController.irADetalle(Routes.METODOS_COBRO_DUENO)
+                        },
+                        onCreado = {
+                            navController.navigate(Routes.INICIO) {
+                                popUpTo(Routes.INICIO) { inclusive = true }
+                            }
+                        }
+                    )
+                }
             }
 
             // ---- Flujo Trabajador ----
@@ -708,7 +728,8 @@ fun CobrateApp() {
             composableToke(Routes.TRABAJADORES_DUENO) {
                 EquipoScreen(
                     businessViewModel = businessViewModel,
-                    soloLectura = (rolActivo == RolCuentaNegocio.TRABAJADOR && !esDuenoReal)
+                    soloLectura = (rolActivo == RolCuentaNegocio.TRABAJADOR && !esDuenoReal),
+                    onIrAPlanes = { navController.irADetalle(Routes.PLAN_FACTURACION_DUENO) },
                 )
             }
 
@@ -741,7 +762,8 @@ fun CobrateApp() {
                         MetodosDeCobroScreen(
                             businessViewModel = businessViewModel,
                             soloLectura = false,
-                            onBack = { navController.popBackStack() }
+                            onBack = { navController.popBackStack() },
+                            onIrAPlanes = { navController.irADetalle(Routes.PLAN_FACTURACION_DUENO) },
                         )
                     } else {
                         LaunchedEffect(Unit) {
@@ -754,7 +776,10 @@ fun CobrateApp() {
 
 
             composableToke(Routes.ESTADISTICAS_DUENO) {
-                BusinessStatsScreen(businessViewModel)
+                BusinessStatsScreen(
+                    businessViewModel = businessViewModel,
+                    onIrAPlanes = { navController.irADetalle(Routes.PLAN_FACTURACION_DUENO) },
+                )
             }
 
             composableToke(Routes.PLAN_FACTURACION_DUENO) {
@@ -803,10 +828,20 @@ fun CobrateApp() {
             }
 
             composable(Routes.MIS_NEGOCIOS) {
+                val misNegociosList by NegocioStore.negocios.collectAsState()
+                val planEstado by com.flabs.cobrate.features.planes.PlanStore.estado.collectAsState()
+                val esPro = planEstado?.plan == com.flabs.cobrate.features.planes.Plan.PRO
+
                 MisNegociosScreen(
                     negocioViewModel = negocioViewModel,
                     onVolver = { navController.popBackStack() },
-                    onCrearNegocio = { navController.navigate(Routes.CREAR_NEGOCIO) },
+                    onCrearNegocio = {
+                        if (misNegociosList.isNotEmpty() && !esPro) {
+                            navController.navigate(Routes.PLAN_FACTURACION_DUENO)
+                        } else {
+                            navController.navigate(Routes.CREAR_NEGOCIO)
+                        }
+                    },
                     onUnirmeNegocio = { navController.navigate(Routes.INGRESAR_CODIGO) },
                     onBorrarNegocio = { id ->
                         NegocioStore.seleccionarNegocio(id)
@@ -1090,8 +1125,19 @@ private fun InicioScreen(
         onMisQRs = { navController.irADetalle(Routes.METODOS_COBRO_DUENO) },
         onAnadirTrabajador = { navController.irAPestana(Routes.TRABAJADORES_DUENO) },
         onReclamarPagos = {},
-        onCrearNegocio = { navController.navigate(Routes.CREAR_NEGOCIO) },
+        onCrearNegocio = {
+            val esPro = com.flabs.cobrate.features.planes.PlanStore.plan == com.flabs.cobrate.features.planes.Plan.PRO
+            if (misNegocios.isNotEmpty() && !esPro) {
+                navController.navigate(Routes.PLAN_FACTURACION_DUENO)
+            } else {
+                navController.navigate(Routes.CREAR_NEGOCIO)
+            }
+        },
         onUnirmeNegocio = { navController.navigate(Routes.INGRESAR_CODIGO) },
+        onConfirmarInvitacion = { invitacion ->
+            InvitacionStore.agregarManual(invitacion)
+            navController.navigate("${Routes.CONFIRMAR_INVITACION}/${invitacion.codigo}")
+        },
         onSalirDelNegocio = onSalirDelNegocio,
         onRefrescarTab = onRefrescarTab,
         onSeleccionarOperacion = { id -> navController.irADetalle("${Routes.DETALLE_OPERACION}/$id") },

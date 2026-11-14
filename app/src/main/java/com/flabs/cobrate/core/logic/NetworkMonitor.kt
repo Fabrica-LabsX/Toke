@@ -13,6 +13,9 @@ import kotlinx.coroutines.flow.asStateFlow
  * CAPA TAREA E-1: NetworkMonitor
  */
 object NetworkMonitor {
+    @Volatile
+    private var inicializado = false
+
     private val _disponible = MutableStateFlow(false)
     val disponible: StateFlow<Boolean> = _disponible.asStateFlow()
 
@@ -20,8 +23,11 @@ object NetworkMonitor {
     val redActiva: StateFlow<Network?> = _redActiva.asStateFlow()
 
     fun init(context: Context) {
-        val cm = context.getSystemService(ConnectivityManager::class.java)
+        if (inicializado) return
+        val appContext = context.applicationContext
+        val cm = appContext.getSystemService(ConnectivityManager::class.java)
             ?: return
+        inicializado = true
 
         fun evaluarRed() {
             val activeNetwork = cm.activeNetwork

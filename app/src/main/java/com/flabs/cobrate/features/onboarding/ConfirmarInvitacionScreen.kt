@@ -1,5 +1,4 @@
 package com.flabs.cobrate.features.onboarding
-import com.flabs.cobrate.ui.theme.solidoSobre
 import com.flabs.cobrate.ui.theme.TokeRojo
 import com.flabs.cobrate.ui.theme.TokeAmbarTexto
 
@@ -8,6 +7,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -101,12 +101,12 @@ fun ConfirmarInvitacionScreen(
             }
     }
 
-    AccesoFondo(paleta = paleta) {
+    AccesoFondo(paleta = paleta, esDesplazable = false) {
         BotonAtras(paleta, onVolver)
         TituloAcceso(paleta, stringResource(R.string.encontrado_titulo))
 
         if (loading) {
-            Box(modifier = Modifier.fillMaxWidth().height(180.dp), contentAlignment = Alignment.Center) {
+            Box(modifier = Modifier.fillMaxWidth().height(140.dp), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator(color = paleta.verde)
             }
         }
@@ -126,8 +126,13 @@ fun ConfirmarInvitacionScreen(
             )
         }
 
-        EspacioAcceso(4)
-        BotonAcceso(paleta, stringResource(R.string.encontrado_aceptar), principal = !loading && errorPreview == null) {
+        Spacer(modifier = Modifier.weight(1f))
+        BotonAcceso(
+            paleta = paleta,
+            texto = stringResource(R.string.encontrado_aceptar),
+            principal = !loading && errorPreview == null,
+            altura = 44.dp,
+        ) {
             if (loading || errorPreview != null) return@BotonAcceso
             scope.launch {
                 errorAceptar = null
@@ -165,53 +170,58 @@ fun ConfirmarInvitacionScreen(
                     }
             }
         }
-        BotonAcceso(paleta, stringResource(R.string.pausado_volver), principal = false, onClick = onVolver)
+        BotonAcceso(
+            paleta = paleta,
+            texto = stringResource(R.string.pausado_volver),
+            principal = false,
+            altura = 44.dp,
+            onClick = onVolver,
+        )
         Text(
             text = stringResource(R.string.encontrado_footer_nota),
-            style = TextStyle(fontFamily = PlusJakartaSans, fontWeight = FontWeight.Medium, fontSize = 12.5.sp),
+            style = TextStyle(fontFamily = PlusJakartaSans, fontWeight = FontWeight.Medium, fontSize = 11.5.sp),
             color = paleta.textoSecundario,
             textAlign = TextAlign.Center,
             modifier = Modifier.fillMaxWidth(),
         )
-        EspacioAcceso(8)
     }
 }
 
 @Composable
 private fun TarjetaNegocio(paleta: TokePaleta, negocio: String, invito: String) {
     Surface(
-        shape = RoundedCornerShape(24.dp),
+        shape = RoundedCornerShape(18.dp),
         color = paleta.tarjeta,
         border = BorderStroke(1.dp, paleta.borde),
         modifier = Modifier.fillMaxWidth(),
     ) {
         Column(
-            modifier = Modifier.fillMaxWidth().padding(24.dp),
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 14.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            Surface(shape = RoundedCornerShape(22.dp), color = paleta.tileFondo, modifier = Modifier.size(80.dp)) {
+            Surface(shape = RoundedCornerShape(16.dp), color = paleta.tileFondo, modifier = Modifier.size(52.dp)) {
                 Box(contentAlignment = Alignment.Center) {
                     Icon(
                         painter = painterResource(id = TokeIcons.Tienda),
                         contentDescription = null,
                         tint = paleta.textoPrincipal,
-                        modifier = Modifier.size(38.dp),
+                        modifier = Modifier.size(26.dp),
                     )
                 }
             }
             Text(
                 text = negocio,
-                style = TextStyle(fontFamily = PlusJakartaSans, fontWeight = FontWeight.ExtraBold, fontSize = 26.sp),
+                style = TextStyle(fontFamily = PlusJakartaSans, fontWeight = FontWeight.ExtraBold, fontSize = 20.sp),
                 color = paleta.textoPrincipal,
                 textAlign = TextAlign.Center,
             )
             Surface(shape = RoundedCornerShape(9999.dp), color = paleta.tileFondo) {
                 Text(
                     text = invito,
-                    style = TextStyle(fontFamily = PlusJakartaSans, fontWeight = FontWeight.Bold, fontSize = 13.sp),
+                    style = TextStyle(fontFamily = PlusJakartaSans, fontWeight = FontWeight.Bold, fontSize = 12.sp),
                     color = paleta.textoSecundario,
-                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp),
+                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
                 )
             }
         }
@@ -220,19 +230,18 @@ private fun TarjetaNegocio(paleta: TokePaleta, negocio: String, invito: String) 
 
 @Composable
 private fun MensajeError(texto: String) {
-    val rojo = TokeRojo
     val paleta = tokePaleta()
     Surface(
         shape = RoundedCornerShape(16.dp),
-        color = rojo.solidoSobre(paleta.fondo, 0.12f),
-        border = BorderStroke(1.dp, rojo.solidoSobre(paleta.fondo, 0.4f)),
+        color = paleta.rojoFondo,
+        border = BorderStroke(1.dp, paleta.rojoBorde),
         modifier = Modifier.fillMaxWidth(),
     ) {
         Text(
             text = texto,
             modifier = Modifier.padding(16.dp),
             style = TextStyle(fontFamily = PlusJakartaSans, fontWeight = FontWeight.Medium, fontSize = 14.sp),
-            color = rojo,
+            color = paleta.rojo,
         )
     }
 }

@@ -26,11 +26,15 @@ data class TokePaleta(
     val seleccionTexto: Color,
     /** Ámbar de pendientes y acciones de asignar. */
     val ambar: Color,
+    val ambarFondo: Color,
+    val ambarBorde: Color,
     val ambarTexto: Color,
     val enlaceVerde: Color,
     val enlaceAzul: Color,
     /** Verde de marca: acción principal y estado "recibido", con el color del texto sobre él. */
     val verde: Color,
+    val verdeFondo: Color,
+    val verdeBorde: Color,
     val verdeTexto: Color,
     /** Borde y detalles del verde de marca (chips, tile del negocio actual). */
     val activo: Color,
@@ -42,6 +46,9 @@ data class TokePaleta(
     /** Verde vivo de los indicadores de estado (wifi, sincronizado): el mismo en claro y en oscuro. */
     val verdeVivo: Color,
     val verdeVivoBorde: Color,
+    /** Fondo y borde sutiles del badge con candado negro de funciones PRO. */
+    val candadoBadgeFondo: Color,
+    val candadoBadgeBorde: Color,
 )
 
 /** Rojo de error y de acciones que borran; el mismo en claro y oscuro. */
@@ -60,18 +67,24 @@ val TokePaletaClara = TokePaleta(
     seleccionFondo = Color(0xFF0F172A),
     seleccionTexto = Color(0xFFFFFFFF),
     ambar = Color(0xFFF59E0B),
+    ambarFondo = Color(0xFFFEF3C7),
+    ambarBorde = Color(0xFFFCD34D),
     ambarTexto = Color(0xFF181202),
-    enlaceVerde = Color(0xFF047857),
+    enlaceVerde = Color(0xFF00853F),
     enlaceAzul = Color(0xFF2563EB),
-    verde = Color(0xFF059669),
+    verde = Color(0xFF00A651),
+    verdeFondo = Color(0xFFE8F5E9),
+    verdeBorde = Color(0xFFA8DAB5),
     verdeTexto = Color(0xFFFFFFFF),
-    activo = Color(0xFF059669),
+    activo = Color(0xFF00A651),
     bordeControl = Color(0xFFCBD5E1),
     rojo = TokeRojo,
     rojoFondo = Color(0xFFFEE2E2),
     rojoBorde = Color(0xFFFECACA),
     verdeVivo = Color(0xFF00C853),
     verdeVivoBorde = Color(0xFF00B44A),
+    candadoBadgeFondo = Color(0xFFE2E8F0),
+    candadoBadgeBorde = Color(0xFFCBD5E1),
 )
 
 val TokePaletaOscura = TokePaleta(
@@ -84,10 +97,14 @@ val TokePaletaOscura = TokePaleta(
     seleccionFondo = Color(0xFFF8FAFC),
     seleccionTexto = Color(0xFF0F172A),
     ambar = Color(0xFFF59E0B),
+    ambarFondo = Color(0xFF291E05),
+    ambarBorde = Color(0xFF5A3E08),
     ambarTexto = Color(0xFF181202),
     enlaceVerde = Color(0xFF00C853),
     enlaceAzul = Color(0xFF60A5FA),
     verde = Color(0xFF00C853),
+    verdeFondo = Color(0xFF0F2618),
+    verdeBorde = Color(0xFF1E4D2B),
     verdeTexto = Color(0xFF042615),
     activo = Color(0xFF00C853),
     bordeControl = Color(0xFF2D3546),
@@ -96,6 +113,8 @@ val TokePaletaOscura = TokePaleta(
     rojoBorde = Color(0xFF3D1E1E),
     verdeVivo = Color(0xFF00C853),
     verdeVivoBorde = Color(0xFF00B44A),
+    candadoBadgeFondo = Color(0xFF1E242F),
+    candadoBadgeBorde = Color(0xFF2D3546),
 )
 
 /** Paleta vigente según el aspecto elegido en la app. */

@@ -1,5 +1,4 @@
 package com.flabs.cobrate.features.permisos
-import com.flabs.cobrate.ui.theme.solidoSobre
 import com.flabs.cobrate.ui.theme.TokeRojo
 import com.flabs.cobrate.ui.theme.TokeAmbarTexto
 
@@ -41,6 +40,8 @@ fun PermisosBanner(
     val datos = when (estado) {
         EstadoServicio.OPERATIVO -> DatosBanner(
             color = paleta.activo,
+            fondo = paleta.verdeFondo,
+            borde = paleta.verdeBorde,
             icono = TokeIcons.Check,
             titulo = "Sincronización activa",
             mensaje = "¡Genial!, TOKE está listo para recibir cobros y avisar a tu equipo en tiempo real.",
@@ -48,6 +49,8 @@ fun PermisosBanner(
         )
         EstadoServicio.PARCIAL -> DatosBanner(
             color = paleta.ambar,
+            fondo = paleta.ambarFondo,
+            borde = paleta.ambarBorde,
             icono = TokeIcons.Advertencia,
             titulo = "Avisos en pausa al bloquear",
             mensaje = "TOKE funciona, pero dejará de enviar alertas cuando la pantalla se apague.",
@@ -55,6 +58,8 @@ fun PermisosBanner(
         )
         EstadoServicio.DESACTIVADO -> DatosBanner(
             color = Rojo,
+            fondo = paleta.rojoFondo,
+            borde = paleta.rojoBorde,
             icono = TokeIcons.Bloqueado,
             titulo = "Falta activar TOKE",
             mensaje = "Activa los accesos de abajo para que TOKE pueda avisarte de cada cobro.",
@@ -64,8 +69,8 @@ fun PermisosBanner(
 
     Surface(
         shape = RoundedCornerShape(22.dp),
-        color = datos.color.solidoSobre(paleta.fondo, 0.12f),
-        border = BorderStroke(1.dp, datos.color.solidoSobre(paleta.fondo, 0.35f)),
+        color = datos.fondo,
+        border = BorderStroke(1.dp, datos.borde),
         modifier = Modifier.fillMaxWidth(),
     ) {
         Row(
@@ -113,7 +118,7 @@ fun PermisosBanner(
                 Surface(
                     shape = RoundedCornerShape(9999.dp),
                     color = paleta.tarjeta,
-                    border = BorderStroke(1.dp, datos.color.solidoSobre(paleta.tarjeta, 0.5f)),
+                    border = BorderStroke(1.dp, datos.borde),
                 ) {
                     Text(
                         text = datos.etiqueta,
@@ -133,6 +138,8 @@ fun PermisosBanner(
 
 private data class DatosBanner(
     val color: Color,
+    val fondo: Color,
+    val borde: Color,
     val icono: Int,
     val titulo: String,
     val mensaje: String,

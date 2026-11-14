@@ -44,6 +44,7 @@ import com.flabs.cobrate.ui.theme.tokePaleta
 fun EquipoScreen(
     businessViewModel: BusinessViewModel,
     soloLectura: Boolean = false,
+    onIrAPlanes: () -> Unit = {},
 ) {
     val paleta = tokePaleta()
     val puedeAdministrar = !soloLectura
@@ -132,6 +133,7 @@ fun EquipoScreen(
                                 InvitarTrabajadorScreen(
                                     businessViewModel = businessViewModel,
                                     onCerrar = { mostrandoInvitar = false },
+                                    onIrAPlanes = onIrAPlanes,
                                 )
                             }
                         }
@@ -177,20 +179,52 @@ fun EquipoScreen(
             }
 
             if (puedeAdministrar) {
+                val planEstado by com.flabs.cobrate.features.planes.PlanStore.estado.collectAsState()
+                val esPro = planEstado?.plan == com.flabs.cobrate.features.planes.Plan.PRO
+                val puedeGenerarMas = esPro || (trabajadores.size < com.flabs.cobrate.features.planes.PlanLogica.MAX_TRABAJADORES_FREE && codigosActivos.size < com.flabs.cobrate.features.planes.PlanLogica.MAX_CODIGOS_ACTIVOS_FREE)
+                val aforoLleno = codigosActivos.size >= com.flabs.cobrate.features.planes.PlanLogica.MAX_CODIGOS_ACTIVOS_GLOBAL
+
                 when (pestana) {
-                    PestanaEquipo.MI_EQUIPO -> EquipoBotonPrincipal(
-                        paleta = paleta,
-                        texto = "+ Invitar nuevo colaborador",
-                        onClick = {
-                            pestana = PestanaEquipo.CODIGOS
-                            mostrandoInvitar = true
-                        },
-                    )
-                    PestanaEquipo.CODIGOS -> EquipoBotonPrincipal(
-                        paleta = paleta,
-                        texto = if (mostrandoInvitar) "Ocultar panel de invitación" else "+ Generar nuevo código",
-                        onClick = { mostrandoInvitar = !mostrandoInvitar },
-                    )
+                    PestanaEquipo.MI_EQUIPO -> {
+                        if (puedeGenerarMas) {
+                            EquipoBotonPrincipal(
+                                paleta = paleta,
+                                texto = "+ Invitar nuevo colaborador",
+                                onClick = {
+                                    pestana = PestanaEquipo.CODIGOS
+                                    mostrandoInvitar = true
+                                },
+                            )
+                        } else {
+                            com.flabs.cobrate.components.BotonProBloqueado(
+                                paleta = paleta,
+                                texto = "Invitar colaborador (Máx 1 en Free)",
+                                onClick = onIrAPlanes,
+                            )
+                        }
+                    }
+                    PestanaEquipo.CODIGOS -> {
+                        if (aforoLleno) {
+                            com.flabs.cobrate.features.acceso.BotonAcceso(
+                                paleta = paleta,
+                                texto = "Aforo máximo de 5 códigos alcanzado",
+                                principal = false,
+                                onClick = {},
+                            )
+                        } else if (!puedeGenerarMas) {
+                            com.flabs.cobrate.components.BotonProBloqueado(
+                                paleta = paleta,
+                                texto = if (trabajadores.size >= 1) "Máx 1 colaborador en Free (Ver planes)" else "Máx 1 código en Free (Ver planes)",
+                                onClick = onIrAPlanes,
+                            )
+                        } else {
+                            EquipoBotonPrincipal(
+                                paleta = paleta,
+                                texto = if (mostrandoInvitar) "Ocultar panel de invitación" else "+ Generar nuevo código",
+                                onClick = { mostrandoInvitar = !mostrandoInvitar },
+                            )
+                        }
+                    }
                     PestanaEquipo.SOLICITUDES -> Unit
                 }
             }

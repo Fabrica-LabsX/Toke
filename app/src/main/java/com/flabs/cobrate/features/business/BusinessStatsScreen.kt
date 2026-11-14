@@ -45,6 +45,7 @@ import com.flabs.cobrate.components.TokeIcons
 import com.flabs.cobrate.features.acceso.BotonAcceso
 import com.flabs.cobrate.features.reportes.PeriodoReporte
 import com.flabs.cobrate.features.planes.ActivarProDialogo
+import com.flabs.cobrate.features.planes.Plan
 import com.flabs.cobrate.features.planes.PlanLogica
 import com.flabs.cobrate.features.planes.PlanStore
 import com.flabs.cobrate.features.reportes.ReportesAcciones
@@ -62,7 +63,10 @@ import kotlinx.coroutines.launch
  * recomendación para cerrar el día y la exportación a Excel.
  */
 @Composable
-fun BusinessStatsScreen(businessViewModel: BusinessViewModel) {
+fun BusinessStatsScreen(
+    businessViewModel: BusinessViewModel,
+    onIrAPlanes: () -> Unit = {},
+) {
     val paleta = tokePaleta()
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -72,6 +76,7 @@ fun BusinessStatsScreen(businessViewModel: BusinessViewModel) {
     var periodo by remember { mutableStateOf(PeriodoReporte.DIA) }
     var elegirParaExportar by remember { mutableStateOf(false) }
     val planEstado by PlanStore.estado.collectAsState()
+    val esPro = planEstado?.plan == Plan.PRO
     var verActivacion by remember { mutableStateOf(false) }
     // En Free solo se ve el día; el resto lleva al aviso del plan Pro.
     val puede = { p: PeriodoReporte -> PlanLogica.puedeVerPeriodo(planEstado?.plan, p) }
@@ -156,7 +161,19 @@ fun BusinessStatsScreen(businessViewModel: BusinessViewModel) {
             }
         }
 
-        BotonAcceso(paleta, "Exportar en Excel", principal = true) { elegirParaExportar = true }
+        val cuotaRestante = remember(planEstado) { com.flabs.cobrate.features.reportes.ExportQuotaStore.restantes(esPro) }
+        val puedeExportar = remember(cuotaRestante, esPro) { com.flabs.cobrate.features.reportes.ExportQuotaStore.puedeExportar(esPro) }
+
+        if (!puedeExportar) {
+            com.flabs.cobrate.components.BotonProBloqueado(
+                paleta = paleta,
+                texto = "Exportar en Excel (0/3 cuota semanal alcanzada)",
+                onClick = onIrAPlanes,
+            )
+        } else {
+            val etiqueta = if (esPro) "Exportar en Excel" else "Exportar en Excel ($cuotaRestante/3 disponibles esta semana)"
+            BotonAcceso(paleta, etiqueta, principal = true) { elegirParaExportar = true }
+        }
     }
 
     if (elegirParaExportar) {
@@ -167,8 +184,16 @@ fun BusinessStatsScreen(businessViewModel: BusinessViewModel) {
             onExportar = { elegido ->
                 elegirParaExportar = false
                 val nombres = trabajadores.associate { it.cuentaId to it.username }
-                if (!puede(elegido)) verActivacion = true
-                else scope.launch { ReportesAcciones.exportarExcel(context, operaciones, nombres, elegido) }
+                if (!puede(elegido)) {
+                    onIrAPlanes()
+                } else if (!com.flabs.cobrate.features.reportes.ExportQuotaStore.puedeExportar(esPro)) {
+                    onIrAPlanes()
+                } else {
+                    scope.launch {
+                        ReportesAcciones.exportarExcel(context, operaciones, nombres, elegido)
+                        com.flabs.cobrate.features.reportes.ExportQuotaStore.registrarExportacion(esPro)
+                    }
+                }
             },
         )
     }

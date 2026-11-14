@@ -77,6 +77,7 @@ import com.flabs.cobrate.ui.theme.TokePaleta
 fun AccesoFondo(
     paleta: TokePaleta,
     horizontal: Alignment.Horizontal = Alignment.Start,
+    esDesplazable: Boolean = true,
     pie: (@Composable ColumnScope.() -> Unit)? = null, // botón fijo al pie, fuera del scroll
     contenido: @Composable ColumnScope.() -> Unit,
 ) {
@@ -88,22 +89,38 @@ fun AccesoFondo(
             .navigationBarsPadding()
             .imePadding(),
     ) {
-        Column(modifier = Modifier.fillMaxSize()) {
-            Column(modifier = Modifier.weight(1f).verticalScroll(rememberScrollState())) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .defaultMinSize(minHeight = if (pie == null) this@BoxWithConstraints.maxHeight else 0.dp)
-                        .padding(horizontal = 20.dp, vertical = 16.dp),
-                    horizontalAlignment = horizontal,
-                    verticalArrangement = Arrangement.spacedBy(14.dp),
-                    content = contenido,
+        if (esDesplazable) {
+            Column(modifier = Modifier.fillMaxSize()) {
+                Column(modifier = Modifier.weight(1f).verticalScroll(rememberScrollState())) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .defaultMinSize(minHeight = if (pie == null) this@BoxWithConstraints.maxHeight else 0.dp)
+                            .padding(horizontal = 20.dp, vertical = 16.dp),
+                        horizontalAlignment = horizontal,
+                        verticalArrangement = Arrangement.spacedBy(14.dp),
+                        content = contenido,
+                    )
+                }
+                if (pie != null) Column(
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp).padding(top = 8.dp, bottom = 16.dp),
+                    content = pie,
                 )
             }
-            if (pie != null) Column(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp).padding(top = 8.dp, bottom = 16.dp),
-                content = pie,
-            )
+        } else {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                horizontalAlignment = horizontal,
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                contenido()
+                if (pie != null) Column(
+                    modifier = Modifier.fillMaxWidth().padding(top = 6.dp),
+                    content = pie,
+                )
+            }
         }
     }
 }
@@ -300,7 +317,13 @@ private fun Row14(
 
 /** Botón en píldora: [principal] va en verde; si no, blanco con borde. */
 @Composable
-fun BotonAcceso(paleta: TokePaleta, texto: String, principal: Boolean, onClick: () -> Unit) {
+fun BotonAcceso(
+    paleta: TokePaleta,
+    texto: String,
+    principal: Boolean,
+    altura: androidx.compose.ui.unit.Dp = TokeMedidas.BotonAltura,
+    onClick: () -> Unit,
+) {
     val pulso = rememberPulsacion()
     Surface(
         onClick = onClick,
@@ -310,13 +333,17 @@ fun BotonAcceso(paleta: TokePaleta, texto: String, principal: Boolean, onClick: 
         border = if (principal) null else BorderStroke(1.dp, paleta.bordeControl),
         modifier = Modifier
             .fillMaxWidth()
-            .height(TokeMedidas.BotonAltura)
+            .height(altura)
             .then(pulso.modificador),
     ) {
         Box(contentAlignment = Alignment.Center) {
             Text(
                 text = texto,
-                style = TextStyle(fontFamily = PlusJakartaSans, fontWeight = FontWeight.Bold, fontSize = 16.sp),
+                style = TextStyle(
+                    fontFamily = PlusJakartaSans,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = if (altura < 46.dp) 14.5.sp else 16.sp,
+                ),
                 color = if (principal) paleta.verdeTexto else paleta.textoPrincipal,
                 maxLines = 1,
             )

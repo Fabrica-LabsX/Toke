@@ -1,6 +1,5 @@
 package com.flabs.cobrate.features.business
 
-import com.flabs.cobrate.ui.theme.solidoSobre
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -125,12 +124,13 @@ private fun TarjetaPlanActual(paleta: TokePaleta, esPro: Boolean, proHasta: Long
                 )
                 Surface(
                     shape = RoundedCornerShape(9999.dp),
-                    color = if (esPro) paleta.verdeTexto.solidoSobre(paleta.verde, 0.18f) else paleta.tileFondo,
+                    color = if (esPro) paleta.verdeFondo else paleta.tileFondo,
+                    border = BorderStroke(1.dp, if (esPro) paleta.verdeBorde else paleta.bordeControl),
                 ) {
                     Text(
                         text = if (esPro) "Activo" else "Gratis",
                         style = estilo(FontWeight.Bold, 12),
-                        color = textoFuerte,
+                        color = if (esPro) paleta.activo else textoFuerte,
                         modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
                     )
                 }

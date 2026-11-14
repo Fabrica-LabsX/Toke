@@ -48,6 +48,7 @@ import com.flabs.cobrate.core.logic.RolEfectivo
 import com.flabs.cobrate.core.model.Alerta
 import com.flabs.cobrate.core.model.EstadoOperacion
 import com.flabs.cobrate.core.model.EstadoRelacion
+import com.flabs.cobrate.core.model.InvitacionTrabajador
 import com.flabs.cobrate.core.model.Negocio
 import com.flabs.cobrate.core.model.Operacion
 import com.flabs.cobrate.core.model.RolCuentaNegocio
@@ -127,6 +128,7 @@ fun HomeScreen(
     onReclamarPagos: () -> Unit,
     onCrearNegocio: () -> Unit,
     onUnirmeNegocio: () -> Unit,
+    onConfirmarInvitacion: ((InvitacionTrabajador) -> Unit)? = null,
     onSalirDelNegocio: (() -> Unit)? = null,
     onRefrescarTab: (() -> Unit)? = null,
     onSeleccionarOperacion: ((String) -> Unit)? = null,
@@ -146,6 +148,7 @@ fun HomeScreen(
         onReclamarPagos = onReclamarPagos,
         onCrearNegocio = onCrearNegocio,
         onUnirmeNegocio = onUnirmeNegocio,
+        onConfirmarInvitacion = onConfirmarInvitacion,
         onSalirDelNegocio = onSalirDelNegocio,
         onRefrescarTab = onRefrescarTab,
         onSeleccionarOperacion = onSeleccionarOperacion,
@@ -169,6 +172,7 @@ private fun HomeScreenContent(
     onReclamarPagos: () -> Unit,
     onCrearNegocio: () -> Unit,
     onUnirmeNegocio: () -> Unit,
+    onConfirmarInvitacion: ((InvitacionTrabajador) -> Unit)? = null,
     onSalirDelNegocio: (() -> Unit)? = null,
     onRefrescarTab: (() -> Unit)? = null,
     onSeleccionarOperacion: ((String) -> Unit)? = null,
@@ -367,8 +371,12 @@ private fun HomeScreenContent(
                 } else if (estadoSync == EstadoSincronizacionRemota.EXITO) {
                     EmpezarScreen(
                         onCrearNegocio = onCrearNegocio,
-                        onValidarCodigo = { _ ->
-                            onUnirmeNegocio()
+                        onValidarCodigo = { invitacion ->
+                            if (onConfirmarInvitacion != null) {
+                                onConfirmarInvitacion(invitacion)
+                            } else {
+                                onUnirmeNegocio()
+                            }
                         },
                         onCerrarSesion = { mostrarConfirmarCierre = true }
                     )
@@ -460,7 +468,13 @@ private fun HomeScreenContent(
                     else -> {
                         EmpezarScreen(
                             onCrearNegocio = onCrearNegocio,
-                            onValidarCodigo = { _ -> onUnirmeNegocio() },
+                            onValidarCodigo = { invitacion ->
+                                if (onConfirmarInvitacion != null) {
+                                    onConfirmarInvitacion(invitacion)
+                                } else {
+                                    onUnirmeNegocio()
+                                }
+                            },
                             onCerrarSesion = { mostrarConfirmarCierre = true }
                         )
                     }

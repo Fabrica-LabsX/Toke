@@ -22,8 +22,8 @@ extensions.configure<ApplicationExtension> {
         applicationId = "com.flabs.cobrate"
         minSdk = 24
         targetSdk = 37
-        versionCode = 1
-        versionName = "1.0.0"
+        versionCode = 2
+        versionName = "1.1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -120,7 +120,6 @@ dependencies {
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.androidx.junit)
-    implementation(libs.google.mlkit.barcode.scanning)
 
     // Firebase
     implementation(platform(libs.firebase.bom))

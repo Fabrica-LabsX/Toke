@@ -53,8 +53,8 @@ fun BienvenidaScreen(
     onIngresarCodigo: () -> Unit = {}
 ) {
     val paleta = tokePaleta()
-    AccesoFondo(paleta = paleta) {
-        // En pantallas altas la ilustración se centra en el espacio libre, en vez de quedar pegada arriba.
+    AccesoFondo(paleta = paleta, esDesplazable = false) {
+        // En pantallas 9:16 la ilustración se centra en el espacio libre sin permitir swipe vertical
         Box(modifier = Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
             IlustracionBienvenida(paleta)
         }
@@ -64,8 +64,8 @@ fun BienvenidaScreen(
             subtitulo = "Notificaciones de pago al instante para tu negocio.",
         )
         Spacer(modifier = Modifier.height(10.dp))
-        BotonAcceso(paleta, stringResource(R.string.bienvenida_iniciar_sesion), principal = false, onClick = onIniciarSesion)
-        BotonAcceso(paleta, "+ " + stringResource(R.string.bienvenida_crear_cuenta), principal = true, onClick = onCrearCuenta)
+        BotonAcceso(paleta, stringResource(R.string.bienvenida_iniciar_sesion), principal = false, altura = 44.dp, onClick = onIniciarSesion)
+        BotonAcceso(paleta, "+ " + stringResource(R.string.bienvenida_crear_cuenta), principal = true, altura = 44.dp, onClick = onCrearCuenta)
         EnlaceAcceso(paleta, "Tengo un código de trabajador", onIngresarCodigo)
     }
 }

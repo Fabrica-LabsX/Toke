@@ -26,12 +26,16 @@ fun SesionUnicaAviso(authViewModel: AuthViewModel) {
             onConfirmar = { scope.launch { SesionUnicaStore.usarAqui() } },
             onCancelar = { authViewModel.cerrarSesion() },
         )
-        AvisoSesion.Desplazada -> DialogoToke(
+        is AvisoSesion.Desplazada -> DialogoToke(
             titulo = "Tu cuenta se abrió en otro celular",
-            texto = "TOKE solo funciona en un celular a la vez, así que cerramos la sesión en este.",
-            textoConfirmar = "Entendido",
-            textoCancelar = "Cerrar",
-            onConfirmar = { authViewModel.cerrarSesion() },
+            texto = if (!a.dispositivoNombre.isNullOrBlank()) {
+                "Tu cuenta ahora está activa en ${a.dispositivoNombre}. TOKE solo funciona en un celular a la vez."
+            } else {
+                "TOKE solo funciona en un celular a la vez, por lo que la sesión se trasladó a otro celular."
+            },
+            textoConfirmar = "Usar aquí",
+            textoCancelar = "Cerrar sesión",
+            onConfirmar = { scope.launch { SesionUnicaStore.usarAqui() } },
             onCancelar = { authViewModel.cerrarSesion() },
         )
         null -> Unit

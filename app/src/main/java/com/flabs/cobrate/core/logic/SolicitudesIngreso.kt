@@ -23,6 +23,8 @@ object SolicitudesIngreso {
             .sortedBy { it.fechaVinculacion }
     }
 
+    const val RETENCION_CADUCADOS_MS = 60 * 60 * 1000L // 1 hora como revocado antes de eliminación definitiva
+
     /** Códigos PENDIENTES y no vencidos, el que vence antes primero. */
     fun codigosVigentes(invitaciones: List<InvitacionTrabajador>, ahoraMs: Long): List<InvitacionTrabajador> {
         return invitaciones
@@ -31,6 +33,18 @@ object SolicitudesIngreso {
                 it.expiracion > ahoraMs
             }
             .sortedBy { it.expiracion }
+    }
+
+    /** Códigos no purgados (vigentes o vencidos hace menos de 1 hora). */
+    fun codigosNoPurgados(invitaciones: List<InvitacionTrabajador>, ahoraMs: Long): List<InvitacionTrabajador> {
+        return invitaciones
+            .filter { !debePurgarseDefinitivo(it, ahoraMs) }
+            .sortedBy { it.expiracion }
+    }
+
+    /** Indica si el código ya superó la hora de retención posterior al vencimiento. */
+    fun debePurgarseDefinitivo(invitacion: InvitacionTrabajador, ahoraMs: Long): Boolean {
+        return (ahoraMs - invitacion.expiracion) >= RETENCION_CADUCADOS_MS
     }
 
     /** Segundos que le quedan a un código (0 si ya venció). */

@@ -89,9 +89,18 @@ internal class InvitacionRepository {
     }
 
     /**
+     * Limpia en Supabase los códigos expirados (marca como REVOCADA los vencidos y purga los de más de 1 hora).
+     */
+    suspend fun limpiarExpirados(): Result<Unit> = runCatching {
+        postgrest.rpc("limpiar_codigos_expirados")
+    }
+
+    /**
      * Consulta las invitaciones PENDIENTES de un negocio (CAPA 44).
      */
     suspend fun codigosActivos(negocioId: String): Result<List<InvitacionTrabajador>> = runCatching {
+        runCatching { limpiarExpirados() }
+        val ahora = System.currentTimeMillis()
         postgrest.from("invitaciones_trabajador")
             .select {
                 filter {
@@ -101,6 +110,7 @@ internal class InvitacionRepository {
             }
             .decodeList<InvitacionDto>()
             .mapNotNull { it.toDomainOrNull() }
+            .filter { it.expiracion > ahora }
     }
 
     /**
