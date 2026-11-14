@@ -1,0 +1,22 @@
+{
+  "name": "toke-video-1min",
+  "version": "1.0.0",
+  "description": "Video promocional de 1 minuto 9:16 para TOKE Cobrate",
+  "main": "src/index.ts",
+  "scripts": {
+    "start": "remotion preview src/index.ts",
+    "build": "remotion render src/index.ts TokePromo1Min ../One/toke-promo-1min.mp4"
+  },
+  "dependencies": {
+    "@remotion/media-utils": "^4.0.543",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "remotion": "^4.0.543"
+  },
+  "devDependencies": {
+    "@remotion/cli": "^4.0.543",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "typescript": "^7.0.2"
+  }
+}
