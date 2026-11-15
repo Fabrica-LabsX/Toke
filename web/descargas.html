@@ -33,32 +33,97 @@
   <nav class="nav" id="nav" aria-label="Principal"><a href="/#como-funciona">Cómo funciona</a><a href="/seguridad">Seguridad</a><a href="/#planes">Planes</a><a href="/ayuda">Ayuda</a><a href="/descargas" aria-current="page">Descargas</a></nav>
   <div class="top-actions">
     <button class="theme-btn" type="button" aria-label="Cambiar a modo oscuro"><svg class="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><svg class="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4 8.5 8.5 0 1 0 20 14.5z"/></svg></button>
-    <a class="btn btn-primary btn-sm hide-s" href="/descargas">Descargar</a>
+    <a class="btn btn-sm hide-s" style="background:#EAB308;color:#000000;border:1px solid #CA8A04;font-weight:700;" href="/descargas">Mantenimiento</a>
     <button class="menu-btn" type="button" aria-label="Abrir menú" aria-expanded="false" aria-controls="nav"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
   </div>
 </div></header>
 <main id="contenido">
-<div class="wrap page-head"><span class="eyebrow">Descargas</span><h1>Descarga Toke.</h1><p>Instalador para Android, solo desde esta página.</p></div>
+<div class="wrap page-head"><span class="eyebrow">Descargas</span><h1>Descarga Toke.</h1><p>Instalador oficial para Android, distribuido directamente por Fábrica Labs.</p></div>
 <div class="wrap prose">
-  <div class="release"><h2>Versión oficial</h2>
-  <p class="state">Versión 1.0.0 · 12 de noviembre de 2026 · 25,0 MB (26 217 028 bytes) · Android 7.0 o superior.</p>
-  <p class="state">SHA-256: <code>07f0e880f7a7d0bb55cba12970fa6cb095e92df7c6bf7300d4c4f5b6517c26c6</code></p>
-  <div class="actions"><a class="btn btn-primary" href="https://github.com/Fabrica-LabsX/toke-releases/releases/download/v1.0.0/toke-1.0.0.apk" rel="noopener">Descargar Toke 1.0.0 (.apk)</a></div></div>
-  <h2>Qué es el APK</h2><p>El APK es el archivo que instala la app TOKE en un celular Android. Contiene la app y nada más: no es un archivo bancario, no es una billetera y no mueve dinero. Instalarla no le da acceso a tus cuentas de Yape, Plin o del banco.</p>
-  <h2>De dónde descargarlo</h2><ul><li>Solo desde esta página oficial. No descargues TOKE de otros sitios, chats ni repositorios desconocidos.</li><li>Cada versión publicada muestra aquí su versión, fecha, tamaño y código SHA-256. Compáralo con el de tu archivo: si no coincide, no lo instales.</li></ul>  <p>Estar en esta página no vuelve segura a una descarga por sí solo: por eso queremos publicar el código de verificación.</p>
+  <div class="release">
+    <h2>Estado de descargas</h2>
+    <p class="state">Actualmente no hay versiones públicas recientes disponibles para descarga o el servicio se encuentra en mantenimiento programado.</p>
+    <div class="actions">
+      <button type="button" class="btn" style="background:#EAB308;color:#000000;border:1.5px solid #CA8A04;font-weight:700;cursor:not-allowed;" disabled>En mantenimiento · No hay modelos recientes</button>
+    </div>
+  </div>
+
+  <div class="callout" style="margin:24px 0">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l8 3v6c0 4.5-3.2 8-8 9-4.8-1-8-4.5-8-9V6l8-3z"/><path d="M9 12l2 2 4-4"/></svg>
+    <div>
+      <b>Resumen de privacidad antes de descargar e instalar:</b>
+      <ul style="margin:8px 0 0 18px;font-size:0.92rem;line-height:1.5">
+        <li><b>Qué datos procesa:</b> Notificaciones locales de cobro emitidas por apps compatibles en el celular del dueño (monto, billetera, fecha/hora y nombre si viene en el aviso).</li>
+        <li><b>Qué descarta:</b> Cualquier notificación de mensajería privada u otras aplicaciones es descartada de inmediato en memoria volátil sin leerse ni registrarse. No se conserva el texto íntegro ni mensajes personales.</li>
+        <li><b>Qué NUNCA hace:</b> NO accede a tus cuentas bancarias, Yape o Plin; NO solicita contraseñas ni saldos; NO puede mover dinero; NO pide permisos de ubicación, contactos, SMS, cámara, micrófono ni fotos/archivos.</li>
+        <li><b>Dónde se guardan los datos:</b> En servidores seguros en Sudamérica (Supabase, São Paulo) protegidos con reglas estrictas de aislamiento a nivel de fila (RLS).</li>
+        <li><b>Control total:</b> Puedes pausar o expulsar trabajadores, borrar tus negocios o solicitar la eliminación total de tu cuenta cuando lo decidas.</li>
+      </ul>
+    </div>
+  </div>
+
+  <h2>Qué es el APK</h2>
+  <p>El APK es el archivo que instala la aplicación TOKE en tu celular Android. Ha sido compilado directamente por Fábrica Labs y firmado con su certificado oficial de lanzamiento. Contiene exclusivamente el código de la aplicación: no es una entidad bancaria, no es una billetera y no procesa transacciones dinerarias. Instalarla no otorga acceso a tus cuentas de Yape, Plin ni a tu banco.</p>
+
+  <h2>De dónde descargarlo</h2>
+  <ul>
+    <li>Descárgalo únicamente desde este sitio oficial (<code>tokelabs.pages.dev</code>). No descargues TOKE de repositorios no oficiales, enlaces en redes sociales ni chats de terceros.</li>
+    <li>Cada versión publicada detalla aquí su número de versión, fecha de publicación, tamaño en bytes y código SHA-256. Coteja este código con tu archivo antes de instalarlo: si no coincide, no lo instales.</li>
+    <li>Estar publicado en esta web no sustituye tu propia verificación técnica: por ello publicamos los mecanismos de verificación independiente descritos abajo.</li>
+  </ul>
+
   <h2>Cómo instalar en 3 pasos</h2>
-  <ol class="install"><li><div><b>Descarga el archivo .APK</b><br>Es el instalador oficial de Toke.</div></li><li><div><b>Permite instalar desde tu navegador</b><br>Android te pide activar “Instalar apps desconocidas” para tu navegador. Es normal en apps que se instalan fuera de Play Store; depende de tu celular. Revisa de dónde viene el archivo antes de instalar.</div></li><li><div><b>Toca Instalar y abre Toke</b><br>Si Play Protect avisa, es porque la app pide un permiso sensible. Elige “Instalar de todos modos” solo si descargaste desde aquí.</div></li></ol>
-  <h2>Permisos</h2><p>TOKE pide el acceso a notificaciones (especial), notificaciones, internet, servicio en primer plano, vibración e instalar apps (solo para actualizarse con tu confirmación). No pide ubicación, contactos, SMS, cámara, micrófono ni archivos. El acceso a notificaciones es amplio: Android entrega las notificaciones a la app, y TOKE descarta sin leer las que no son de apps de pago compatibles. Explicación completa en <a href="/privacidad">Privacidad</a> (sección 4).</p>
-  <h2>Actualizaciones</h2><ul><li>Las actualizaciones son manuales: TOKE te avisa en la app, tú las descargas e instalas y Android te pide confirmar.</li><li>Antes de ofrecerte instalar, la app comprueba el tamaño, el código SHA-256, el nombre de la app y que la firma sea la misma de la app que ya tienes.</li><li>Si Android rechaza la actualización por una firma distinta, no instales de otra fuente: escríbenos.</li><li>Una actualización puede cambiar o reiniciar configuraciones. Tu cuenta y tus negocios están en el servidor.</li></ul>  <h2>Versiones modificadas por terceros</h2><p>Solo podemos responder por las versiones oficiales de esta página. Un APK cambiado por otra persona puede tener código no autorizado o comportarse distinto, y puede no funcionar con el servicio. Evita descargar TOKE de lugares desconocidos. TOKE no tiene un control propio para detectar copias modificadas, salvo la comprobación de firma al actualizarse desde la app.</p>
-  <h2>Desinstalar</h2><p>Al desinstalar se borran los datos guardados en tu celular. <b>Tu cuenta, tus negocios y tus trabajadores siguen en el servidor.</b> Para eliminar la cuenta, mira <a href="/eliminar-cuenta">Eliminar cuenta</a>.</p>
-  <h2>Requisitos y límites</h2><ul><li>Android 7.0 o superior.</li><li>Internet para sincronizar con tu equipo.</li><li>Algunas marcas de celular cierran las apps para ahorrar batería: puede retrasar o cortar los avisos.</li><li>Las apps de pago pueden cambiar sus notificaciones y TOKE dejar de reconocerlas hasta actualizar.</li><li>TOKE no garantiza detección instantánea ni funcionamiento perfecto en todos los celulares, y no confirma por sí sola que el dinero llegó.</li></ul>  <p>Mejoras de cada versión: <a href="/novedades">Novedades</a>.</p>
+  <ol class="install">
+    <li><div><b>Descarga el archivo .APK</b><br>Es el instalador oficial de Toke para Android.</div></li>
+    <li><div><b>Permite instalar desde tu navegador</b><br>Android te solicitará habilitar “Instalar apps desconocidas” para tu navegador. Es el comportamiento habitual del sistema operativo para aplicaciones instaladas fuera de Google Play Store. Verifica siempre el origen del archivo antes de aceptar.</div></li>
+    <li><div><b>Toca Instalar y abre Toke</b><br>Si Android o Google Play Protect muestran un aviso preventivo, se debe a que la app proviene de fuera de Play Store y requiere acceso a notificaciones para detectar pagos. Puedes comprobar la autenticidad e integridad del archivo comparando su hash SHA-256 con el publicado arriba antes de continuar. Si tienes dudas, contáctanos antes de instalar.</div></li>
+  </ol>
+
+  <h2>Procedimiento de verificación independiente</h2>
+  <p>Para comprobar de forma independiente que el instalador descargado no ha sido alterado y es idéntico bit a bit al generado por los desarrolladores:</p>
+  <ul>
+    <li><b>En Windows (PowerShell):</b> abre la consola en la carpeta de descarga y ejecuta:<br><code>Get-FileHash toke-1.1.0.apk -Algorithm SHA256</code></li>
+    <li><b>En Linux, macOS o Android (con emulador de terminal o app de comprobación de hash):</b> ejecuta:<br><code>sha256sum toke-1.1.0.apk</code></li>
+    <li><b>Cadena esperada:</b> el valor resultante en minúsculas debe coincidir con:<br><code>1214d4df9906c4fc4b818f6e44bd138a6cb3367959d063829d354c27d648c80c</code></li>
+    <li><b>Verificación de la firma digital:</b> el binario está firmado digitalmente con el certificado de release de Fábrica Labs (<code>com.flabs.cobrate</code>). El sistema Android valida criptográficamente que las actualizaciones futuras coincidan con esta misma firma, impidiendo la sobreescritura por parte de binarios no autorizados.</li>
+  </ul>
+
+  <h2>Canal para dudas de seguridad o falsos positivos</h2>
+  <p>Si tu dispositivo, Play Protect o una herramienta antivirus emite una advertencia sobre el archivo, te agradeceremos informarnos para asistirte y remitir la muestra para su análisis de falsos positivos:</p>
+  <ul>
+    <li>Correo de seguridad: <a href="mailto:AeroCorpKT@protonmail.com">AeroCorpKT@protonmail.com</a> (asunto: “Reporte de falso positivo / Seguridad”)</li>
+    <li>WhatsApp de soporte: <a href="https://wa.me/51998360217">+51 998 360 217</a> (atención diaria de 2:00 p. m. a 8:00 p. m.)</li>
+  </ul>
+
+  <h2>Permisos solicitados</h2>
+  <p>TOKE requiere el acceso especial a notificaciones, permiso de notificaciones, acceso a internet, servicio en primer plano, vibración y permiso para instalar actualizaciones (exclusivamente para actualizarse con tu confirmación). No solicita ubicación, agenda de contactos, SMS, llamadas, cámara, micrófono ni acceso al almacenamiento personal. El acceso a notificaciones es un mecanismo general de Android: el sistema entrega las notificaciones recibidas a la app, y TOKE descarta de inmediato sin leer aquellas que no provengan de las apps de pago compatibles. Explicación detallada en <a href="/privacidad">Privacidad</a> (sección 4).</p>
+
+  <h2>Actualizaciones y bloqueo de versiones obsoletas</h2>
+  <ul>
+    <li>Las actualizaciones son gestionadas de forma segura: la aplicación consulta el manifiesto en el servidor, comprueba tamaño, código SHA-256 y verifica que la firma coincida exactamente con la versión instalada antes de solicitar tu confirmación para instalar.</li>
+    <li>Por motivos de seguridad e integridad operativa, versiones descontinuadas quedan bloqueadas en el arranque hasta actualizar a la versión vigente.</li>
+    <li>Tus credenciales de cuenta y negocios se conservan en el servidor y no se pierden al actualizar.</li>
+  </ul>
+
+  <h2>Desinstalación</h2>
+  <p>Al desinstalar la app se eliminan únicamente los datos locales almacenados en el teléfono. <b>Tu cuenta, tus negocios y tus trabajadores permanecen en el servidor.</b> Para eliminar tu cuenta de forma definitiva del servidor, revisa <a href="/eliminar-cuenta">Eliminar cuenta</a>.</p>
+
+  <h2>Requisitos y límites operativos</h2>
+  <ul>
+    <li>Celular con Android 7.0 o superior.</li>
+    <li>Conexión a internet para la sincronización en tiempo real con tu equipo.</li>
+    <li>Determinadas capas de personalización del fabricante pueden suspender aplicaciones en segundo plano para ahorrar batería; recomendamos excluir a TOKE de la optimización agresiva de batería.</li>
+    <li>Las entidades bancarias y billeteras digitales pueden actualizar el formato de sus avisos; en tales casos, TOKE se adapta mediante actualizaciones periódicas.</li>
+    <li>TOKE constituye una herramienta de asistencia operativa en el punto de venta; no certifica transferencias de fondos por sí misma ni sustituye la verificación bancaria definitiva.</li>
+  </ul>
+  <p>Consulta las notas de la versión actual en <a href="/novedades">Novedades</a>.</p>
 </div>
 </main>
 <footer><div class="wrap">
   <div class="foot">
     <div>
       <a class="brand" href="/"><img src="/assets/img/toke-mark.ede3cb76b2.png" width="32" height="33" alt=""><span>Toke</span></a>
-      <p>Un producto de Fábrica Labs.</p>
+      <p>Un proyecto de Fábrica Labs.</p>
     </div>
     <div><h4>Producto</h4><ul><li><a href="/#como-funciona">Cómo funciona</a></li><li><a href="/#planes">Planes</a></li><li><a href="/descargas">Descargas</a></li><li><a href="/novedades">Novedades</a></li></ul></div>
     <div><h4>Ayuda</h4><ul><li><a href="/ayuda">Manual y preguntas</a></li><li><a href="/seguridad">Seguridad</a></li><li><a href="/eliminar-cuenta">Eliminar mi cuenta</a></li><li><a href="/contacto">Contacto</a></li></ul></div>
@@ -68,6 +133,5 @@
   <div class="copy-line"><span>© 2026 Fábrica Labs. Todos los derechos reservados.</span><span>Yape y Plin son marcas de sus titulares. Toke no está afiliada, respaldada ni representa a dichas marcas.</span></div>
 </div></footer>
 <script src="/assets/js/site.d9eba35ddc.js" defer></script>
-
 </body>
 </html>

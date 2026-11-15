@@ -33,15 +33,49 @@
   <nav class="nav" id="nav" aria-label="Principal"><a href="/#como-funciona">Cómo funciona</a><a href="/seguridad">Seguridad</a><a href="/#planes">Planes</a><a href="/ayuda">Ayuda</a><a href="/descargas">Descargas</a></nav>
   <div class="top-actions">
     <button class="theme-btn" type="button" aria-label="Cambiar a modo oscuro"><svg class="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><svg class="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4 8.5 8.5 0 1 0 20 14.5z"/></svg></button>
-    <a class="btn btn-primary btn-sm hide-s" href="/descargas">Descargar</a>
+    <a class="btn btn-sm hide-s" style="background:#EAB308;color:#000000;border:1px solid #CA8A04;font-weight:700;" href="/descargas">Mantenimiento</a>
     <button class="menu-btn" type="button" aria-label="Abrir menú" aria-expanded="false" aria-controls="nav"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
   </div>
 </div></header>
 <main id="contenido">
-<div class="wrap page-head"><span class="eyebrow">Novedades</span><h1>Historial de versiones.</h1></div>
+<div class="wrap page-head"><span class="eyebrow">Novedades</span><h1>Historial de versiones.</h1><p>Registro de cambios, mejoras de rendimiento y actualizaciones de seguridad de TOKE.</p></div>
 <div class="wrap prose">
-  <h2>Notas de cada versión</h2>
-  <p>Aquí se publican las novedades de cada versión de TOKE.</p>
+
+  <div class="release" style="margin-top:0">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+      <h2 style="margin:0">Versión 1.1.0</h2>
+      <span style="display:inline-block;padding:4px 12px;border-radius:999px;background:#EAB308;color:#000000;font-weight:700;font-size:0.8rem">En mantenimiento</span>
+    </div>
+    <p class="state" style="margin-top:8px">Publicada el 14 de noviembre de 2026 · Tamaño: 4,6 MB (4 774 151 bytes) · Android 7.0 o superior (Nougat+)</p>
+    <p class="state">SHA-256: <code class="mono">1214d4df9906c4fc4b818f6e44bd138a6cb3367959d063829d354c27d648c80c</code></p>
+    
+    <h3 style="margin-top:20px">Cambios destacados</h3>
+    <ul>
+      <li><b>Interfaz adaptada a proporción 9:16:</b> ajuste integral de los flujos de bienvenida, registro y autenticación para que el contenido sea accesible de un vistazo en pantallas de 4,7" a 6,7" sin desplazamientos innecesarios ni botones ocultos.</li>
+      <li><b>Sesión única activa simultánea (estilo WhatsApp Web):</b> protección contra accesos no autorizados. Al iniciar sesión en un nuevo dispositivo, se solicita confirmación explícita y se revoca inmediatamente la sesión anterior mediante eventos en tiempo real, notificando al usuario.</li>
+      <li><b>Sincronización estricta de límites Free:</b> integración total con el backend (Supabase) aplicando cuota de 20 avisos al día (reinicio a las 00:00 h Lima), máximo 1 negocio, 1 colaborador activo (y 1 invitación pendiente), 1 método de cobro vinculado y hasta 3 exportaciones a Excel por semana.</li>
+      <li><b>Señalización visual y candados PRO:</b> indicadores claros en funciones avanzadas (historial completo, avisos en voz alta "Básico" con billetera y monto, exportaciones a Excel ilimitadas y comercios ilimitados) con acceso directo a la activación del plan Pro (mensual o Pack 3 meses por S/ 40).</li>
+      <li><b>Expiración reforzada en invitaciones:</b> los códigos de invitación para colaboradores de 6 letras expiran automáticamente a los 5 minutos de su emisión, impidiendo reutilizaciones o uniones extemporáneas.</li>
+      <li><b>Minimización de datos y privacidad:</b> se retiró la captura de números de operación o códigos bancarios de comprobantes en el detalle de cobros, conservando únicamente los datos operativos normalizados (monto, billetera, fecha y hora).</li>
+      <li><b>Ciclo de vida y desvinculaciones seguras:</b> retención de colaboradores expulsados por 30 días para trazabilidad antes de su eliminación definitiva (Decisión PRI6), desvinculación disociada de cobros y purga automatizada de archivos QR en menos de 24 horas (Decisión PRI2).</li>
+      <li><b>Bloqueo obligatorio de versiones obsoletas:</b> verificación criptográfica en el arranque contra el registro oficial para requerir actualización inmediata en clientes descontinuados.</li>
+    </ul>
+
+    <div class="actions" style="margin-top:20px">
+      <button type="button" class="btn btn-sm" style="background:#EAB308;color:#000000;border:1px solid #CA8A04;font-weight:700;cursor:not-allowed;" disabled>En mantenimiento · No hay modelos recientes</button>
+      <a class="btn btn-secondary btn-sm" href="/descargas">Ver estado de descargas</a>
+    </div>
+  </div>
+
+  <div class="release" style="opacity:0.85;margin-top:28px">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+      <h2 style="margin:0">Versión 1.0.0</h2>
+      <span style="display:inline-block;padding:4px 12px;border-radius:999px;background:var(--border);color:var(--muted);font-weight:700;font-size:0.8rem">Descontinuada</span>
+    </div>
+    <p class="state" style="margin-top:8px">Publicada el 12 de noviembre de 2026 · Versión preliminar inicial de lanzamiento.</p>
+    <p>Esta versión ha quedado descontinuada y bloqueada para uso en producción. Los usuarios que aún cuenten con la versión 1.0.0 deben actualizar a la versión 1.1.0 para continuar operando con el servicio.</p>
+  </div>
+
 </div>
 </main>
 <footer><div class="wrap">

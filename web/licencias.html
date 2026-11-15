@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Licencias · Toke</title>
-<meta name="description" content="Atribuciones y licencias de los componentes del sitio de Toke.">
+<title>Licencias y atribuciones · Toke</title>
+<meta name="description" content="Atribuciones, software de código abierto y licencias de terceros de Toke y su sitio web.">
 <meta name="robots" content="index,follow">
 <meta name="color-scheme" content="light dark">
 <meta name="theme-color" content="#F2F4F7" media="(prefers-color-scheme: light)">
@@ -16,8 +16,8 @@
 <meta property="og:type" content="website">
 <meta property="og:locale" content="es_PE">
 <meta property="og:site_name" content="Toke">
-<meta property="og:title" content="Licencias · Toke">
-<meta property="og:description" content="Atribuciones y licencias de los componentes del sitio de Toke.">
+<meta property="og:title" content="Licencias y atribuciones · Toke">
+<meta property="og:description" content="Atribuciones, software de código abierto y licencias de terceros de Toke y su sitio web.">
 <meta property="og:url" content="https://tokelabs.pages.dev/licencias">
 <meta property="og:image" content="https://tokelabs.pages.dev/og.png">
 <meta name="twitter:card" content="summary_large_image">
@@ -33,27 +33,49 @@
   <nav class="nav" id="nav" aria-label="Principal"><a href="/#como-funciona">Cómo funciona</a><a href="/seguridad">Seguridad</a><a href="/#planes">Planes</a><a href="/ayuda">Ayuda</a><a href="/descargas">Descargas</a></nav>
   <div class="top-actions">
     <button class="theme-btn" type="button" aria-label="Cambiar a modo oscuro"><svg class="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><svg class="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4 8.5 8.5 0 1 0 20 14.5z"/></svg></button>
-    <a class="btn btn-primary btn-sm hide-s" href="/descargas">Descargar</a>
+    <a class="btn btn-sm hide-s" style="background:#EAB308;color:#000000;border:1px solid #CA8A04;font-weight:700;" href="/descargas">Mantenimiento</a>
     <button class="menu-btn" type="button" aria-label="Abrir menú" aria-expanded="false" aria-controls="nav"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
   </div>
 </div></header>
 <main id="contenido">
-<div class="wrap page-head"><span class="eyebrow">Licencias</span><h1>Atribuciones.</h1></div>
+<div class="wrap page-head"><span class="eyebrow">Licencias</span><h1>Atribuciones y software libre.</h1><p>Relación completa de librerías de código abierto y avisos de propiedad intelectual.</p></div>
 <div class="wrap prose">
-  <table>
-    <tr><th>Elemento</th><th>Licencia o titular</th></tr>
-    <tr><td>Tipografía Plus Jakarta Sans</td><td>SIL Open Font License 1.1 — © Tokotype Project Authors. <a href="https://openfontlicense.org" rel="noopener">openfontlicense.org</a></td></tr>
-    <tr><td>three.js (logo 3D)</td><td>MIT — © three.js authors. <a href="https://threejs.org" rel="noopener">threejs.org</a></td></tr>
-    <tr><td>Logos de Yape y Plin</td><td>Marcas de sus titulares. Se muestran solo para indicar con qué billeteras funciona Toke; Toke no está afiliada, respaldada ni representa a dichas marcas.</td></tr>
+  <div class="box"><b>Versión 1.1</b> · Vigente desde el 14 de noviembre de 2026.<br><b>A quién aplica:</b> la aplicación móvil TOKE para Android y el sitio web tokelabs.pages.dev.</div>
+
+  <h2>1. Componentes del sitio web</h2>
+  <table class="hist">
+    <thead><tr><th>Elemento</th><th>Licencia y titular</th><th>Enlace</th></tr></thead>
+    <tbody>
+      <tr><td>Tipografía Plus Jakarta Sans</td><td>SIL Open Font License 1.1 — © Tokotype Project Authors</td><td><a href="https://openfontlicense.org" rel="noopener">openfontlicense.org</a></td></tr>
+      <tr><td>three.js (renderizado 3D)</td><td>Licencia MIT — © three.js authors</td><td><a href="https://threejs.org" rel="noopener">threejs.org</a></td></tr>
+    </tbody>
   </table>
-  <div class="box"></div>
+
+  <h2>2. Librerías de código abierto de la aplicación Android</h2>
+  <table class="hist">
+    <thead><tr><th>Librería / Proyecto</th><th>Uso en TOKE</th><th>Licencia</th></tr></thead>
+    <tbody>
+      <tr><td>Kotlin & Kotlinx Serialization</td><td>Lenguaje base y serialización JSON de modelos</td><td>Apache License 2.0 (JetBrains s.r.o.)</td></tr>
+      <tr><td>Android Jetpack, Compose & Material 3</td><td>Arquitectura, interfaz nativa y componentes visuales</td><td>Apache License 2.0 (AOSP / Google LLC)</td></tr>
+      <tr><td>Supabase Kotlin Client (supabase-kt)</td><td>Conexión con autenticación, base de datos y realtime</td><td>MIT License (Jan Tennert & colaboradores)</td></tr>
+      <tr><td>Ktor Client (Android & OkHttp)</td><td>Motor de red HTTP ligero y asíncrono</td><td>Apache License 2.0 (JetBrains s.r.o.)</td></tr>
+      <tr><td>Coil Compose</td><td>Carga asíncrona y procesamiento de imágenes QR</td><td>Apache License 2.0 (Coil Contributors)</td></tr>
+      <tr><td>Google ML Kit Barcode Scanning</td><td>Escaneo y lectura local de códigos QR en el dispositivo</td><td>Apache License 2.0 / Google APIs Terms</td></tr>
+      <tr><td>Firebase Cloud Messaging (FCM)</td><td>Recepción de avisos de datos en segundo plano</td><td>Apache License 2.0 (Google LLC)</td></tr>
+      <tr><td>Android Security Crypto</td><td>Cifrado local de tokens de sesión (EncryptedSharedPreferences)</td><td>Apache License 2.0 (AOSP / Google LLC)</td></tr>
+    </tbody>
+  </table>
+
+  <h2>3. Marcas comerciales y uso descriptivo nominativo</h2>
+  <p>Yape es una marca registrada del Banco de Crédito del Perú (BCP). Plin es una marca registrada de sus entidades financieras participantes (BBVA, Interbank, Scotiabank, BanBif). Las marcas y nombres comerciales de entidades financieras (BCP, Interbank, BBVA, Scotiabank, BanBif, Banco Pichincha, BIM, Tunki, Ligo, Lemon Cash) son propiedad exclusiva de sus respectivos titulares.</p>
+  <p>Su mención en TOKE y en este sitio web tiene carácter estrictamente informativo y nominativo, orientada exclusivamente a describir la compatibilidad técnica de lectura de notificaciones e interoperabilidad del servicio en el punto de venta, de conformidad con las disposiciones vigentes en materia de propiedad industrial (Decisión 486 de la Comunidad Andina y Decreto Legislativo N.º 1075 del Perú). TOKE y Fábrica Labs no ostentan representación, patrocinio, afiliación ni vínculo comercial con dichas instituciones.</p>
 </div>
 </main>
 <footer><div class="wrap">
   <div class="foot">
     <div>
       <a class="brand" href="/"><img src="/assets/img/toke-mark.ede3cb76b2.png" width="32" height="33" alt=""><span>Toke</span></a>
-      <p>Un producto de Fábrica Labs.</p>
+      <p>Un proyecto de Fábrica Labs.</p>
     </div>
     <div><h4>Producto</h4><ul><li><a href="/#como-funciona">Cómo funciona</a></li><li><a href="/#planes">Planes</a></li><li><a href="/descargas">Descargas</a></li><li><a href="/novedades">Novedades</a></li></ul></div>
     <div><h4>Ayuda</h4><ul><li><a href="/ayuda">Manual y preguntas</a></li><li><a href="/seguridad">Seguridad</a></li><li><a href="/eliminar-cuenta">Eliminar mi cuenta</a></li><li><a href="/contacto">Contacto</a></li></ul></div>
@@ -63,6 +85,5 @@
   <div class="copy-line"><span>© 2026 Fábrica Labs. Todos los derechos reservados.</span><span>Yape y Plin son marcas de sus titulares. Toke no está afiliada, respaldada ni representa a dichas marcas.</span></div>
 </div></footer>
 <script src="/assets/js/site.d9eba35ddc.js" defer></script>
-
 </body>
 </html>
