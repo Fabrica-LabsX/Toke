@@ -82,9 +82,9 @@
   <h2>Procedimiento de verificación independiente</h2>
   <p>Para comprobar de forma independiente que el instalador descargado no ha sido alterado y es idéntico bit a bit al generado por los desarrolladores:</p>
   <ul>
-    <li><b>En Windows (PowerShell):</b> abre la consola en la carpeta de descarga y ejecuta:<br><code>Get-FileHash toke-1.1.0.apk -Algorithm SHA256</code></li>
-    <li><b>En Linux, macOS o Android (con emulador de terminal o app de comprobación de hash):</b> ejecuta:<br><code>sha256sum toke-1.1.0.apk</code></li>
-    <li><b>Cadena esperada:</b> el valor resultante en minúsculas debe coincidir con:<br><code>1214d4df9906c4fc4b818f6e44bd138a6cb3367959d063829d354c27d648c80c</code></li>
+    <li><b>En Windows (PowerShell):</b> abre la consola en la carpeta de descarga y ejecuta:<br><code>Get-FileHash toke.apk -Algorithm SHA256</code></li>
+    <li><b>En Linux, macOS o Android (con emulador de terminal o app de comprobación de hash):</b> ejecuta:<br><code>sha256sum toke.apk</code></li>
+    <li><b>Cadena esperada:</b> el valor resultante en minúsculas debe coincidir con el hash oficial publicado junto con cada versión oficial (temporalmente en pausa durante la fase de mantenimiento).</li>
     <li><b>Verificación de la firma digital:</b> el binario está firmado digitalmente con el certificado de release de Fábrica Labs (<code>com.flabs.cobrate</code>). El sistema Android valida criptográficamente que las actualizaciones futuras coincidan con esta misma firma, impidiendo la sobreescritura por parte de binarios no autorizados.</li>
   </ul>
 
