@@ -23,7 +23,13 @@
 <meta name="twitter:card" content="summary_large_image">
 <link rel="preload" href="/assets/fonts/pjs-latin.153fc85b70.woff2" as="font" type="font/woff2" crossorigin>
 <script src="/assets/js/theme.e778065358.js"></script>
-<link rel="stylesheet" href="/assets/css/site.41ab8f74fa.css">
+<link rel="stylesheet" href="/assets/css/site.41ab8f74fa.css?v=1.5.1">
+<style>
+  .prose > * { max-width: 760px; }
+  .callout { margin: 24px 0 !important; max-width: 760px !important; width: 100% !important; box-sizing: border-box !important; }
+  .release { max-width: 760px; margin-top: 0; border: 1.5px solid var(--border); box-shadow: 0 4px 20px rgba(0,0,0,0.04); }
+  .install { max-width: 760px; padding-left: 0; }
+</style>
 </head>
 <body>
 <svg width="0" height="0" class="sr" aria-hidden="true"><defs><symbol id="mark" viewBox="330 290 400 400"><path fill="currentColor" d="M382 350H557V632A48.5 48.5 0 0 1 460 632V440H382A45 45 0 0 1 382 350Z"/><path fill="currentColor" d="M565 440V382A58 58 0 0 1 623 440Z"/><path fill="currentColor" d="M636 440A64 64 0 0 0 574 376.1V353.1A87 87 0 0 1 659 440Z"/><path fill="currentColor" d="M680 440A108 108 0 0 0 574 332V309A131 131 0 0 1 703 440Z"/></symbol></defs></svg>
@@ -38,19 +44,30 @@
   </div>
 </div></header>
 <main id="contenido">
-<div class="wrap page-head"><span class="eyebrow">Descargas</span><h1>Descarga Toke.</h1><p>Instalador oficial para Android, distribuido directamente por Fábrica Labs.</p></div>
+<div class="wrap page-head">
+  <span class="eyebrow">Descargas</span>
+  <h1>Descarga Toke.</h1>
+  <p>Instalador oficial para Android, distribuido directamente por Fábrica Labs.</p>
+</div>
+
 <div class="wrap prose">
-  <div class="release">
-    <h2>Toke 1.5.1 para Android</h2>
-    <p class="state">Publicada el 15 de noviembre de 2026 · Tamaño: 4,6 MB (4 774 155 bytes) · Android 7.0 o superior</p>
-    <p class="state">SHA-256: <code class="mono">0f5b6c8464f223fb2b3a29b9f59ab4d08973a692411ca6f2e31049b7f06fd18f</code></p>
-    <div class="actions">
-      <a class="btn btn-primary" href="https://github.com/Fabrica-LabsX/toke-releases/releases/download/v1.5.1/app-release.apk">Descargar APK v1.5.1</a>
-      <a class="btn btn-secondary btn-sm" href="/novedades">Ver novedades</a>
+  <div class="release" style="max-width: 760px; margin-top: 0; border: 1.5px solid var(--border); box-shadow: 0 4px 20px rgba(0,0,0,0.04);">
+    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+      <h2 style="margin: 0; font-size: 1.6rem;">Toke 1.5.1 para Android</h2>
+      <span style="display: inline-block; padding: 5px 14px; border-radius: 999px; background: #00C06D; color: #000000; font-weight: 800; font-size: 0.8rem; letter-spacing: 0.02em;">Versión oficial vigente</span>
+    </div>
+    <p class="state" style="margin-top: 10px; font-size: 0.95rem;">Publicada el 15 de noviembre de 2026 · Tamaño: 4,6 MB (4 774 155 bytes) · Android 7.0 o superior</p>
+    <p class="state" style="margin-top: 4px; font-size: 0.9rem;">SHA-256: <code class="mono" style="word-break: break-all; background: var(--border); padding: 2px 6px; border-radius: 6px;">0f5b6c8464f223fb2b3a29b9f59ab4d08973a692411ca6f2e31049b7f06fd18f</code></p>
+    <div class="actions" style="margin-top: 22px; display: flex; gap: 12px; flex-wrap: wrap;">
+      <a class="btn btn-primary" style="height: 48px; padding: 0 28px; font-size: 1.05rem;" href="https://github.com/Fabrica-LabsX/toke-releases/releases/download/v1.5.1/app-release.apk">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width: 20px; height: 20px; margin-right: 6px;"><path d="M12 4v11M7 11l5 5 5-5M5 20h14"/></svg>
+        Descargar APK v1.5.1
+      </a>
+      <a class="btn btn-secondary btn-sm" style="height: 48px; padding: 0 20px; display: inline-flex; align-items: center;" href="/novedades">Ver novedades</a>
     </div>
   </div>
 
-  <div class="callout" style="margin:24px 0">
+  <div class="callout" style="margin: 24px 0 !important; max-width: 760px; width: 100%; box-sizing: border-box;">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l8 3v6c0 4.5-3.2 8-8 9-4.8-1-8-4.5-8-9V6l8-3z"/><path d="M9 12l2 2 4-4"/></svg>
     <div>
       <b>Resumen de privacidad antes de descargar e instalar:</b>
@@ -75,7 +92,7 @@
   </ul>
 
   <h2>Cómo instalar en 3 pasos</h2>
-  <ol class="install">
+  <ol class="install" style="padding-left: 0;">
     <li><div><b>Descarga el archivo .APK</b><br>Es el instalador oficial de Toke para Android.</div></li>
     <li><div><b>Permite instalar desde tu navegador</b><br>Android te solicitará habilitar “Instalar apps desconocidas” para tu navegador. Es el comportamiento habitual del sistema operativo para aplicaciones instaladas fuera de Google Play Store. Verifica siempre el origen del archivo antes de aceptar.</div></li>
     <li><div><b>Toca Instalar y abre Toke</b><br>Si Android o Google Play Protect muestran un aviso preventivo, se debe a que la app proviene de fuera de Play Store y requiere acceso a notificaciones para detectar pagos. Puedes comprobar la autenticidad e integridad del archivo comparando su hash SHA-256 con el publicado arriba antes de continuar. Si tienes dudas, contáctanos antes de instalar.</div></li>
@@ -84,10 +101,10 @@
   <h2>Procedimiento de verificación independiente</h2>
   <p>Para comprobar de forma independiente que el instalador descargado no ha sido alterado y es idéntico bit a bit al generado por los desarrolladores:</p>
   <ul>
-    <li><b>En Windows (PowerShell):</b> abre la consola en la carpeta de descarga y ejecuta:<br><code>Get-FileHash toke.apk -Algorithm SHA256</code></li>
-    <li><b>En Linux, macOS o Android (con emulador de terminal o app de comprobación de hash):</b> ejecuta:<br><code>sha256sum toke.apk</code></li>
-    <li><b>Cadena esperada:</b> el valor resultante en minúsculas debe coincidir con el hash oficial publicado junto con cada versión oficial (temporalmente en pausa durante la fase de mantenimiento).</li>
-    <li><b>Verificación de la firma digital:</b> el binario está firmado digitalmente con el certificado de release de Fábrica Labs (<code>com.flabs.cobrate</code>). El sistema Android valida criptográficamente que las actualizaciones futuras coincidan con esta misma firma, impidiendo la sobreescritura por parte de binarios no autorizados.</li>
+    <li><b>En Windows (PowerShell):</b> abre la consola en la carpeta de descarga y ejecuta:<br><code>Get-FileHash app-release.apk -Algorithm SHA256</code></li>
+    <li><b>En Linux, macOS o Android (con emulador de terminal o app de comprobación de hash):</b> ejecuta:<br><code>sha256sum app-release.apk</code></li>
+    <li><b>Cadena esperada:</b> el valor resultante en minúsculas debe coincidir con el hash oficial publicado arriba (<code class="mono">0f5b6c8464f223fb2b3a29b9f59ab4d08973a692411ca6f2e31049b7f06fd18f</code>).</li>
+    <li><b>Verificación de la firma digital:</b> el binario está firmado digitalmente con el certificado oficial de Fábrica Labs (<code>CN=TOKE, O=FLABS, C=PE</code>). El sistema Android valida criptográficamente que las actualizaciones futuras coincidan con esta misma firma, impidiendo la sobreescritura por parte de binarios no autorizados.</li>
   </ul>
 
   <h2>Canal para dudas de seguridad o falsos positivos</h2>
@@ -125,7 +142,7 @@
   <div class="foot">
     <div>
       <a class="brand" href="/"><img src="/assets/img/toke-mark.ede3cb76b2.png" width="32" height="33" alt=""><span>Toke</span></a>
-      <p>Un proyecto de Fábrica Labs.</p>
+      <p>Un producto de Fábrica Labs.</p>
     </div>
     <div><h4>Producto</h4><ul><li><a href="/#como-funciona">Cómo funciona</a></li><li><a href="/#planes">Planes</a></li><li><a href="/descargas">Descargas</a></li><li><a href="/novedades">Novedades</a></li></ul></div>
     <div><h4>Ayuda</h4><ul><li><a href="/ayuda">Manual y preguntas</a></li><li><a href="/seguridad">Seguridad</a></li><li><a href="/eliminar-cuenta">Eliminar mi cuenta</a></li><li><a href="/contacto">Contacto</a></li></ul></div>

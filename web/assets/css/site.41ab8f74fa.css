@@ -193,6 +193,9 @@ section{padding:88px 0}
 .prose ul,.prose ol{padding-left:22px;display:grid;gap:8px;margin-top:12px}
 .prose li{padding-left:4px}
 .prose .box{margin-top:20px;padding:18px 20px;border:1px solid var(--border);border-radius:var(--r);background:var(--card)}
+.prose .callout{margin:24px 0;max-width:760px;width:100%;box-sizing:border-box}
+.prose .release{margin-top:0;max-width:760px}
+.prose .install{padding-left:0;max-width:760px}
 .prose table{width:100%;border-collapse:collapse;margin-top:16px;font-size:.95rem}
 .prose th,.prose td{text-align:left;padding:12px 14px;border-bottom:1px solid var(--border);vertical-align:top}
 .prose th{color:var(--muted);font-weight:600;font-size:.85rem}
