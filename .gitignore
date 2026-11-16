@@ -69,9 +69,11 @@ docs/
 scripts/
 CLAUDE.md
 
-# Migraciones SQL locales (viven exclusivamente ejecutadas en Supabase)
-supabase/migrations/*.sql
+# Archivos de base de datos y esquemas
 *.sql
+*.sqlite
+*.sqlite3
+*.db
 
 # Proyectos y artefactos desacoplados del cliente Android
 One/
