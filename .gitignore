@@ -8,8 +8,12 @@ local.properties
 .externalNativeBuild
 .cxx
 
-# Capturas de depuración (logcat exportado, no es código)
+# Capturas de depuración y registros
+*.log
+**/*.log
 *.logcat
+hs_err_pid*.log
+replay_pid*.log
 
 # Sensitive credentials and config
 google-services.json
@@ -43,8 +47,21 @@ keystone.properties
 *.bks
 *.p12
 *.pfx
-hs_err_pid*.log
-replay_pid*.log
+
+# Binarios e instaladores generados
+*.apk
+*.aab
+
+# Variables de entorno
+.env
+.env.*
+*.env
+
+# Pruebas y reportes temporales
+test-results/
+playwright-report/
+blob-report/
+scratch/
 
 # Copias y documentos privados viven fuera del repositorio
 *.zip

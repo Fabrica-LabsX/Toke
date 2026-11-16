@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Descargas · Toke</title>
-<meta name="description" content="Descarga la app oficial de Toke para Android: versión, fecha, tamaño y SHA-256.">
+<title>Centro de descargas · Toke</title>
+<meta name="description" content="Descarga la app oficial de Toke para Android. Verifica su integridad, consulta permisos y revisa análisis de seguridad independientes.">
 <meta name="robots" content="index,follow">
 <meta name="color-scheme" content="light dark">
 <meta name="theme-color" content="#F2F4F7" media="(prefers-color-scheme: light)">
@@ -16,20 +16,15 @@
 <meta property="og:type" content="website">
 <meta property="og:locale" content="es_PE">
 <meta property="og:site_name" content="Toke">
-<meta property="og:title" content="Descargas · Toke">
-<meta property="og:description" content="Descarga la app oficial de Toke para Android: versión, fecha, tamaño y SHA-256.">
+<meta property="og:title" content="Centro de descargas · Toke">
+<meta property="og:description" content="Descarga la app oficial de Toke para Android. Verifica su integridad, consulta permisos y revisa análisis de seguridad independientes.">
 <meta property="og:url" content="https://tokelabs.pages.dev/descargas">
 <meta property="og:image" content="https://tokelabs.pages.dev/og.png">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="preload" href="/assets/fonts/pjs-latin.153fc85b70.woff2" as="font" type="font/woff2" crossorigin>
 <script src="/assets/js/theme.e778065358.js"></script>
-<link rel="stylesheet" href="/assets/css/site.41ab8f74fa.css?v=1.5.1">
-<style>
-  .prose > * { max-width: 760px; }
-  .callout { margin: 24px 0 !important; max-width: 760px !important; width: 100% !important; box-sizing: border-box !important; }
-  .release { max-width: 760px; margin-top: 0; border: 1.5px solid var(--border); box-shadow: 0 4px 20px rgba(0,0,0,0.04); }
-  .install { max-width: 760px; padding-left: 0; }
-</style>
+<link rel="stylesheet" href="/assets/css/site.41ab8f74fa.css">
+<link rel="stylesheet" href="/assets/css/downloads.f8e9a1b2c3.css">
 </head>
 <body>
 <svg width="0" height="0" class="sr" aria-hidden="true"><defs><symbol id="mark" viewBox="330 290 400 400"><path fill="currentColor" d="M382 350H557V632A48.5 48.5 0 0 1 460 632V440H382A45 45 0 0 1 382 350Z"/><path fill="currentColor" d="M565 440V382A58 58 0 0 1 623 440Z"/><path fill="currentColor" d="M636 440A64 64 0 0 0 574 376.1V353.1A87 87 0 0 1 659 440Z"/><path fill="currentColor" d="M680 440A108 108 0 0 0 574 332V309A131 131 0 0 1 703 440Z"/></symbol></defs></svg>
@@ -45,77 +40,199 @@
 </div></header>
 <main id="contenido">
 <div class="wrap page-head">
-  <span class="eyebrow">Descargas</span>
-  <h1>Descarga Toke.</h1>
-  <p>Instalador oficial para Android, distribuido directamente por Fábrica Labs.</p>
+  <span class="eyebrow">Centro de descargas</span>
+  <h1>Descarga, verifica e inspecciona.</h1>
+  <p>Instalador oficial para Android, distribuido directamente por Fábrica Labs. Aquí puedes descargar, comprobar la integridad del archivo y consultar todos los detalles técnicos.</p>
 </div>
 
 <div class="wrap prose">
-  <div class="release" style="max-width: 760px; margin-top: 0; border: 1.5px solid var(--border); box-shadow: 0 4px 20px rgba(0,0,0,0.04);">
-    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
-      <h2 style="margin: 0; font-size: 1.6rem;">Toke 1.5.1 para Android</h2>
-      <span style="display: inline-block; padding: 5px 14px; border-radius: 999px; background: #00C06D; color: #000000; font-weight: 800; font-size: 0.8rem; letter-spacing: 0.02em;">Versión oficial vigente</span>
+
+  <!-- ═══════ BLOQUE A: DESCARGA PRINCIPAL ═══════ -->
+  <div class="dl-hero" role="region" aria-label="Descarga principal">
+    <div class="dl-hero-head">
+      <h2 id="dl-version">Toke para Android</h2>
+      <span class="dl-badge" id="dl-badge">Versión oficial vigente</span>
     </div>
-    <p class="state" style="margin-top: 10px; font-size: 0.95rem;">Publicada el 15 de noviembre de 2026 · Tamaño: 4,6 MB (4 774 155 bytes) · Android 7.0 o superior</p>
-    <p class="state" style="margin-top: 4px; font-size: 0.9rem;">SHA-256: <code class="mono" style="word-break: break-all; background: var(--border); padding: 2px 6px; border-radius: 6px;">0f5b6c8464f223fb2b3a29b9f59ab4d08973a692411ca6f2e31049b7f06fd18f</code></p>
-    <div class="actions" style="margin-top: 22px; display: flex; gap: 12px; flex-wrap: wrap;">
-      <a class="btn btn-primary" style="height: 48px; padding: 0 28px; font-size: 1.05rem;" href="https://github.com/Fabrica-LabsX/toke-releases/releases/download/v1.5.1/app-release.apk">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width: 20px; height: 20px; margin-right: 6px;"><path d="M12 4v11M7 11l5 5 5-5M5 20h14"/></svg>
-        Descargar APK v1.5.1
+    <dl class="dl-meta">
+      <dt>Publicada</dt><dd id="dl-date">—</dd>
+      <dt>Tamaño</dt><dd id="dl-size">—</dd>
+      <dt>Compatibilidad</dt><dd id="dl-android">—</dd>
+    </dl>
+    <p class="dl-sha">SHA-256: <code id="dl-sha256">—</code></p>
+    <div class="dl-origin">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l8 3v6c0 4.5-3.2 8-8 9-4.8-1-8-4.5-8-9V6l8-3z"/><path d="M9 12l2 2 4-4"/></svg>
+      Origen oficial: <strong>GitHub Releases</strong> del repositorio de distribución de Fábrica Labs.
+    </div>
+
+    <!-- Texto de advertencia antes del botón (lenguaje de calle) -->
+    <div class="dl-warning-card" id="advertencia-descarga" role="note" aria-label="Aviso antes de descargar">
+      <div class="dl-warning-head">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.01"/></svg>
+        <h3>Antes de descargar, esto es lo que debes saber</h3>
+      </div>
+      <p class="dl-warning-sub">TOKE aun no está en Play Store, así que queremos ser claros contigo desde el inicio.</p>
+      <ol class="dl-warning-list">
+        <li>
+          <strong>1. TOKE lee las notificaciones de tu celular.</strong>
+          <p>Es la única forma de detectar tus cobros apenas llegan. Es un permiso delicado de Android y por eso tú lo activas a mano. Este permiso no deja mover dinero ni entrar a tu Yape, Plin o banco, y TOKE nunca te pide claves. Puedes quitarlo cuando quieras en Ajustes.</p>
+        </li>
+        <li>
+          <strong>2. Las actualizaciones no pasan por Play Store.</strong>
+          <p>Cuando hay una versión nueva, TOKE te avisa y te pide confirmar antes de instalar. Nunca se instala sola. Descarga TOKE solo desde este enlace oficial (tokelabs.pages.dev) y desconfía de cualquier otro.</p>
+        </li>
+        <li>
+          <strong>3. Hoy esto lo afirmamos nosotros mismos.</strong>
+          <p>Todavía no hay una auditoría externa, y no te pedimos que nos creas a ciegas. Puedes revisar el archivo en nuestro GitHub o ver el análisis en VirusTotal.</p>
+        </li>
+      </ol>
+    </div>
+
+    <div class="dl-actions">
+      <a class="btn btn-primary" id="dl-button" style="height:48px;padding:0 28px;font-size:1.05rem" href="#">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:20px;height:20px;margin-right:6px"><path d="M12 4v11M7 11l5 5 5-5M5 20h14"/></svg>
+        Descargar APK
       </a>
-      <a class="btn btn-secondary btn-sm" style="height: 48px; padding: 0 20px; display: inline-flex; align-items: center;" href="/novedades">Ver novedades</a>
+      <a class="btn btn-secondary btn-sm" style="height:48px;padding:0 20px;display:inline-flex;align-items:center" href="/novedades">Ver novedades</a>
     </div>
   </div>
 
-  <div class="callout" style="margin: 24px 0 !important; max-width: 760px; width: 100%; box-sizing: border-box;">
+  <!-- Modal interactivo de advertencia (asalta al pulsar descargar si se activa confirmación) -->
+  <div id="modal-advertencia" class="modal-advertencia" role="dialog" aria-modal="true" aria-labelledby="modal-adv-title">
+    <div class="modal-advertencia-card">
+      <h3 id="modal-adv-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.01"/></svg>
+        Antes de descargar, esto es lo que debes saber
+      </h3>
+      <p class="dl-warning-sub">TOKE aun no está en Play Store, así que queremos ser claros contigo desde el inicio.</p>
+      <ol class="dl-warning-list">
+        <li><strong>1. TOKE lee las notificaciones de tu celular.</strong><p>Es la única forma de detectar tus cobros apenas llegan. Es un permiso delicado de Android y por eso tú lo activas a mano. No deja mover dinero ni entrar a tus cuentas.</p></li>
+        <li><strong>2. Las actualizaciones no pasan por Play Store.</strong><p>TOKE te avisa y pide confirmación antes de instalar cualquier versión. Descárgala sólo de este sitio oficial.</p></li>
+        <li><strong>3. Hoy esto lo afirmamos nosotros mismos.</strong><p>No te pedimos fe ciega: revisa el código en GitHub o el reporte de VirusTotal.</p></li>
+      </ol>
+      <div class="modal-advertencia-actions">
+        <a class="btn btn-primary" id="modal-adv-confirm" href="#">Entendido, descargar APK</a>
+        <button type="button" class="btn btn-secondary" id="modal-adv-close">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ BLOQUE B: VERIFICAR MI APK ═══════ -->
+  <div class="verify-section" role="region" aria-label="Verificar archivo APK">
+    <h2>Comprobar mi APK</h2>
+    <p>Verifica que el archivo que descargaste es idéntico al publicado por Fábrica Labs. El archivo <strong>nunca se envía a ningún servidor</strong>: la comprobación se ejecuta completamente en tu dispositivo.</p>
+    <div class="verify-drop" id="verify-drop" role="button" tabindex="0" aria-label="Seleccionar archivo APK para verificar">
+      <input type="file" id="verify-file" class="verify-file-input" accept=".apk" aria-label="Seleccionar archivo APK">
+      <div class="verify-drop-label">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M20 21H4"/></svg>
+        <strong>Selecciona o arrastra tu archivo .APK</strong>
+        <span>El archivo se procesa localmente. No se sube a ningún servidor.</span>
+      </div>
+    </div>
+    <div class="verify-result" id="verify-result" role="alert" aria-live="polite">
+      <span id="verify-icon"></span>
+      <div>
+        <div id="verify-title"></div>
+        <div id="verify-detail"></div>
+        <button type="button" id="verify-reset" hidden>Verificar otro archivo</button>
+      </div>
+    </div>
+    <div class="verify-progress" id="verify-progress" hidden>
+      <div class="verify-fill" id="verify-fill"></div>
+    </div>
+  </div>
+
+  <!-- ═══════ BLOQUE C: VIRUSTOTAL ═══════ -->
+  <div class="vt-card" id="vt-section" role="region" aria-label="Análisis de seguridad independiente">
+    <h2>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l8 3v6c0 4.5-3.2 8-8 9-4.8-1-8-4.5-8-9V6l8-3z"/></svg>
+      Análisis de seguridad independiente
+    </h2>
+    <div class="vt-info">
+      <div><span class="vt-badge" id="vt-badge">0 / 67 detecciones</span></div>
+      <p id="vt-version"><strong>Versión analizada:</strong> Toke 1.5.1 (SHA-256 oficial)</p>
+      <p id="vt-status">Cargando estado…</p>
+      <p id="vt-date"></p>
+      <p><a id="vt-link" href="https://www.virustotal.com/gui/file/0f5b6c8464f223fb2b3a29b9f59ab4d08973a692411ca6f2e31049b7f06fd18f" target="_blank" rel="noopener">Ver informe original en VirusTotal</a></p>
+    </div>
+
+    <!-- Desplegable dinámico: muestra únicamente la captura correspondiente al tema activo -->
+    <details class="vt-preview-toggle">
+      <summary>Ver captura de referencia de la auditoría en VirusTotal</summary>
+      <div class="vt-screenshots-container">
+        <!-- En tema claro sólo se muestra la captura blanca -->
+        <figure class="vt-shot-figure vt-theme-light" role="button" tabindex="0" aria-label="Tocar para ampliar captura en tema claro">
+          <img src="/assets/img/vt/virustotal_light.png" alt="Captura oficial de VirusTotal en tema claro mostrando 0 de 67 detecciones" loading="lazy">
+          <figcaption>Auditoría VirusTotal — 0/67 motores limpios (Toca la imagen para ampliar)</figcaption>
+        </figure>
+        <!-- En tema oscuro sólo se muestra la captura negra -->
+        <figure class="vt-shot-figure vt-theme-dark" role="button" tabindex="0" aria-label="Tocar para ampliar captura en tema oscuro">
+          <img src="/assets/img/vt/virustotal_dark.png" alt="Captura oficial de VirusTotal en tema oscuro mostrando 0 de 67 detecciones" loading="lazy">
+          <figcaption>Auditoría VirusTotal — 0/67 motores limpios (Toca la imagen para ampliar)</figcaption>
+        </figure>
+      </div>
+      <p style="font-size:0.8rem;color:var(--muted);margin-top:8px">Nota: Captura correspondiente a la auditoría técnica de la versión v1.5.1. Consulta el informe en vivo mediante el enlace de arriba.</p>
+    </details>
+
+    <!-- Fondo oscuro al hacer zoom en la imagen -->
+    <div class="vt-backdrop" id="vt-backdrop"></div>
+
+    <div id="vt-disclaimer">
+      <strong>Aclaración:</strong> VirusTotal reúne resultados de distintas herramientas antivirus. Un resultado sin detecciones (0/67) indica que ninguno de los motores consultados identificó el archivo como malicioso, pero no constituye una certificación absoluta de seguridad.
+    </div>
+  </div>
+
+  <!-- ═══════ BLOQUE D: PERMISOS ═══════ -->
+  <div class="permisos-section" role="region" aria-label="Permisos de TOKE">
+    <details>
+      <summary>¿A qué puede acceder TOKE?</summary>
+      <div class="permisos-body" id="permisos-lista">
+        <p>Cargando permisos…</p>
+      </div>
+    </details>
+  </div>
+
+  <!-- ═══════ CERTIFICADO DE FIRMA ═══════ -->
+  <div class="cert-card" role="region" aria-label="Certificado de firma digital">
+    <h2>Firma digital</h2>
+    <p style="font-size:0.9rem;color:var(--muted);margin-bottom:16px">El APK está firmado digitalmente con el certificado oficial de Fábrica Labs. Android valida criptográficamente que las actualizaciones coincidan con esta misma firma.</p>
+    <dl class="cert-grid">
+      <dt>Emisor</dt><dd id="cert-subject">—</dd>
+      <dt>Huella SHA-256</dt><dd id="cert-sha256">—</dd>
+    </dl>
+  </div>
+
+
+  <!-- ═══════ SOBRE LA POLÍTICA DE PRIVACIDAD: NOMBRES Y MONTOS ═══════ -->
+  <div class="callout" style="margin: 40px 0 !important; max-width: 760px; width: 100%; box-sizing: border-box;">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l8 3v6c0 4.5-3.2 8-8 9-4.8-1-8-4.5-8-9V6l8-3z"/><path d="M9 12l2 2 4-4"/></svg>
     <div>
-      <b>Resumen de privacidad antes de descargar e instalar:</b>
+      <b>Sobre la privacidad de tus cobros (nombres y montos):</b>
       <ul style="margin:8px 0 0 18px;font-size:0.92rem;line-height:1.5">
-        <li><b>Qué datos procesa:</b> Notificaciones locales de cobro emitidas por apps compatibles en el celular del dueño (monto, billetera, fecha/hora y nombre si viene en el aviso).</li>
-        <li><b>Qué descarta:</b> Cualquier notificación de mensajería privada u otras aplicaciones es descartada de inmediato en memoria volátil sin leerse ni registrarse. No se conserva el texto íntegro ni mensajes personales.</li>
-        <li><b>Qué NUNCA hace:</b> NO accede a tus cuentas bancarias, Yape o Plin; NO solicita contraseñas ni saldos; NO puede mover dinero; NO pide permisos de ubicación, contactos, SMS, cámara, micrófono ni fotos/archivos.</li>
-        <li><b>Dónde se guardan los datos:</b> En servidores seguros en Sudamérica (Supabase, São Paulo) protegidos con reglas estrictas de aislamiento a nivel de fila (RLS).</li>
-        <li><b>Control total:</b> Puedes pausar o expulsar trabajadores, borrar tus negocios o solicitar la eliminación total de tu cuenta cuando lo decidas.</li>
+        <li><b>Qué datos se guardan:</b> Solo el monto recibido, la billetera (Yape o Plin), fecha, hora y el nombre de quien paga si viene en el aviso. Nunca leemos ni guardamos tus chats privados de WhatsApp ni SMS.</li>
+        <li><b>Dónde se guardan:</b> En servidores seguros en Sudamérica (Supabase, São Paulo, Brasil) protegidos con reglas estrictas de aislamiento por comercio (RLS).</li>
+        <li><b>Quién los ve:</b> Únicamente tú (dueño del negocio) y los colaboradores autorizados de tu equipo asignados a ese cobro. Nadie más tiene acceso.</li>
+        <li><b>Cómo se borran:</b> Se eliminan de inmediato al pausar o expulsar trabajadores, al borrar tu negocio o al solicitar la eliminación total de tu cuenta en la app o en <a href="/eliminar-cuenta">Eliminar cuenta</a>.</li>
       </ul>
     </div>
   </div>
 
+  <!-- ═══════ INFORMACIÓN ADICIONAL ═══════ -->
   <h2>Qué es el APK</h2>
   <p>El APK es el archivo que instala la aplicación TOKE en tu celular Android. Ha sido compilado directamente por Fábrica Labs y firmado con su certificado oficial de lanzamiento. Contiene exclusivamente el código de la aplicación: no es una entidad bancaria, no es una billetera y no procesa transacciones dinerarias. Instalarla no otorga acceso a tus cuentas de Yape, Plin ni a tu banco.</p>
-
-  <h2>De dónde descargarlo</h2>
-  <ul>
-    <li>Descárgalo únicamente desde este sitio oficial (<code>tokelabs.pages.dev</code>). No descargues TOKE de repositorios no oficiales, enlaces en redes sociales ni chats de terceros.</li>
-    <li>Cada versión publicada detalla aquí su número de versión, fecha de publicación, tamaño en bytes y código SHA-256. Coteja este código con tu archivo antes de instalarlo: si no coincide, no lo instales.</li>
-    <li>Estar publicado en esta web no sustituye tu propia verificación técnica: por ello publicamos los mecanismos de verificación independiente descritos abajo.</li>
-  </ul>
 
   <h2>Cómo instalar en 3 pasos</h2>
   <ol class="install" style="padding-left: 0;">
     <li><div><b>Descarga el archivo .APK</b><br>Es el instalador oficial de Toke para Android.</div></li>
-    <li><div><b>Permite instalar desde tu navegador</b><br>Android te solicitará habilitar “Instalar apps desconocidas” para tu navegador. Es el comportamiento habitual del sistema operativo para aplicaciones instaladas fuera de Google Play Store. Verifica siempre el origen del archivo antes de aceptar.</div></li>
-    <li><div><b>Toca Instalar y abre Toke</b><br>Si Android o Google Play Protect muestran un aviso preventivo, se debe a que la app proviene de fuera de Play Store y requiere acceso a notificaciones para detectar pagos. Puedes comprobar la autenticidad e integridad del archivo comparando su hash SHA-256 con el publicado arriba antes de continuar. Si tienes dudas, contáctanos antes de instalar.</div></li>
+    <li><div><b>Permite instalar desde tu navegador</b><br>Android te solicitará habilitar "Instalar apps desconocidas" para tu navegador. Es el comportamiento habitual del sistema operativo para aplicaciones instaladas fuera de Google Play Store. Verifica siempre el origen del archivo antes de aceptar.</div></li>
+    <li><div><b>Toca Instalar y abre Toke</b><br>Si Android o Google Play Protect muestran un aviso preventivo, se debe a que la app proviene de fuera de Play Store y requiere acceso a notificaciones para detectar pagos. Puedes comprobar la autenticidad e integridad del archivo con el verificador de arriba antes de continuar. Si tienes dudas, contáctanos antes de instalar.</div></li>
   </ol>
-
-  <h2>Procedimiento de verificación independiente</h2>
-  <p>Para comprobar de forma independiente que el instalador descargado no ha sido alterado y es idéntico bit a bit al generado por los desarrolladores:</p>
-  <ul>
-    <li><b>En Windows (PowerShell):</b> abre la consola en la carpeta de descarga y ejecuta:<br><code>Get-FileHash app-release.apk -Algorithm SHA256</code></li>
-    <li><b>En Linux, macOS o Android (con emulador de terminal o app de comprobación de hash):</b> ejecuta:<br><code>sha256sum app-release.apk</code></li>
-    <li><b>Cadena esperada:</b> el valor resultante en minúsculas debe coincidir con el hash oficial publicado arriba (<code class="mono">0f5b6c8464f223fb2b3a29b9f59ab4d08973a692411ca6f2e31049b7f06fd18f</code>).</li>
-    <li><b>Verificación de la firma digital:</b> el binario está firmado digitalmente con el certificado oficial de Fábrica Labs (<code>CN=TOKE, O=FLABS, C=PE</code>). El sistema Android valida criptográficamente que las actualizaciones futuras coincidan con esta misma firma, impidiendo la sobreescritura por parte de binarios no autorizados.</li>
-  </ul>
 
   <h2>Canal para dudas de seguridad o falsos positivos</h2>
   <p>Si tu dispositivo, Play Protect o una herramienta antivirus emite una advertencia sobre el archivo, te agradeceremos informarnos para asistirte y remitir la muestra para su análisis de falsos positivos:</p>
   <ul>
-    <li>Correo de seguridad: <a href="mailto:AeroCorpKT@protonmail.com">AeroCorpKT@protonmail.com</a> (asunto: “Reporte de falso positivo / Seguridad”)</li>
+    <li>Correo de seguridad: <a href="mailto:AeroCorpKT@protonmail.com">AeroCorpKT@protonmail.com</a> (asunto: "Reporte de falso positivo / Seguridad")</li>
     <li>WhatsApp de soporte: <a href="https://wa.me/51998360217">+51 998 360 217</a> (atención diaria de 2:00 p. m. a 8:00 p. m.)</li>
   </ul>
-
-  <h2>Permisos solicitados</h2>
-  <p>TOKE requiere el acceso especial a notificaciones, permiso de notificaciones, acceso a internet, servicio en primer plano, vibración y permiso para instalar actualizaciones (exclusivamente para actualizarse con tu confirmación). No solicita ubicación, agenda de contactos, SMS, llamadas, cámara, micrófono ni acceso al almacenamiento personal. El acceso a notificaciones es un mecanismo general de Android: el sistema entrega las notificaciones recibidas a la app, y TOKE descarta de inmediato sin leer aquellas que no provengan de las apps de pago compatibles. Explicación detallada en <a href="/privacidad">Privacidad</a> (sección 4).</p>
 
   <h2>Actualizaciones y bloqueo de versiones obsoletas</h2>
   <ul>
@@ -152,5 +269,6 @@
   <div class="copy-line"><span>© 2026 Fábrica Labs. Todos los derechos reservados.</span><span>Yape y Plin son marcas de sus titulares. Toke no está afiliada, respaldada ni representa a dichas marcas.</span></div>
 </div></footer>
 <script src="/assets/js/site.d9eba35ddc.js" defer></script>
+<script src="/assets/js/verify.a1b2c3d4e5.js" defer></script>
 </body>
 </html>

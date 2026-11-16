@@ -232,8 +232,8 @@ footer{border-top:1px solid var(--border);background:var(--card);padding:44px 0 
   .nav.open{display:grid;position:absolute;left:0;right:0;top:68px;background:var(--card);border-bottom:1px solid var(--border);padding:12px var(--pad) 20px;gap:4px}
   .nav.open a{padding:12px 0;font-size:1.05rem}
   .split,.fair .wrap{grid-template-columns:1fr;gap:36px}
-  .steps,.plans{grid-template-columns:1fr}
-  .plans{max-width:460px;margin-inline:auto}
+  .steps{grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+  .plans{grid-template-columns:repeat(auto-fit,minmax(240px,1fr));max-width:100%}
   .foot{grid-template-columns:1fr 1fr}
 }
 @media (max-width:820px){
@@ -242,8 +242,12 @@ footer{border-top:1px solid var(--border);background:var(--card);padding:44px 0 
   .hero-copy{padding:16px 0 0}
   .stage{max-width:420px;margin:0 auto}
   .row{grid-template-columns:1fr;gap:6px}
+  .steps{grid-template-columns:1fr}
 }
-@media (max-width:560px){
+@media (max-width:640px){
+  .plans{grid-template-columns:1fr;max-width:440px;margin-inline:auto}
+}
+@media (max-width:560px), (max-aspect-ratio: 9/16){
   body{font-size:16px}
   .actions .btn{width:100%}
   .top .btn-sm.hide-s{display:none}
@@ -251,6 +255,7 @@ footer{border-top:1px solid var(--border);background:var(--card);padding:44px 0 
   .release dt{margin-top:10px}
   .foot{grid-template-columns:1fr}
   .brand small{display:none}
+  .wrap{padding:0 16px}
 }
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation:none!important;transition:none!important}

@@ -1,0 +1,90 @@
+# Workflow: Actualizar metadatos de distribución del sitio web de TOKE
+# Se ejecuta cuando se publica una nueva release en el repositorio de distribución.
+#
+# PREREQUISITOS:
+# 1. Un Personal Access Token (PAT) de GitHub con permisos para disparar
+#    deploy hooks, almacenado como secreto CF_DEPLOY_HOOK_URL en el repositorio.
+# 2. El secreto CF_DEPLOY_HOOK_URL debe contener la URL completa del
+#    Cloudflare Pages Deploy Hook del proyecto tokelabs.
+#
+# NOTA: Este workflow NO introduce tokens ni secretos en el código fuente.
+#       Los secretos se configuran exclusivamente en GitHub Settings > Secrets.
+
+name: Actualizar metadatos de release
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  update-metadata:
+    runs-on: ubuntu-latest
+    if: "!github.event.release.prerelease && !github.event.release.draft"
+    permissions:
+      contents: read
+
+    steps:
+      - name: Obtener datos de la release
+        id: release
+        run: |
+          echo "tag=${{ github.event.release.tag_name }}" >> $GITHUB_OUTPUT
+          echo "name=${{ github.event.release.name }}" >> $GITHUB_OUTPUT
+          echo "date=${{ github.event.release.published_at }}" >> $GITHUB_OUTPUT
+          echo "body<<EOF" >> $GITHUB_OUTPUT
+          echo "${{ github.event.release.body }}" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Descargar APK y calcular hash
+        id: apk
+        run: |
+          # Buscar el asset APK en la release
+          APK_URL=$(echo '${{ toJSON(github.event.release.assets) }}' | jq -r '.[] | select(.name | endswith(".apk")) | .browser_download_url' | head -1)
+          APK_NAME=$(echo '${{ toJSON(github.event.release.assets) }}' | jq -r '.[] | select(.name | endswith(".apk")) | .name' | head -1)
+          APK_SIZE=$(echo '${{ toJSON(github.event.release.assets) }}' | jq -r '.[] | select(.name | endswith(".apk")) | .size' | head -1)
+
+          if [ -z "$APK_URL" ] || [ "$APK_URL" = "null" ]; then
+            echo "::error::No se encontró un archivo .apk en los assets de la release."
+            exit 1
+          fi
+
+          echo "url=$APK_URL" >> $GITHUB_OUTPUT
+          echo "name=$APK_NAME" >> $GITHUB_OUTPUT
+          echo "size=$APK_SIZE" >> $GITHUB_OUTPUT
+
+          # Descargar y calcular SHA-256
+          curl -sLo "$APK_NAME" "$APK_URL"
+          ACTUAL_SIZE=$(stat -c%s "$APK_NAME")
+          SHA256=$(sha256sum "$APK_NAME" | cut -d' ' -f1)
+
+          echo "sha256=$SHA256" >> $GITHUB_OUTPUT
+          echo "actual_size=$ACTUAL_SIZE" >> $GITHUB_OUTPUT
+
+          # Verificar coherencia de tamaño
+          if [ "$ACTUAL_SIZE" != "$APK_SIZE" ]; then
+            echo "::warning::Tamaño declarado ($APK_SIZE) difiere del descargado ($ACTUAL_SIZE)."
+          fi
+
+      - name: Mostrar resumen
+        run: |
+          echo "## Resumen de la release" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Campo | Valor |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Tag | ${{ steps.release.outputs.tag }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| APK | ${{ steps.apk.outputs.name }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Tamaño | ${{ steps.apk.outputs.actual_size }} bytes |" >> $GITHUB_STEP_SUMMARY
+          echo "| SHA-256 | \`${{ steps.apk.outputs.sha256 }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| URL | ${{ steps.apk.outputs.url }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Acción requerida:** Actualizar \`web/assets/data/releases.json\` con estos datos y redesplegar." >> $GITHUB_STEP_SUMMARY
+
+      # Disparar redeploy de Cloudflare Pages si el hook está configurado
+      - name: Disparar deploy hook de Cloudflare Pages
+        if: env.CF_DEPLOY_HOOK_URL != ''
+        env:
+          CF_DEPLOY_HOOK_URL: ${{ secrets.CF_DEPLOY_HOOK_URL }}
+        run: |
+          curl -sS -X POST "$CF_DEPLOY_HOOK_URL" \
+            -H "Content-Type: application/json" \
+            -d '{"event":"release","tag":"${{ steps.release.outputs.tag }}"}' \
+            || echo "::warning::No se pudo disparar el deploy hook."

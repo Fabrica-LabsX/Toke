@@ -1,0 +1,206 @@
+{
+  "current": "v1.5.1",
+  "releases": [
+    {
+      "version": "1.5.1",
+      "versionCode": 4,
+      "tag": "v1.5.1",
+      "date": "2026-11-15",
+      "mandatory": true,
+      "apk": {
+        "name": "app-release.apk",
+        "sizeBytes": 4774155,
+        "sha256": "0f5b6c8464f223fb2b3a29b9f59ab4d08973a692411ca6f2e31049b7f06fd18f",
+        "downloadUrl": "https://github.com/Fabrica-LabsX/toke-releases/releases/download/v1.5.1/app-release.apk"
+      },
+      "android": {
+        "minSdk": 24,
+        "minVersion": "7.0",
+        "targetSdk": 37
+      },
+      "signature": {
+        "subject": "CN=TOKE, O=FLABS, C=PE",
+        "sha256Fingerprint": "34:A2:8F:90:A1:DB:EE:55:CB:8A:9F:68:D3:7A:55:A8:91:D8:8D:6D:46:E5:E6:92:87:E4:5A:2C:9B:AD:8B:55",
+        "algorithm": "RSA 4096",
+        "serialNumber": "b523bb25765f9536",
+        "thumbprint": "72d18a8e238bee88154eb52bd58bf42d6090121f",
+        "verified": true
+      },
+      "virusTotal": {
+        "url": "https://www.virustotal.com/gui/file/0f5b6c8464f223fb2b3a29b9f59ab4d08973a692411ca6f2e31049b7f06fd18f",
+        "status": "confirmed",
+        "detections": 0,
+        "totalEngines": 67,
+        "analysisDate": "2026-11-16 02:56:54 UTC",
+        "ratio": "0/67"
+      },
+      "package": "com.flabs.cobrate",
+      "notes": [
+        "Unión directa y reactivación sin trabas: Corrección en la integración de colaboradores a comercios con aprobación previa desactivada; validación ajustada para cuentas activas y reactivadas en plan Free.",
+        "Sincronización inmediata de nombres de equipo: En «Mi cuenta», los cambios de nombre se reflejan al instante tanto para el dueño en «Mi equipo» como para los colaboradores en su vista del negocio.",
+        "Diseño 100% sólido (Anti-Glassmorphism): Reemplazo integral de transparencias y gradientes por tarjetas, banners y estados con contraste y colores sólidos del sistema de diseño Toke.",
+        "Mejora en pantallas de acceso y bienvenida: Ajuste de proporciones en «¿Cómo deseas empezar?» y «Negocio encontrado»; eliminación del acceso anónimo sin correo (todas las cuentas requieren correo electrónico).",
+        "Políticas de negocios propios para colaboradores: Crear un negocio propio siendo colaborador en otro comercio no activa erróneamente el bloqueo de plan Free."
+      ]
+    }
+  ],
+  "identity": {
+    "name": "TOKE",
+    "package": "com.flabs.cobrate",
+    "publisher": "Fábrica Labs (FLABS)",
+    "country": "PE",
+    "website": "https://tokelabs.pages.dev",
+    "contact": {
+      "email": "AeroCorpKT@protonmail.com",
+      "whatsapp": "+51998360217"
+    }
+  },
+  "permissions": {
+    "special": [
+      {
+        "id": "android.permission.BIND_NOTIFICATION_LISTENER_SERVICE",
+        "name": "Acceso a notificaciones (Servicio)",
+        "type": "special",
+        "description": "Permite que TOKE reciba las notificaciones del dispositivo para identificar los avisos de pago compatibles.",
+        "detail": "Es un acceso especial de Android otorgado a NotificationListenerService. El usuario debe habilitarlo manualmente en Ajustes del Sistema. TOKE descarta de inmediato cualquier notificación que no provenga de las billeteras de pago compatibles.",
+        "important": "No otorga acceso directo a tus cuentas bancarias, Yape o Plin ni permite transferir dinero.",
+        "source": "app"
+      }
+    ],
+    "dangerous": [
+      {
+        "id": "android.permission.POST_NOTIFICATIONS",
+        "name": "Publicar notificaciones",
+        "type": "dangerous",
+        "description": "Permite que TOKE muestre notificaciones en tu celular (avisos de cobros entrantes y estado del equipo).",
+        "detail": "Android 13 o superior lo solicita como permiso de ejecución. En versiones anteriores se gestiona automáticamente.",
+        "important": "Permite a TOKE emitir alertas, no leer las notificaciones de otras aplicaciones.",
+        "source": "app"
+      }
+    ],
+    "normal": [
+      {
+        "id": "android.permission.INTERNET",
+        "name": "Acceso a internet",
+        "type": "normal",
+        "description": "Permite que TOKE sincronice los cobros detectados con tu equipo en tiempo real.",
+        "detail": "Sin internet, los cobros se guardan en el celular y se envían automáticamente al recuperar la señal.",
+        "source": "app"
+      },
+      {
+        "id": "android.permission.FOREGROUND_SERVICE",
+        "name": "Servicio en primer plano",
+        "type": "normal",
+        "description": "Permite mantener activa la detección de pagos en segundo plano sin que el sistema suspenda el proceso.",
+        "detail": "Muestra una notificación persistente obligatoria de Android para indicar que el servicio está activo.",
+        "source": "app"
+      },
+      {
+        "id": "android.permission.FOREGROUND_SERVICE_SPECIAL_USE",
+        "name": "Servicio en primer plano (uso especial)",
+        "type": "normal",
+        "description": "Declaración requerida por Android 14+ para servicios en primer plano de tipo especial.",
+        "detail": "Alineado con los requisitos de Google Play y Android 14 para NotificationListenerService.",
+        "source": "app"
+      },
+      {
+        "id": "android.permission.VIBRATE",
+        "name": "Vibración",
+        "type": "normal",
+        "description": "Permite hacer vibrar el dispositivo cuando ingresa un cobro confirmado.",
+        "detail": "Permiso normal de Android que no compromete privacidad.",
+        "source": "app"
+      },
+      {
+        "id": "android.permission.REQUEST_INSTALL_PACKAGES",
+        "name": "Solicitar instalación de actualizaciones",
+        "type": "normal",
+        "description": "Permite a la app iniciar el instalador del sistema cuando descargas una actualización oficial.",
+        "detail": "TOKE verifica criptográficamente el hash SHA-256, tamaño y firma antes de pedir tu confirmación para instalar.",
+        "source": "app"
+      },
+      {
+        "id": "android.permission.WAKE_LOCK",
+        "name": "Impedir suspensión temporal",
+        "type": "normal",
+        "description": "Permite al procesador procesar brevemente una notificación push entrante de Firebase.",
+        "detail": "Utilizado por Firebase Cloud Messaging (FCM).",
+        "source": "library_fcm"
+      },
+      {
+        "id": "android.permission.ACCESS_NETWORK_STATE",
+        "name": "Consultar estado de la red",
+        "type": "normal",
+        "description": "Permite verificar si hay conectividad antes de intentar sincronizar con el servidor.",
+        "detail": "Utilizado por Firebase y el sincronizador offline de TOKE.",
+        "source": "library_fcm"
+      },
+      {
+        "id": "com.google.android.c2dm.permission.RECEIVE",
+        "name": "Recepción de push de Firebase",
+        "type": "normal",
+        "description": "Permiso interno para recibir avisos push a través de Google Play Services.",
+        "detail": "Requerido por la biblioteca oficial de Firebase Cloud Messaging.",
+        "source": "library_fcm"
+      },
+      {
+        "id": "com.flabs.cobrate.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION",
+        "name": "Protección de receptores dinámicos",
+        "type": "normal",
+        "description": "Permiso de seguridad interno generado por AndroidX para aislar la comunicación interna de la app.",
+        "detail": "Impide que otras aplicaciones del dispositivo envíen mensajes no autorizados a TOKE.",
+        "source": "library_androidx"
+      }
+    ],
+    "notRequested": [
+      "Ubicación (GPS)",
+      "Contactos / Agenda",
+      "SMS",
+      "Llamadas telefónicas",
+      "Cámara",
+      "Micrófono",
+      "Almacenamiento / Fotos / Archivos",
+      "Calendario",
+      "Bluetooth",
+      "NFC"
+    ]
+  },
+  "privacy": {
+    "dataProcessed": "Notificaciones locales de cobro emitidas por apps de pago compatibles (monto, billetera, fecha/hora y nombre del pagador si aparece en el aviso).",
+    "dataDiscarded": "Cualquier notificación de mensajería privada u otras aplicaciones se descarta de inmediato en memoria volátil sin leerse ni registrarse.",
+    "dataStored": {
+      "local": "Preferencias de la app (tema, configuración). No se almacenan datos de cobros localmente más allá de la sesión activa.",
+      "remote": "Datos de cobros se sincronizan en servidores Supabase (São Paulo, Brasil) protegidos con reglas estrictas de aislamiento a nivel de fila (RLS)."
+    },
+    "thirdParty": [
+      {
+        "name": "Supabase",
+        "purpose": "Base de datos, autenticación y sincronización en tiempo real",
+        "location": "São Paulo, Brasil (sa-east-1)"
+      },
+      {
+        "name": "Firebase Cloud Messaging",
+        "purpose": "Entrega de notificaciones push al equipo de trabajo",
+        "location": "Infraestructura de Google"
+      },
+      {
+        "name": "Brevo (Sendinblue)",
+        "purpose": "Envío de correos transaccionales (verificación de cuenta, recuperación de contraseña)",
+        "location": "Europa"
+      }
+    ],
+    "neverDoes": [
+      "Acceder a cuentas bancarias, Yape o Plin",
+      "Solicitar contraseñas ni saldos bancarios",
+      "Mover, enviar o recibir dinero",
+      "Acceder a ubicación, contactos, SMS, cámara, micrófono ni archivos"
+    ]
+  },
+  "_meta": {
+    "generated": "2026-11-16",
+    "generator": "automated_audit",
+    "virustotal_verified": true,
+    "virustotal_analysis_date": "2026-11-16 02:56:54 UTC",
+    "virustotal_ratio": "0/67"
+  }
+}
