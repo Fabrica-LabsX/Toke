@@ -68,6 +68,10 @@ scratch/
 docs/
 scripts/
 CLAUDE.md
+GEMINI.md
+PROTOCOLO_RELEASES.md
+*.example
+entregables/
 
 # Archivos de base de datos y esquemas
 *.sql
