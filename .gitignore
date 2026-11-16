@@ -52,6 +52,10 @@ docs/
 scripts/
 CLAUDE.md
 
+# Migraciones SQL locales (viven exclusivamente ejecutadas en Supabase)
+supabase/migrations/*.sql
+*.sql
+
 # Video publicitario independiente (repositorio privado TokeAdds)
 hyperframes-video/
 
