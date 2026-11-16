@@ -33,6 +33,9 @@ object PreferenciasAppStore {
     private val _avisoBateriaMostrado = MutableStateFlow(false)
     val avisoBateriaMostrado: StateFlow<Boolean> = _avisoBateriaMostrado.asStateFlow()
 
+    private val _conteoAperturas = MutableStateFlow(0)
+    val conteoAperturas: StateFlow<Int> = _conteoAperturas.asStateFlow()
+
     private var currentSessionUid: String? = null
     private var appContext: Context? = null
 
@@ -41,6 +44,7 @@ object PreferenciasAppStore {
     private fun keyTema(uid: String) = stringPreferencesKey("theme_$uid")
     private fun keyAvisarCobroEnviado(uid: String) = booleanPreferencesKey("avisar_cobro_enviado_$uid")
     private fun keyAvisoBateriaMostrado(uid: String) = booleanPreferencesKey("aviso_bateria_mostrado_$uid")
+    private fun keyConteoAperturas(uid: String) = androidx.datastore.preferences.core.intPreferencesKey("conteo_aperturas_$uid")
 
     /**
      * Inicializa el store y observa la sesión para cargar las preferencias correspondientes.
@@ -61,6 +65,7 @@ object PreferenciasAppStore {
                         _themeMode.value = ThemeMode.LIGHT
                         _avisarCobroEnviado.value = false
                         _avisoBateriaMostrado.value = false
+                        _conteoAperturas.value = 0
                     }
                 }
             }
@@ -69,18 +74,28 @@ object PreferenciasAppStore {
 
     private suspend fun cargarPreferencias(uid: String) {
         val ctx = appContext ?: return
-        val (tema, avisar, bateriaMostrado) = ctx.dataStore.data.map { prefs ->
+        val (tema, avisar, bateriaMostrado, conteo) = ctx.dataStore.data.map { prefs ->
             val temaSaved = prefs[keyTema(uid)]?.let { name ->
                 runCatching { ThemeMode.valueOf(name) }.getOrNull()
             } ?: ThemeMode.LIGHT
             val avisarSaved = prefs[keyAvisarCobroEnviado(uid)] ?: false
             val bateriaSaved = prefs[keyAvisoBateriaMostrado(uid)] ?: false
-            Triple(temaSaved, avisarSaved, bateriaSaved)
+            val conteoActual = prefs[keyConteoAperturas(uid)] ?: 0
+            listOf(temaSaved, avisarSaved, bateriaSaved, conteoActual)
         }.first()
 
-        _themeMode.value = tema
-        _avisarCobroEnviado.value = avisar
-        _avisoBateriaMostrado.value = bateriaMostrado
+        val nuevoConteo = (conteo as Int) + 1
+        scope.launch {
+            ctx.dataStore.edit { prefs ->
+                prefs[keyConteoAperturas(uid)] = nuevoConteo
+            }
+        }
+
+        @Suppress("UNCHECKED_CAST")
+        _themeMode.value = tema as ThemeMode
+        _avisarCobroEnviado.value = avisar as Boolean
+        _avisoBateriaMostrado.value = bateriaMostrado as Boolean
+        _conteoAperturas.value = nuevoConteo
     }
 
     /**

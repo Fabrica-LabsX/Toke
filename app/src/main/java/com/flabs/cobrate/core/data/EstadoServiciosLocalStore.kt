@@ -21,9 +21,9 @@ import kotlinx.serialization.json.Json
  * Se guarda la lista completa de estados (uno por negocio) como una única
  * cadena JSON bajo una clave de Preferences.
  */
-internal class EstadoServiciosLocalStore(private val context: Context) {
+private val Context.estadoServiciosDataStore by preferencesDataStore(name = "estado_servicios")
 
-    private val Context.dataStore by preferencesDataStore(name = "estado_servicios")
+internal class EstadoServiciosLocalStore(private val context: Context) {
 
     private val estadosKey = stringPreferencesKey("lista_estado_servicios")
 
@@ -33,7 +33,7 @@ internal class EstadoServiciosLocalStore(private val context: Context) {
 
     /** Lee los estados persistidos una sola vez (DTOs). */
     suspend fun leerUnaVez(): List<EstadoServiciosDto> =
-        context.dataStore.data.map { prefs ->
+        context.estadoServiciosDataStore.data.map { prefs ->
             prefs[estadosKey]?.let { raw ->
                 runCatching {
                     json.decodeFromString<List<EstadoServiciosDto>>(raw)
@@ -44,7 +44,7 @@ internal class EstadoServiciosLocalStore(private val context: Context) {
     /** Guarda la lista completa de estados (sobrescribe lo anterior). */
     suspend fun guardar(estados: List<EstadoServicios>) {
         val raw = json.encodeToString(estados.map { it.aDto() })
-        context.dataStore.edit { prefs ->
+        context.estadoServiciosDataStore.edit { prefs ->
             prefs[estadosKey] = raw
         }
     }

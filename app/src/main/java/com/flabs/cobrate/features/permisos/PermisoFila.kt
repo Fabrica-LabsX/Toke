@@ -80,15 +80,15 @@ private fun PermisoFila(paleta: TokePaleta, permiso: PermisoUi) {
     ) {
         Surface(
             shape = RoundedCornerShape(14.dp),
-            color = if (permiso.resaltado) paleta.ambarFondo else paleta.tileFondo,
-            border = BorderStroke(1.dp, if (permiso.resaltado) paleta.ambarBorde else paleta.bordeControl),
+            color = paleta.tileFondo,
+            border = BorderStroke(1.dp, if (permiso.resaltado) paleta.ambar else paleta.bordeControl),
             modifier = Modifier.size(48.dp),
         ) {
             Box(contentAlignment = Alignment.Center) {
                 Icon(
                     painter = painterResource(id = permiso.icono),
                     contentDescription = null,
-                    tint = if (permiso.resaltado) TokeAmbarTexto else paleta.textoPrincipal,
+                    tint = if (permiso.resaltado) paleta.ambar else paleta.textoPrincipal,
                     modifier = Modifier.size(24.dp),
                 )
             }
@@ -128,8 +128,8 @@ private fun PermisoFila(paleta: TokePaleta, permiso: PermisoUi) {
 private fun ChipListo(paleta: TokePaleta) {
     Surface(
         shape = RoundedCornerShape(9999.dp),
-        color = paleta.verdeFondo,
-        border = BorderStroke(1.dp, paleta.verdeBorde)
+        color = paleta.tileFondo,
+        border = BorderStroke(1.dp, paleta.bordeControl)
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
@@ -138,7 +138,7 @@ private fun ChipListo(paleta: TokePaleta) {
             Icon(
                 painter = painterResource(id = TokeIcons.CheckVerde),
                 contentDescription = null,
-                tint = paleta.activo,
+                tint = paleta.verde,
                 modifier = Modifier.size(14.dp),
             )
             Spacer(modifier = Modifier.width(6.dp))
@@ -147,9 +147,9 @@ private fun ChipListo(paleta: TokePaleta) {
                 style = TextStyle(
                     fontFamily = PlusJakartaSans,
                     fontWeight = FontWeight.Bold,
-                    fontSize = 14.sp,
+                    fontSize = 13.sp,
                 ),
-                color = paleta.activo,
+                color = paleta.verde,
             )
         }
     }

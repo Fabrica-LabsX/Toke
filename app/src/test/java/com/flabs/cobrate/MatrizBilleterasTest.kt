@@ -26,13 +26,13 @@ class MatrizBilleterasTest {
     private val lemon = "com.applemoncash"
 
     private val casos = listOf(
-        C(yape, "Yape", "Juan P* te envió un pago por S/ 5.00", true),
-        C(yape, "¡Te yapearon!", "Ana R* te yapeó S/ 10", true),
-        C(yape, "Yape", "Te yapearon S/ 20.50", true),
-        C(yape, "Yape", "Recibiste S/ 15 de Luis M*", true),
-        C(yape, "Yape", "Luis M* te envió S/ 1,250.50", true),
-        C(yape, "Yape", "Carlos Ganoza* te envió un pago por S/ 8", true),
-        C(yape, "Yape", "Bonifacio R* te yapeó S/ 8", true),
+        C(yape, "Confirmación de Pago", "Juan P* te envió un pago por S/ 5.00", true),
+        C(yape, "Confirmación de Pago", "Ana R* te envió un pago por S/ 10. El cód. de seguridad es: 715", true),
+        C(yape, "Confirmación de Pago", "Yape! CHARLY RUBEN LLONTOP te envió un pago por S/ 20.50", true),
+        C(yape, "Confirmación de Pago", "Yape! SOLORZANO SALAS DIEGO ARMANDO te envió un pago por S/ 15.00", true),
+        C(yape, "Confirmación de Pago", "Luis M* te envió un pago por S/ 1,250.50", true),
+        C(yape, "Confirmación de Pago", "Carlos Ganoza* te envió un pago por S/ 8", true),
+        C(yape, "Confirmación de Pago", "Bonifacio R* te envió un pago por S/ 8. El cód. de seguridad es: 001", true),
         C(bcp, "Plin", "Recibiste un Plin de Juan P. por S/ 20.00", true),
         C(bcp, "Plin", "Juan P. te envió S/ 20.00 por Plin", true),
         C(bcp, "BCP", "Te transfirieron S/ 100.00 de JUAN PEREZ", true),

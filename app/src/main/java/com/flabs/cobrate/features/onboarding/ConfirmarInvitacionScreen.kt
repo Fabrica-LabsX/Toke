@@ -131,7 +131,7 @@ fun ConfirmarInvitacionScreen(
             paleta = paleta,
             texto = stringResource(R.string.encontrado_aceptar),
             principal = !loading && errorPreview == null,
-            altura = 44.dp,
+            altura = 48.dp,
         ) {
             if (loading || errorPreview != null) return@BotonAcceso
             scope.launch {
@@ -174,7 +174,7 @@ fun ConfirmarInvitacionScreen(
             paleta = paleta,
             texto = stringResource(R.string.pausado_volver),
             principal = false,
-            altura = 44.dp,
+            altura = 48.dp,
             onClick = onVolver,
         )
         Text(
@@ -190,38 +190,42 @@ fun ConfirmarInvitacionScreen(
 @Composable
 private fun TarjetaNegocio(paleta: TokePaleta, negocio: String, invito: String) {
     Surface(
-        shape = RoundedCornerShape(18.dp),
+        shape = RoundedCornerShape(20.dp),
         color = paleta.tarjeta,
         border = BorderStroke(1.dp, paleta.borde),
         modifier = Modifier.fillMaxWidth(),
     ) {
         Column(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 14.dp),
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 18.dp, vertical = 20.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
-            Surface(shape = RoundedCornerShape(16.dp), color = paleta.tileFondo, modifier = Modifier.size(52.dp)) {
+            Surface(shape = RoundedCornerShape(16.dp), color = paleta.tileFondo, modifier = Modifier.size(62.dp)) {
                 Box(contentAlignment = Alignment.Center) {
                     Icon(
                         painter = painterResource(id = TokeIcons.Tienda),
                         contentDescription = null,
                         tint = paleta.textoPrincipal,
-                        modifier = Modifier.size(26.dp),
+                        modifier = Modifier.size(30.dp),
                     )
                 }
             }
             Text(
                 text = negocio,
-                style = TextStyle(fontFamily = PlusJakartaSans, fontWeight = FontWeight.ExtraBold, fontSize = 20.sp),
+                style = TextStyle(fontFamily = PlusJakartaSans, fontWeight = FontWeight.ExtraBold, fontSize = 23.sp),
                 color = paleta.textoPrincipal,
                 textAlign = TextAlign.Center,
             )
-            Surface(shape = RoundedCornerShape(9999.dp), color = paleta.tileFondo) {
+            Surface(
+                shape = RoundedCornerShape(9999.dp),
+                color = paleta.tileFondo,
+                border = BorderStroke(1.dp, paleta.bordeControl)
+            ) {
                 Text(
                     text = invito,
-                    style = TextStyle(fontFamily = PlusJakartaSans, fontWeight = FontWeight.Bold, fontSize = 12.sp),
+                    style = TextStyle(fontFamily = PlusJakartaSans, fontWeight = FontWeight.Bold, fontSize = 13.sp),
                     color = paleta.textoSecundario,
-                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 5.dp),
                 )
             }
         }

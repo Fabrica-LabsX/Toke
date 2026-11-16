@@ -13,14 +13,14 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
+private val Context.relacionesDataStore by preferencesDataStore(name = "relaciones")
+
 /**
  * Persistencia local de relaciones Cuenta↔Negocio usando Jetpack DataStore
  * (Preferences) con serialización JSON manual — MISMO patrón que
  * [CuentaLocalStore].
  */
 internal class RelacionCuentaNegocioLocalStore(private val context: Context) {
-
-    private val Context.dataStore by preferencesDataStore(name = "relaciones")
 
     private val relacionesKey = stringPreferencesKey("lista_relaciones")
 
@@ -30,7 +30,7 @@ internal class RelacionCuentaNegocioLocalStore(private val context: Context) {
 
     /** Lee las relaciones persistidas una sola vez (DTOs). */
     suspend fun leerUnaVez(): List<RelacionDto> =
-        context.dataStore.data.map { prefs ->
+        context.relacionesDataStore.data.map { prefs ->
             prefs[relacionesKey]?.let { raw ->
                 runCatching {
                     json.decodeFromString<List<RelacionDto>>(raw)
@@ -41,7 +41,7 @@ internal class RelacionCuentaNegocioLocalStore(private val context: Context) {
     /** Guarda la lista completa de relaciones (sobrescribe lo anterior). */
     suspend fun guardar(relaciones: List<RelacionCuentaNegocio>) {
         val raw = json.encodeToString(relaciones.map { it.aDto() })
-        context.dataStore.edit { prefs ->
+        context.relacionesDataStore.edit { prefs ->
             prefs[relacionesKey] = raw
         }
     }

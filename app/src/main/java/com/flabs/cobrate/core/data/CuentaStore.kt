@@ -250,6 +250,16 @@ object CuentaStore {
                 }
             }
 
+            // Sincronizar cuentas de miembros y dueños para tener nombres siempre frescos
+            val idsCuentasRelevantes = (negocios.map { it.dueñoCuentaId } + relaciones.map { it.cuentaId })
+                .filter { it.isNotBlank() }
+                .distinct()
+            if (idsCuentasRelevantes.isNotEmpty()) {
+                cuentaRepo.obtenerVariosPorId(idsCuentasRelevantes).onSuccess { listaCuentas ->
+                    listaCuentas.forEach { upsert(it) }
+                }
+            }
+
             // 4. Sincronizar operaciones en bloque si existen negocios
             val todosNegocioIds = (negocios.map { it.id } + relaciones.map { it.negocioId }).distinct()
             if (todosNegocioIds.isNotEmpty()) {
@@ -280,12 +290,36 @@ object CuentaStore {
     }
 
     /**
-     * Crea (agrega) una cuenta nueva y la persiste.
+     * Crea o actualiza una cuenta (si ya existe y cambiaron datos como el nombre) y la persiste.
      */
     fun crear(cuenta: Cuenta, hashPassword: String = "") {
-        if (_cuentas.value.any { it.id == cuenta.id }) return
+        val existente = _cuentas.value.find { it.id == cuenta.id }
+        if (existente != null) {
+            if (existente.username != cuenta.username || existente.correoVerificado != cuenta.correoVerificado) {
+                _cuentas.value = _cuentas.value.map { if (it.id == cuenta.id) cuenta else it }
+                if (_sesionActual.value?.id == cuenta.id) {
+                    _sesionActual.value = cuenta
+                }
+                persistir()
+            }
+            return
+        }
         _cuentas.value = _cuentas.value + cuenta
         _hashes[cuenta.id] = hashPassword
+        persistir()
+    }
+
+    /** Inserta o actualiza directamente una cuenta en memoria y persistencia local. */
+    fun upsert(cuenta: Cuenta) {
+        val existente = _cuentas.value.find { it.id == cuenta.id }
+        if (existente != null) {
+            _cuentas.value = _cuentas.value.map { if (it.id == cuenta.id) cuenta else it }
+        } else {
+            _cuentas.value = _cuentas.value + cuenta
+        }
+        if (_sesionActual.value?.id == cuenta.id) {
+            _sesionActual.value = cuenta
+        }
         persistir()
     }
 

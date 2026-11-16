@@ -73,15 +73,15 @@ fun EmpezarScreen(
             BotonAtras(paleta, onVolver)
         }
 
-        // Cabecera compacta
-        Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+        // Cabecera clara y espaciosa
+        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Text(
                 text = stringResource(R.string.empezar_titulo),
                 style = TextStyle(
                     fontFamily = PlusJakartaSans,
                     fontWeight = FontWeight.ExtraBold,
-                    fontSize = 20.sp,
-                    lineHeight = 24.sp,
+                    fontSize = 22.sp,
+                    lineHeight = 26.sp,
                 ),
                 color = paleta.textoPrincipal,
             )
@@ -90,12 +90,14 @@ fun EmpezarScreen(
                 style = TextStyle(
                     fontFamily = PlusJakartaSans,
                     fontWeight = FontWeight.Medium,
-                    fontSize = 12.sp,
-                    lineHeight = 15.sp,
+                    fontSize = 13.sp,
+                    lineHeight = 17.sp,
                 ),
                 color = paleta.textoSecundario,
             )
         }
+
+        Spacer(modifier = Modifier.height(4.dp))
 
         // Opción 1: Modo Dueño (Expandida)
         TarjetaOpcionAcceso(
@@ -109,10 +111,12 @@ fun EmpezarScreen(
                 paleta = paleta,
                 texto = stringResource(R.string.empezar_crear_negocio),
                 principal = true,
-                altura = 39.dp,
+                altura = 46.dp,
                 onClick = onCrearNegocio,
             )
         }
+
+        Spacer(modifier = Modifier.height(4.dp))
 
         // Opción 2: Modo Equipo (Expandida con campo y botón propios)
         TarjetaOpcionAcceso(
@@ -124,7 +128,7 @@ fun EmpezarScreen(
         ) {
             // Cuadro de código expandido
             Surface(
-                shape = RoundedCornerShape(10.dp),
+                shape = RoundedCornerShape(12.dp),
                 color = paleta.fondo,
                 border = BorderStroke(
                     width = 1.dp,
@@ -132,12 +136,12 @@ fun EmpezarScreen(
                 ),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(38.dp),
+                    .height(48.dp),
             ) {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(horizontal = 12.dp),
+                        .padding(horizontal = 14.dp),
                     contentAlignment = Alignment.CenterStart,
                 ) {
                     if (codigoInput.isEmpty()) {
@@ -145,7 +149,7 @@ fun EmpezarScreen(
                             text = stringResource(R.string.empezar_placeholder_codigo),
                             style = TextStyle(
                                 fontFamily = PlusJakartaSans,
-                                fontSize = 13.sp,
+                                fontSize = 14.sp,
                                 fontWeight = FontWeight.Normal,
                             ),
                             color = paleta.textoSecundario,
@@ -175,7 +179,7 @@ fun EmpezarScreen(
                         textStyle = TextStyle(
                             fontFamily = PlusJakartaSans,
                             fontWeight = FontWeight.Bold,
-                            fontSize = 14.sp,
+                            fontSize = 15.sp,
                             color = paleta.textoPrincipal,
                         ),
                         cursorBrush = SolidColor(paleta.verde),
@@ -189,7 +193,7 @@ fun EmpezarScreen(
                 paleta = paleta,
                 texto = stringResource(R.string.empezar_unirme),
                 principal = codigoInput.isNotBlank(),
-                altura = 39.dp,
+                altura = 46.dp,
                 onClick = {
                     focusManager.clearFocus()
                     if (codigoInput.isNotBlank()) {
@@ -204,8 +208,8 @@ fun EmpezarScreen(
                 text = "El código expira a los 5 minutos y es para un solo uso.",
                 style = TextStyle(
                     fontFamily = PlusJakartaSans,
-                    fontSize = 10.5.sp,
-                    lineHeight = 13.sp,
+                    fontSize = 11.sp,
+                    lineHeight = 14.sp,
                 ),
                 color = paleta.textoSecundario,
             )
@@ -222,7 +226,7 @@ fun EmpezarScreen(
                 color = paleta.textoPrincipal,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(39.dp),
+                    .height(44.dp),
             ) {
                 Row(
                     modifier = Modifier.fillMaxSize(),
@@ -233,13 +237,13 @@ fun EmpezarScreen(
                         painter = painterResource(id = TokeIcons.CerrarSesion),
                         contentDescription = null,
                         tint = paleta.fondo,
-                        modifier = Modifier.size(15.dp),
+                        modifier = Modifier.size(16.dp),
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
                         text = stringResource(R.string.dialogo_cerrar_confirmar),
                         color = paleta.fondo,
-                        fontSize = 13.sp,
+                        fontSize = 13.5.sp,
                         fontWeight = FontWeight.Bold,
                     )
                 }

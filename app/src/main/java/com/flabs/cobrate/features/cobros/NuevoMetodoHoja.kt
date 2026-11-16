@@ -109,17 +109,17 @@ fun NuevoMetodoHoja(
                         TituloGrupo(paleta, grupo.titulo)
                         grupo.tipos.forEach { opcion ->
                             val habilitada = NuevoMetodoLogica.puedeElegir(opcion, existentes)
+                            val proximamente = NuevoMetodoLogica.esProximamente(opcion)
+                            val yaExiste = opcion == TipoMetodoCobro.YAPE && NuevoMetodoLogica.yaExiste(opcion, existentes)
                             OpcionMetodoFila(
                                 paleta = paleta,
                                 tipo = opcion,
                                 subtitulo = NuevoMetodoLogica.subtituloDe(opcion),
                                 habilitada = habilitada,
-                                yaExiste = opcion != TipoMetodoCobro.PLIN && NuevoMetodoLogica.yaExiste(opcion, existentes),
+                                yaExiste = yaExiste,
+                                proximamente = proximamente,
                                 onClick = {
-                                    if (opcion == TipoMetodoCobro.PLIN) {
-                                        viaPlin = true
-                                        paso = PasoNuevoMetodo.ELEGIR_PARA_PLIN
-                                    } else {
+                                    if (opcion == TipoMetodoCobro.YAPE && habilitada) {
                                         viaPlin = false
                                         tipo = opcion
                                         paso = PasoNuevoMetodo.DATOS
@@ -193,8 +193,16 @@ fun NuevoMetodoHoja(
                         AvisoBilleteraAbierta(paleta, nombre)
                         BotonGuardar(
                             paleta = paleta,
-                            habilitado = NuevoMetodoLogica.datosValidos(dato),
-                            onClick = { onConfirm(elegido, com.flabs.cobrate.core.logic.EntradaSegura.limpiar(dato, 40), com.flabs.cobrate.core.logic.EntradaSegura.limpiar(titular, 40)) },
+                            habilitado = NuevoMetodoLogica.datosValidos(dato) && NuevoMetodoLogica.esTipoPermitidoParaCrear(elegido),
+                            onClick = {
+                                if (NuevoMetodoLogica.esTipoPermitidoParaCrear(elegido)) {
+                                    onConfirm(
+                                        elegido,
+                                        com.flabs.cobrate.core.logic.EntradaSegura.limpiar(dato, 40),
+                                        com.flabs.cobrate.core.logic.EntradaSegura.limpiar(titular, 40)
+                                    )
+                                }
+                            },
                         )
                         Text(
                             text = "Después podrás cargar la foto de tu QR.",

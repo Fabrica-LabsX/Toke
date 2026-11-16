@@ -189,13 +189,14 @@ class BusinessViewModel : ViewModel() {
 
     /**
      * Lista de trabajadores reales del negocio actual (vinculados por invitación).
-     * CAPA 9: migración a RelacionCuentaNegocio real.
+     * CAPA 9: migración a RelacionCuentaNegocio real con soporte para vista de trabajador (RPC).
      */
     val trabajadoresReales: StateFlow<List<TrabajadorRealInfo>> = combine(
         negocioActualId,
         RelacionCuentaNegocioStore.relaciones,
-        CuentaStore.cuentas
-    ) { negocioId, todasLasRelaciones, cuentasCheadas ->
+        CuentaStore.cuentas,
+        _equipoVisible
+    ) { negocioId, todasLasRelaciones, cuentasCheadas, equipoVisible ->
         if (negocioId == null) return@combine emptyList()
 
         val relacionesTrabajador = todasLasRelaciones.filter {
@@ -204,8 +205,28 @@ class BusinessViewModel : ViewModel() {
             com.flabs.cobrate.features.equipo.FiltroEquipo.apareceEnEquipo(it.estado)
         }
 
-        // Identificar qué cuentas no están en el caché local
-        val idsFaltantes = relacionesTrabajador
+        val listaTrabajadores = if (relacionesTrabajador.isNotEmpty()) {
+            relacionesTrabajador.map { rel ->
+                val cuenta = cuentasCheadas.find { it.id == rel.cuentaId }
+                TrabajadorRealInfo(
+                    cuentaId = rel.cuentaId,
+                    username = cuenta?.username ?: "Cargando...",
+                    estado = rel.estado
+                )
+            }
+        } else {
+            equipoVisible.filter { it.rol == RolCuentaNegocio.TRABAJADOR }.map { m ->
+                val cuenta = cuentasCheadas.find { it.id == m.cuentaId }
+                TrabajadorRealInfo(
+                    cuentaId = m.cuentaId,
+                    username = cuenta?.username ?: m.username,
+                    estado = m.estado
+                )
+            }
+        }
+
+        // Identificar cuentas faltantes para cargar nombres
+        val idsFaltantes = listaTrabajadores
             .map { it.cuentaId }
             .filter { id -> cuentasCheadas.none { it.id == id } }
 
@@ -213,19 +234,12 @@ class BusinessViewModel : ViewModel() {
             cargarCuentasAgrupadas(idsFaltantes)
         }
 
-        relacionesTrabajador.map { rel ->
-            val cuenta = cuentasCheadas.find { it.id == rel.cuentaId }
-            TrabajadorRealInfo(
-                cuentaId = rel.cuentaId,
-                username = cuenta?.username ?: "Cargando...",
-                estado = rel.estado
-            )
-        }
+        listaTrabajadores
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     /**
-     * Carga las relaciones completas de todo el negocio (solo para Dueño/Admin).
-     * CAPA 23.
+     * Carga las relaciones completas de todo el negocio (Dueño/Admin) o el equipo visible (Trabajador)
+     * y refresca los nombres de las cuentas en tiempo real desde Supabase.
      */
     fun cargarEquipoDelNegocio() {
         val negocioId = negocioActualId.value ?: return
@@ -239,30 +253,45 @@ class BusinessViewModel : ViewModel() {
                     it.rol == RolCuentaNegocio.ADMINISTRADOR && it.estado == EstadoRelacion.ACTIVA
         }
 
-        if (!esDueno && !esAdminActivo) return
-
         viewModelScope.launch {
-            conReintentoPorReloj {
-                relacionRepo.relacionesDelNegocio(negocioId)
-            }.onSuccess { resultado ->
-                RelacionCuentaNegocioStore.sincronizarNegocio(negocioId, resultado)
-            }.onFailure { err ->
-                LogSeguro.w("TokeEquipo", "Error al cargar relaciones del negocio", err)
+            if (esDueno || esAdminActivo) {
+                conReintentoPorReloj {
+                    relacionRepo.relacionesDelNegocio(negocioId)
+                }.onSuccess { resultado ->
+                    RelacionCuentaNegocioStore.sincronizarNegocio(negocioId, resultado)
+                    val uids = (resultado.map { it.cuentaId } + listOfNotNull(negocio?.dueñoCuentaId)).distinct()
+                    if (uids.isNotEmpty()) {
+                        cuentaRepo.obtenerVariosPorId(uids).onSuccess { listaCuentas ->
+                            listaCuentas.forEach { CuentaStore.upsert(it) }
+                        }
+                    }
+                }.onFailure { err ->
+                    LogSeguro.w("TokeEquipo", "Error al cargar relaciones del negocio", err)
+                }
+            } else {
+                cargarEquipoVisible()
             }
         }
     }
 
     /**
-     * Carga el equipo del negocio llamando a la RPC equipo_de_negocio (para Trabajador).
-     * CAPA 24.
+     * Carga el equipo del negocio llamando a la RPC equipo_de_negocio (para Trabajador)
+     * y refresca los nombres de cuentas en CuentaStore.
      */
     fun cargarEquipoVisible() {
         val negocioId = negocioActualId.value ?: return
+        val negocio = NegocioStore.negocios.value.find { it.id == negocioId }
         viewModelScope.launch {
             conReintentoPorReloj {
                 relacionRepo.equipoDeNegocio(negocioId)
             }.onSuccess { miembros ->
                 _equipoVisible.value = miembros
+                val uids = (miembros.map { it.cuentaId } + listOfNotNull(negocio?.dueñoCuentaId)).distinct()
+                if (uids.isNotEmpty()) {
+                    cuentaRepo.obtenerVariosPorId(uids).onSuccess { listaCuentas ->
+                        listaCuentas.forEach { CuentaStore.upsert(it) }
+                    }
+                }
             }.onFailure { err ->
                 LogSeguro.w("TokeEquipo", "Error al cargar equipo visible", err)
             }
@@ -277,12 +306,9 @@ class BusinessViewModel : ViewModel() {
         viewModelScope.launch {
             cuentaRepo.obtenerVariosPorId(realmenteFaltantes)
                 .onSuccess { cuentas ->
-                    cuentas.forEach { CuentaStore.crear(it) }
-                    // No removemos de idsEnVuelo tras éxito porque CuentaStore.cuentas
-                    // ya las tendrá y el filtro inicial las descartará.
+                    cuentas.forEach { CuentaStore.upsert(it) }
                 }
                 .onFailure {
-                    // Si falla, permitimos reintento liberando los IDs
                     idsEnVuelo.removeAll(realmenteFaltantes.toSet())
                 }
         }
@@ -332,6 +358,10 @@ class BusinessViewModel : ViewModel() {
     }
 
     fun crearMetodo(tipo: TipoMetodoCobro, dato: String, nombre: String) {
+        if (!com.flabs.cobrate.features.cobros.NuevoMetodoLogica.esTipoPermitidoParaCrear(tipo)) {
+            FeedbackManager.showErrorMessage("Por el momento solo se permite vincular Yape")
+            return
+        }
         val id = negocioActualId.value ?: return
         if (estaMetodoActivoEnOtroNegocio(tipo, id)) {
             FeedbackManager.showErrorMessage("Esta billetera ya está activa en otro negocio tuyo")
@@ -360,6 +390,10 @@ class BusinessViewModel : ViewModel() {
         val negId = negocioActualId.value ?: return
         val listaMetodos = MetodoDeCobroStore.obtenerPorNegocio(negId)
         val metodoExistente = listaMetodos.find { it.id == id }
+        if (metodoExistente != null && metodoExistente.tipo != TipoMetodoCobro.YAPE) {
+            FeedbackManager.showErrorMessage("Solo se permite modificar métodos de Yape en esta versión")
+            return
+        }
         if (activo == true && metodoExistente != null) {
             if (estaMetodoActivoEnOtroNegocio(metodoExistente.tipo, negId)) {
                 FeedbackManager.showErrorMessage("Esta billetera ya está activa en otro negocio tuyo")

@@ -18,13 +18,13 @@ import kotlinx.coroutines.flow.map
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
+private val Context.operacionesCacheDataStore by preferencesDataStore(name = "operaciones_cache")
+
 /**
  * Persistencia local de operaciones por usuario (UID) usando DataStore + JSON.
  * CAPA 8-SANEAMIENTO.
  */
 internal class OperationLocalStore(private val context: Context) {
-
-    private val Context.dataStore by preferencesDataStore(name = "operaciones_cache")
 
     private fun keyParaUsuario(uid: String) = stringPreferencesKey("ops_$uid")
 
@@ -34,7 +34,7 @@ internal class OperationLocalStore(private val context: Context) {
 
     /** Expone la lista guardada como Flow para un usuario específico. */
     fun operaciones(uid: String): Flow<List<Operacion>> =
-        context.dataStore.data.map { prefs ->
+        context.operacionesCacheDataStore.data.map { prefs ->
             prefs[keyParaUsuario(uid)]?.let { raw ->
                 runCatching {
                     json.decodeFromString<List<OperacionLocalDto>>(raw).mapNotNull { it.aModelo() }
@@ -45,7 +45,7 @@ internal class OperationLocalStore(private val context: Context) {
     /** Guarda la lista completa de operaciones para un usuario (espera finalización). */
     suspend fun guardar(uid: String, operaciones: List<Operacion>) {
         val raw = json.encodeToString(operaciones.map { it.aDto() })
-        context.dataStore.edit { prefs ->
+        context.operacionesCacheDataStore.edit { prefs ->
             prefs[keyParaUsuario(uid)] = raw
         }
     }
@@ -55,7 +55,7 @@ internal class OperationLocalStore(private val context: Context) {
     
     /** Borra los datos de un usuario específico. */
     suspend fun borrarParaUsuario(uid: String) {
-        context.dataStore.edit { it.remove(keyParaUsuario(uid)) }
+        context.operacionesCacheDataStore.edit { it.remove(keyParaUsuario(uid)) }
     }
 }
 

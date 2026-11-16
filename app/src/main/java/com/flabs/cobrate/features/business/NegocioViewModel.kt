@@ -146,6 +146,20 @@ class NegocioViewModel : ViewModel() {
         }
     }
 
+    fun refrescarCuentas(ids: List<String>) {
+        val validos = ids.filter { it.isNotBlank() && it !in idsCuentasEnVuelo }.distinct()
+        if (validos.isEmpty()) return
+
+        idsCuentasEnVuelo.addAll(validos)
+        viewModelScope.launch {
+            cuentaRepo.obtenerVariosPorId(validos).onSuccess { cuentas ->
+                cuentas.forEach { CuentaStore.upsert(it) }
+            }.onFailure {
+                idsCuentasEnVuelo.removeAll(validos.toSet())
+            }
+        }
+    }
+
     fun descartarAvisoExpulsion() {
         _negocioExpulsado.value = null
     }
@@ -154,7 +168,7 @@ class NegocioViewModel : ViewModel() {
         viewModelScope.launch {
             negocios.collect { lista ->
                 val cuids = lista.map { it.dueñoCuentaId }.distinct()
-                cargarCuentasFaltantes(cuids)
+                refrescarCuentas(cuids)
             }
         }
 

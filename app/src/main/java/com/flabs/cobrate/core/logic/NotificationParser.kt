@@ -8,7 +8,8 @@ sealed class ResultadoParseo {
     /** Se detectó un monto en soles, con un nivel de confianza asociado. */
     data class MontoDetectado(
         val monto: Double,
-        val confianza: NivelConfianzaParseo
+        val confianza: NivelConfianzaParseo,
+        val pagador: String? = null
     ) : ResultadoParseo()
 
     /** No se detectó un patrón de monto: no parece un pago. */
@@ -49,6 +50,12 @@ object NotificationParser {
         paqueteOrigen: String,
         datosAdicionales: String? = null
     ): ResultadoParseo {
+        // Enrutamiento específico para Yape (CAPA 6c)
+        if (paqueteOrigen == YapeNotificationParser.PAQUETE_YAPE) {
+            return YapeNotificationParser.parsear(titulo, texto, paqueteOrigen, datosAdicionales)
+        }
+
+        // Comportamiento heredado para cualquier otro paquete:
         // Paso 0 — Normalización
         val contenido = NormalizadorDeTexto.unificar(titulo, texto, datosAdicionales)
 

@@ -60,7 +60,12 @@ fun CrearNegocioScreen(
 
     // Una vez creado el negocio no se vuelve atrás: se crearía otro igual.
     BackHandler(paso != PasoWizard.PASO_1_NOMBRE_Y_COLOR) {
-        if (paso == PasoWizard.PASO_2_TIPO_NEGOCIO) paso = PasoWizard.PASO_1_NOMBRE_Y_COLOR
+        when (paso) {
+            PasoWizard.PASO_2_TIPO_NEGOCIO -> paso = PasoWizard.PASO_1_NOMBRE_Y_COLOR
+            PasoWizard.PASO_3_MEDIOS_COBRO -> paso = PasoWizard.PASO_4_LISTO
+            PasoWizard.PASO_4_LISTO -> onCreado()
+            else -> {}
+        }
     }
 
     when (paso) {
@@ -87,21 +92,29 @@ fun CrearNegocioScreen(
                 procesando = true
                 scope.launch {
                     FeedbackManager.setLoading(true, "Creando negocio...")
-                    val result = negocioViewModel.crearNegocio(
-                        nombre = nombreComercial,
-                        tipo = tipo,
-                        colorMarca = colorHexSeleccionado
-                    )
-                    FeedbackManager.setLoading(false)
-                    result.onSuccess { neg ->
-                        negocioCreado = neg
-                        FeedbackManager.showSuccess("¡Listo! Negocio creado.")
-                        paso = if (businessViewModel != null) PasoWizard.PASO_3_MEDIOS_COBRO else PasoWizard.PASO_4_LISTO
-                    }.onFailure { err ->
-                        val limite = com.flabs.cobrate.features.planes.PlanLogica
-                            .mensajeDeLimite("${err.message} ${(err as? io.github.jan.supabase.exceptions.RestException)?.description}")
-                        if (limite != null) mensajeLimitePlan = limite else FeedbackManager.showError(err)
+                    try {
+                        val result = negocioViewModel.crearNegocio(
+                            nombre = nombreComercial,
+                            tipo = tipo,
+                            colorMarca = colorHexSeleccionado
+                        )
+                        result.onSuccess { neg ->
+                            negocioCreado = neg
+                            FeedbackManager.showSuccess("¡Listo! Negocio creado.")
+                            paso = if (businessViewModel != null) PasoWizard.PASO_3_MEDIOS_COBRO else PasoWizard.PASO_4_LISTO
+                        }.onFailure { err ->
+                            val limite = com.flabs.cobrate.features.planes.PlanLogica
+                                .mensajeDeLimite("${err.message} ${(err as? io.github.jan.supabase.exceptions.RestException)?.description}")
+                            if (limite != null) mensajeLimitePlan = limite else FeedbackManager.showError(err)
+                            procesando = false
+                        }
+                    } catch (e: kotlinx.coroutines.CancellationException) {
+                        throw e
+                    } catch (e: Exception) {
+                        FeedbackManager.showError(e)
                         procesando = false
+                    } finally {
+                        FeedbackManager.setLoading(false)
                     }
                 }
             },

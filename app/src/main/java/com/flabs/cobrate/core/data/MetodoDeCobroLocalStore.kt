@@ -12,13 +12,13 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
+private val Context.metodosDeCobroDataStore by preferencesDataStore(name = "metodos_de_cobro")
+
 /**
  * Persistencia local de métodos de cobro por negocio usando DataStore + JSON.
  * Mismo patrón que NegocioLocalStore.
  */
 internal class MetodoDeCobroLocalStore(private val context: Context) {
-
-    private val Context.dataStore by preferencesDataStore(name = "metodos_de_cobro")
 
     private fun keyParaNegocio(negocioId: String) = stringPreferencesKey("metodos_$negocioId")
 
@@ -27,7 +27,7 @@ internal class MetodoDeCobroLocalStore(private val context: Context) {
     }
 
     suspend fun leerPorNegocio(negocioId: String): List<MetodoDeCobroDto> =
-        context.dataStore.data.map { prefs ->
+        context.metodosDeCobroDataStore.data.map { prefs ->
             prefs[keyParaNegocio(negocioId)]?.let { raw ->
                 runCatching {
                     json.decodeFromString<List<MetodoDeCobroDto>>(raw)
@@ -37,19 +37,19 @@ internal class MetodoDeCobroLocalStore(private val context: Context) {
 
     suspend fun guardarPorNegocio(negocioId: String, metodos: List<MetodoDeCobro>) {
         val raw = json.encodeToString(metodos.map { it.aDto() })
-        context.dataStore.edit { prefs ->
+        context.metodosDeCobroDataStore.edit { prefs ->
             prefs[keyParaNegocio(negocioId)] = raw
         }
     }
 
     suspend fun limpiarNegocio(negocioId: String) {
-        context.dataStore.edit { prefs ->
+        context.metodosDeCobroDataStore.edit { prefs ->
             prefs.remove(keyParaNegocio(negocioId))
         }
     }
 
     suspend fun limpiarTodo() {
-        context.dataStore.edit { it.clear() }
+        context.metodosDeCobroDataStore.edit { it.clear() }
     }
 
     @Serializable

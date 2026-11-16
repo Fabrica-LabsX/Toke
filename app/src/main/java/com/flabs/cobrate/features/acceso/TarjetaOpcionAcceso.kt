@@ -37,44 +37,46 @@ fun TarjetaOpcionAcceso(
     etiqueta: String,
     titulo: String,
     texto: String,
+    modifier: Modifier = Modifier,
     contenido: @Composable ColumnScope.() -> Unit,
 ) {
     Surface(
-        shape = RoundedCornerShape(18.dp),
+        shape = RoundedCornerShape(20.dp),
         color = paleta.tarjeta,
         border = BorderStroke(1.dp, paleta.borde),
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
     ) {
         Column(
-            modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
-            verticalArrangement = Arrangement.spacedBy(6.dp),
+            modifier = Modifier.padding(horizontal = 18.dp, vertical = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Surface(
-                    shape = RoundedCornerShape(10.dp),
+                    shape = RoundedCornerShape(12.dp),
                     color = paleta.tileFondo,
-                    modifier = Modifier.size(34.dp),
+                    border = BorderStroke(1.dp, paleta.bordeControl),
+                    modifier = Modifier.size(44.dp),
                 ) {
                     Box(contentAlignment = Alignment.Center) {
                         Icon(
                             painter = painterResource(id = icono),
                             contentDescription = null,
                             tint = paleta.textoPrincipal,
-                            modifier = Modifier.size(18.dp),
+                            modifier = Modifier.size(22.dp),
                         )
                     }
                 }
-                Spacer(modifier = Modifier.width(10.dp))
+                Spacer(modifier = Modifier.width(12.dp))
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = titulo,
                         style = TextStyle(
                             fontFamily = PlusJakartaSans,
                             fontWeight = FontWeight.ExtraBold,
-                            fontSize = 15.sp,
+                            fontSize = 17.sp,
                         ),
                         color = paleta.textoPrincipal,
                     )
@@ -82,16 +84,17 @@ fun TarjetaOpcionAcceso(
                 Surface(
                     shape = RoundedCornerShape(9999.dp),
                     color = paleta.tileFondo,
+                    border = BorderStroke(1.dp, paleta.bordeControl),
                 ) {
                     Text(
                         text = etiqueta,
                         style = TextStyle(
                             fontFamily = PlusJakartaSans,
                             fontWeight = FontWeight.Bold,
-                            fontSize = 10.5.sp,
+                            fontSize = 11.sp,
                         ),
                         color = paleta.enlaceVerde,
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
                     )
                 }
             }
@@ -101,8 +104,8 @@ fun TarjetaOpcionAcceso(
                 style = TextStyle(
                     fontFamily = PlusJakartaSans,
                     fontWeight = FontWeight.Medium,
-                    fontSize = 12.sp,
-                    lineHeight = 16.sp,
+                    fontSize = 13.5.sp,
+                    lineHeight = 18.sp,
                 ),
                 color = paleta.textoSecundario,
             )

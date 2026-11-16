@@ -35,34 +35,52 @@ import com.flabs.cobrate.ui.theme.TokePaleta
 
 private val RojoPausa = TokeRojo
 
-/** Icono grande de pausa en un cuadro rosado, con el punto rojo de alerta. */
+/** Icono de pausa sólido con badge indicador, conforme al diseño oficial y a la paleta Toke. */
 @Composable
 fun AccesoPausadoIcono(paleta: TokePaleta) {
-    Box(modifier = Modifier.size(104.dp)) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
         Surface(
-            shape = RoundedCornerShape(22.dp),
-            color = paleta.rojoFondo,
-            border = BorderStroke(1.dp, paleta.rojoBorde),
-            modifier = Modifier
-                .align(Alignment.Center)
-                .size(92.dp),
+            shape = CircleShape,
+            color = paleta.tileFondo,
+            border = BorderStroke(1.dp, paleta.bordeControl),
+            modifier = Modifier.size(56.dp),
         ) {
             Box(contentAlignment = Alignment.Center) {
                 Icon(
                     painter = painterResource(id = TokeIcons.AccesoPausado),
                     contentDescription = null,
                     tint = RojoPausa,
-                    modifier = Modifier.size(48.dp),
+                    modifier = Modifier.size(26.dp),
                 )
             }
         }
-        Box(
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-                .size(18.dp)
-                .clip(CircleShape)
-                .background(RojoPausa),
-        )
+        Surface(
+            shape = CircleShape,
+            color = paleta.tileFondo,
+            border = BorderStroke(1.dp, paleta.bordeControl),
+        ) {
+            Row(
+                modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(8.dp)
+                        .clip(CircleShape)
+                        .background(RojoPausa),
+                )
+                Text(
+                    text = "Acceso pausado",
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = paleta.textoPrincipal,
+                )
+            }
+        }
     }
 }
 
@@ -146,7 +164,11 @@ fun AccesoPausadoEstado(
                 color = paleta.textoSecundario,
             )
             Spacer(modifier = Modifier.height(12.dp))
-            Surface(shape = RoundedCornerShape(9999.dp), color = paleta.tileFondo) {
+            Surface(
+                shape = RoundedCornerShape(9999.dp),
+                color = paleta.tileFondo,
+                border = BorderStroke(1.dp, paleta.bordeControl)
+            ) {
                 Row(
                     modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
                     verticalAlignment = Alignment.CenterVertically,
@@ -154,7 +176,7 @@ fun AccesoPausadoEstado(
                     Icon(
                         painter = painterResource(id = TokeIcons.CajaRegistradora),
                         contentDescription = null,
-                        tint = paleta.activo,
+                        tint = RojoPausa,
                         modifier = Modifier.size(18.dp),
                     )
                     Spacer(modifier = Modifier.width(8.dp))

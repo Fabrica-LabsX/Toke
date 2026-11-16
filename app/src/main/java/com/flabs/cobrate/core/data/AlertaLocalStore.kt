@@ -13,12 +13,12 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
+private val Context.alertaDataStore by preferencesDataStore(name = "alertas")
+
 /**
  * Persistencia local de alertas aisladas por usuario usando Jetpack DataStore (Preferences).
  */
 internal class AlertaLocalStore(private val context: Context) {
-
-    private val Context.dataStore by preferencesDataStore(name = "alertas")
 
     private fun keyParaUsuario(uid: String) = stringPreferencesKey("alertas_$uid")
 
@@ -28,7 +28,7 @@ internal class AlertaLocalStore(private val context: Context) {
 
     /** Lee las alertas persistidas una sola vez para un usuario específico. */
     suspend fun leerUnaVez(uid: String): List<Alerta> =
-        context.dataStore.data.map { prefs ->
+        context.alertaDataStore.data.map { prefs ->
             prefs[keyParaUsuario(uid)]?.let { raw ->
                 runCatching {
                     json.decodeFromString<List<AlertaDto>>(raw).mapNotNull { it.aModelo(uid) }
@@ -39,7 +39,7 @@ internal class AlertaLocalStore(private val context: Context) {
     /** Guarda la lista completa de alertas para un usuario específico. */
     suspend fun guardar(uid: String, alertas: List<Alerta>) {
         val raw = json.encodeToString(alertas.map { it.aDto() })
-        context.dataStore.edit { prefs ->
+        context.alertaDataStore.edit { prefs ->
             prefs[keyParaUsuario(uid)] = raw
         }
     }

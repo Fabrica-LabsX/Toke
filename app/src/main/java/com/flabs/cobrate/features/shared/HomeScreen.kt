@@ -308,6 +308,7 @@ private fun HomeScreenContent(
                     mostrarBadgeOnline = disponible,
                     onAbrirPermisos = onAbrirPermisos,
                     onAbrirMas = if (esTrabajador) onAbrirMas else null,
+                    esTrabajador = esTrabajador,
                 )
             }
         },
@@ -760,6 +761,7 @@ private fun HomeTopBarCard(
     mostrarBadgeOnline: Boolean = false,
     onAbrirPermisos: () -> Unit = {},
     onAbrirMas: (() -> Unit)? = null,
+    esTrabajador: Boolean = false,
 ) {
     Row(
         modifier = Modifier
@@ -812,12 +814,14 @@ private fun HomeTopBarCard(
             BotonMasOpciones(onClick = onAbrirMas)
             Spacer(modifier = Modifier.width(8.dp))
         }
-        com.flabs.cobrate.components.BadgeSincronizacion(
-            operativo = com.flabs.cobrate.features.permisos.rememberEstadoServicio() ==
-                com.flabs.cobrate.features.permisos.EstadoServicio.OPERATIVO,
-            onClick = onAbrirPermisos,
-        )
-        Spacer(modifier = Modifier.width(8.dp))
+        if (!esTrabajador) {
+            com.flabs.cobrate.components.BadgeSincronizacion(
+                operativo = com.flabs.cobrate.features.permisos.rememberEstadoServicio() ==
+                    com.flabs.cobrate.features.permisos.EstadoServicio.OPERATIVO,
+                onClick = onAbrirPermisos,
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+        }
         if (mostrarBadgeOnline && !mostrarBadgeOffline) {
             com.flabs.cobrate.components.BadgeConexionOnline()
         }

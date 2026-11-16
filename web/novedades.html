@@ -43,36 +43,25 @@
 
   <div class="release" style="margin-top:0">
     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
-      <h2 style="margin:0">Versión 1.1.0</h2>
-      <span style="display:inline-block;padding:4px 12px;border-radius:999px;background:#EAB308;color:#000000;font-weight:700;font-size:0.8rem">En mantenimiento</span>
+      <h2 style="margin:0">Versión 1.5.1</h2>
+      <span style="display:inline-block;padding:4px 12px;border-radius:999px;background:#00C06D;color:#000000;font-weight:700;font-size:0.8rem">Actualización obligatoria</span>
     </div>
-    <p class="state" style="margin-top:8px">Versión en revisión técnica y mantenimiento preventivo · Registro de cambios implementados:</p>
+    <p class="state" style="margin-top:8px">Publicada el 15 de noviembre de 2026 · Tamaño: 4,6 MB (4 774 155 bytes) · Android 7.0 o superior (Nougat+)</p>
+    <p class="state">SHA-256: <code class="mono">0f5b6c8464f223fb2b3a29b9f59ab4d08973a692411ca6f2e31049b7f06fd18f</code></p>
     
-    <h3 style="margin-top:20px">Cambios destacados</h3>
+    <h3 style="margin-top:20px">Novedades y optimizaciones</h3>
     <ul>
-      <li><b>Interfaz adaptada a proporción 9:16:</b> ajuste integral de los flujos de bienvenida, registro y autenticación para que el contenido sea accesible de un vistazo en pantallas de 4,7" a 6,7" sin desplazamientos innecesarios ni botones ocultos.</li>
-      <li><b>Sesión única activa simultánea (estilo WhatsApp Web):</b> protección contra accesos no autorizados. Al iniciar sesión en un nuevo dispositivo, se solicita confirmación explícita y se revoca inmediatamente la sesión anterior mediante eventos en tiempo real, notificando al usuario.</li>
-      <li><b>Sincronización estricta de límites Free:</b> integración total con el backend (Supabase) aplicando cuota de 20 avisos al día (reinicio a las 00:00 h Lima), máximo 1 negocio, 1 colaborador activo (y 1 invitación pendiente), 1 método de cobro vinculado y hasta 3 exportaciones a Excel por semana.</li>
-      <li><b>Señalización visual y candados PRO:</b> indicadores claros en funciones avanzadas (historial completo, avisos en voz alta "Básico" con billetera y monto, exportaciones a Excel ilimitadas y comercios ilimitados) con acceso directo a la activación del plan Pro (mensual o Pack 3 meses por S/ 40).</li>
-      <li><b>Expiración reforzada en invitaciones:</b> los códigos de invitación para colaboradores de 6 letras expiran automáticamente a los 5 minutos de su emisión, impidiendo reutilizaciones o uniones extemporáneas.</li>
-      <li><b>Minimización de datos y privacidad:</b> se retiró la captura de números de operación o códigos bancarios de comprobantes en el detalle de cobros, conservando únicamente los datos operativos normalizados (monto, billetera, fecha y hora).</li>
-      <li><b>Ciclo de vida y desvinculaciones seguras:</b> retención de colaboradores expulsados por 30 días para trazabilidad antes de su eliminación definitiva (Decisión PRI6), desvinculación disociada de cobros y purga automatizada de archivos QR en menos de 24 horas (Decisión PRI2).</li>
-      <li><b>Bloqueo obligatorio de versiones obsoletas:</b> verificación criptográfica en el arranque contra el registro oficial para requerir actualización inmediata en clientes descontinuados.</li>
+      <li><strong>Unión directa y reactivación sin trabas</strong>: Corrección en la integración de colaboradores a comercios con aprobación previa desactivada; validación ajustada para cuentas activas y reactivadas en plan Free.</li>
+      <li><strong>Sincronización inmediata de nombres de equipo</strong>: En "Mi cuenta", los cambios de nombre se reflejan al instante tanto para el dueño en "Mi equipo" como para los colaboradores en su vista del negocio.</li>
+      <li><strong>Diseño 100% sólido (Anti-Glassmorphism)</strong>: Reemplazo integral de transparencias y gradientes por tarjetas, banners y estados con contraste y colores sólidos del sistema de diseño Toke.</li>
+      <li><strong>Mejora en pantallas de acceso y bienvenida</strong>: Ajuste de proporciones en "¿Cómo deseas empezar?" y "Negocio encontrado"; eliminación del acceso anónimo sin correo (todas las cuentas requieren correo electrónico); pie de versión con formato "Versión 1.5.1 - FLABS".</li>
+      <li><strong>Políticas de negocios propios para colaboradores</strong>: Crear un negocio propio siendo colaborador en otro comercio no activa erróneamente el bloqueo de plan Free.</li>
     </ul>
 
     <div class="actions" style="margin-top:20px">
-      <button type="button" class="btn btn-sm" style="background:#EAB308;color:#000000;border:1px solid #CA8A04;font-weight:700;cursor:not-allowed;" disabled>En mantenimiento · No hay modelos recientes</button>
-      <a class="btn btn-secondary btn-sm" href="/descargas">Ver estado de descargas</a>
+      <a class="btn btn-primary btn-sm" href="https://github.com/Fabrica-LabsX/toke-releases/releases/download/v1.5.1/app-release.apk">Descargar APK v1.5.1</a>
+      <a class="btn btn-secondary btn-sm" href="https://github.com/Fabrica-LabsX/toke-releases/releases/tag/v1.5.1" target="_blank" rel="noopener">Ver release en GitHub</a>
     </div>
-  </div>
-
-  <div class="release" style="opacity:0.85;margin-top:28px">
-    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
-      <h2 style="margin:0">Versión 1.0.0</h2>
-      <span style="display:inline-block;padding:4px 12px;border-radius:999px;background:var(--border);color:var(--muted);font-weight:700;font-size:0.8rem">Descontinuada</span>
-    </div>
-    <p class="state" style="margin-top:8px">Publicada el 12 de noviembre de 2026 · Versión preliminar inicial de lanzamiento.</p>
-    <p>Esta versión ha quedado descontinuada y bloqueada para uso en producción. Actualmente todas las descargas públicas se encuentran en mantenimiento preventivo mientras se prepara la siguiente versión del servicio.</p>
   </div>
 
 </div>

@@ -194,13 +194,13 @@ class TokeNotificationListenerService : NotificationListenerService() {
             ?.trim()
             .orEmpty()
 
-        if (titulo.isEmpty() && texto.isEmpty()) {
+        // CAPA 6c-2: captura previa de extras enriquecidos (EXTRA_BIG_TEXT, EXTRA_TEXT_LINES).
+        val datosAdicionales = capturarExtras(sbn)
+
+        if (titulo.isEmpty() && texto.isEmpty() && datosAdicionales.isNullOrEmpty()) {
             LogSeguro.d(TAG, "Notificación sin contenido legible ignorada ($paquete)")
             return
         }
-
-        // CAPA 6c-2: captura de extras enriquecidos.
-        val datosAdicionales = capturarExtras(sbn)
 
         // CAPA 3-FIX: Captura de contexto de identidad para aislamiento.
         val sesionAlInicio = currentSessionUid
@@ -246,7 +246,7 @@ class TokeNotificationListenerService : NotificationListenerService() {
                 if (resultado.confianza == NivelConfianzaParseo.ALTA) {
                     // CAPA 6c-3: pago real (confianza ALTA) desde método
                     // configurado o no.
-                    procesarPagoConfianzaAlta(evento, resultado.monto, paquete, sesionAlInicio)
+                    procesarPagoConfianzaAlta(evento, resultado.monto, resultado.pagador, paquete, sesionAlInicio)
                 } else {
                     LogSeguro.d(TAG, "Posible pago detectado (confianza MEDIA)")
                 }
@@ -266,6 +266,7 @@ class TokeNotificationListenerService : NotificationListenerService() {
     private fun procesarPagoConfianzaAlta(
         evento: EventoDeNotificacion,
         monto: Double,
+        pagadorDetectado: String?,
         paquete: String,
         sesionAlInicio: String
     ) {
@@ -321,7 +322,7 @@ class TokeNotificationListenerService : NotificationListenerService() {
             origen = OrigenOperacion.Detectada(evento.id),
             fechaHora = System.currentTimeMillis(),
             historial = listOf(CambioDeEstado(System.currentTimeMillis(), EstadoOperacion.SIN_ASIGNAR)),
-            pagador = com.flabs.cobrate.core.logic.PagadorExtractor.extraer(evento.titulo, evento.texto)
+            pagador = pagadorDetectado ?: com.flabs.cobrate.core.logic.PagadorExtractor.extraer(evento.titulo, evento.texto)
         )
 
         val trabajadoresActivos = RelacionCuentaNegocioStore.relaciones

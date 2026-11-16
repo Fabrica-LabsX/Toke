@@ -10,7 +10,7 @@ import org.junit.Test
 // TEXTOS SINTÉTICOS: validar contra notificaciones reales del dispositivo
 class NotificationParserFiltroTest {
 
-    private val paquetePrueba = "com.bcp.innovacxion.yapeapp"
+    private val paquetePrueba = "com.bcp.bank.bcp"
 
     @Test
     fun testGanaSoatEsNoEsPago() {

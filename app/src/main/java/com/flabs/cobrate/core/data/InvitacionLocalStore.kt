@@ -17,9 +17,9 @@ import kotlinx.serialization.json.Json
  * (Preferences) con serialización JSON manual vía kotlinx.serialization —
  * MISMO patrón que [CuentaLocalStore].
  */
-internal class InvitacionLocalStore(private val context: Context) {
+private val Context.invitacionesDataStore by preferencesDataStore(name = "invitaciones")
 
-    private val Context.dataStore by preferencesDataStore(name = "invitaciones")
+internal class InvitacionLocalStore(private val context: Context) {
 
     private val invitacionesKey = stringPreferencesKey("lista_invitaciones")
 
@@ -29,7 +29,7 @@ internal class InvitacionLocalStore(private val context: Context) {
 
     /** Lee las invitaciones persistidas una sola vez (DTOs). */
     suspend fun leerUnaVez(): List<InvitacionDto> =
-        context.dataStore.data.map { prefs ->
+        context.invitacionesDataStore.data.map { prefs ->
             prefs[invitacionesKey]?.let { raw ->
                 runCatching {
                     json.decodeFromString<List<InvitacionDto>>(raw)
@@ -40,7 +40,7 @@ internal class InvitacionLocalStore(private val context: Context) {
     /** Guarda la lista completa de invitaciones (sobrescribe lo anterior). */
     suspend fun guardar(invitaciones: List<InvitacionTrabajador>) {
         val raw = json.encodeToString(invitaciones.map { it.aDto() })
-        context.dataStore.edit { prefs ->
+        context.invitacionesDataStore.edit { prefs ->
             prefs[invitacionesKey] = raw
         }
     }

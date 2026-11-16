@@ -603,9 +603,6 @@ fun CobrateApp() {
                     },
                     onCrearCuenta = {
                         navController.navigate("${Routes.LOGIN}?modo=crear")
-                    },
-                    onIngresarCodigo = {
-                        navController.navigate(Routes.INGRESAR_CODIGO)
                     }
                 )
             }
@@ -674,8 +671,14 @@ fun CobrateApp() {
                 val planEstado by com.flabs.cobrate.features.planes.PlanStore.estado.collectAsState()
                 val esPro = planEstado?.plan == com.flabs.cobrate.features.planes.Plan.PRO
 
-                // Barrera infranqueable anti-bypass: Plan Free solo permite 1 negocio
-                if (misNegocios.isNotEmpty() && !esPro) {
+                val sesionActualCrear by CuentaStore.sesionActual.collectAsState()
+                val uidCrear = sesionActualCrear?.id
+                // Barrera infranqueable anti-bypass: Plan Free solo permite 1 negocio propio (dueño).
+                // Los negocios como colaborador/trabajador no cuentan para este límite.
+                val yaTeniaNegocioPropioAlEntrar = remember {
+                    misNegocios.any { it.dueñoCuentaId == uidCrear }
+                }
+                if (yaTeniaNegocioPropioAlEntrar && !esPro) {
                     LaunchedEffect(Unit) {
                         navController.navigate(Routes.PLAN_FACTURACION_DUENO) {
                             popUpTo(Routes.CREAR_NEGOCIO) { inclusive = true }
@@ -836,7 +839,9 @@ fun CobrateApp() {
                     negocioViewModel = negocioViewModel,
                     onVolver = { navController.popBackStack() },
                     onCrearNegocio = {
-                        if (misNegociosList.isNotEmpty() && !esPro) {
+                        val uid = CuentaStore.sesionActual.value?.id
+                        val propios = misNegociosList.count { it.dueñoCuentaId == uid }
+                        if (propios >= 1 && !esPro) {
                             navController.navigate(Routes.PLAN_FACTURACION_DUENO)
                         } else {
                             navController.navigate(Routes.CREAR_NEGOCIO)
@@ -1126,8 +1131,10 @@ private fun InicioScreen(
         onAnadirTrabajador = { navController.irAPestana(Routes.TRABAJADORES_DUENO) },
         onReclamarPagos = {},
         onCrearNegocio = {
+            val uid = CuentaStore.sesionActual.value?.id
             val esPro = com.flabs.cobrate.features.planes.PlanStore.plan == com.flabs.cobrate.features.planes.Plan.PRO
-            if (misNegocios.isNotEmpty() && !esPro) {
+            val propios = misNegocios.count { it.dueñoCuentaId == uid }
+            if (propios >= 1 && !esPro) {
                 navController.navigate(Routes.PLAN_FACTURACION_DUENO)
             } else {
                 navController.navigate(Routes.CREAR_NEGOCIO)

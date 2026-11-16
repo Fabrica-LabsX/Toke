@@ -56,64 +56,74 @@ fun PantallaAccesoPausado(
             .statusBarsPadding()
             .navigationBarsPadding(),
     ) {
-        Column(
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxWidth()
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 16.dp, vertical = 12.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            if (onVolver != null) {
-                Box(modifier = Modifier.fillMaxWidth()) {
-                    Surface(
-                        onClick = onVolver,
-                        shape = RoundedCornerShape(12.dp),
-                        color = paleta.tarjeta,
-                        border = BorderStroke(1.dp, paleta.borde),
-                        modifier = Modifier.size(TokeMedidas.BotonIcono),
-                    ) {
-                        Box(contentAlignment = Alignment.Center) {
-                            Icon(
-                                painter = painterResource(id = TokeIcons.FlechaAtras),
-                                contentDescription = "Volver",
-                                tint = paleta.textoPrincipal,
-                                modifier = Modifier.size(20.dp),
-                            )
-                        }
+        if (onVolver != null) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+            ) {
+                Surface(
+                    onClick = onVolver,
+                    shape = RoundedCornerShape(12.dp),
+                    color = paleta.tarjeta,
+                    border = BorderStroke(1.dp, paleta.borde),
+                    modifier = Modifier.size(TokeMedidas.BotonIcono),
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Icon(
+                            painter = painterResource(id = TokeIcons.FlechaAtras),
+                            contentDescription = "Volver",
+                            tint = paleta.textoPrincipal,
+                            modifier = Modifier.size(20.dp),
+                        )
                     }
                 }
             }
-            Spacer(modifier = Modifier.height(20.dp))
-            AccesoPausadoIcono(paleta = paleta)
-            Spacer(modifier = Modifier.height(20.dp))
-            Text(
-                text = "Acceso pausado por el dueño",
-                style = TextStyle(
-                    fontFamily = PlusJakartaSans,
-                    fontWeight = FontWeight.ExtraBold,
-                    fontSize = 24.sp,
-                    letterSpacing = (-0.5).sp,
-                    textAlign = TextAlign.Center,
-                ),
-                color = paleta.textoPrincipal,
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = "El dueño ha pausado temporalmente tu rol en este comercio. " +
-                    "No escucharás cobros hasta que reactive tu acceso.",
-                style = TextStyle(
-                    fontFamily = PlusJakartaSans,
-                    fontWeight = FontWeight.Medium,
-                    fontSize = 15.sp,
-                    lineHeight = 22.sp,
-                    textAlign = TextAlign.Center,
-                ),
-                color = paleta.textoSecundario,
-                modifier = Modifier.padding(horizontal = 8.dp),
-            )
-            Spacer(modifier = Modifier.height(24.dp))
-            AccesoPausadoEstado(paleta = paleta, negocioNombre = negocioNombre)
+        }
+
+        Box(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth(),
+            contentAlignment = Alignment.Center
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .verticalScroll(rememberScrollState())
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                AccesoPausadoIcono(paleta = paleta)
+                Spacer(modifier = Modifier.height(18.dp))
+                Text(
+                    text = "Acceso pausado por el dueño",
+                    style = TextStyle(
+                        fontFamily = PlusJakartaSans,
+                        fontWeight = FontWeight.ExtraBold,
+                        fontSize = 24.sp,
+                        letterSpacing = (-0.5).sp,
+                        textAlign = TextAlign.Center,
+                    ),
+                    color = paleta.textoPrincipal,
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "El dueño ha pausado temporalmente tu rol en este comercio. " +
+                        "No escucharás cobros hasta que reactive tu acceso.",
+                    style = TextStyle(
+                        fontFamily = PlusJakartaSans,
+                        fontWeight = FontWeight.Medium,
+                        fontSize = 15.sp,
+                        lineHeight = 22.sp,
+                        textAlign = TextAlign.Center,
+                    ),
+                    color = paleta.textoSecundario,
+                    modifier = Modifier.padding(horizontal = 8.dp),
+                )
+                Spacer(modifier = Modifier.height(20.dp))
+                AccesoPausadoEstado(paleta = paleta, negocioNombre = negocioNombre)
+            }
         }
 
         Column(

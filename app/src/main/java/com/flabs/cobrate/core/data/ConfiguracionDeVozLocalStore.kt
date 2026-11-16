@@ -12,6 +12,8 @@ import kotlinx.coroutines.flow.map
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
+private val Context.configuracionVozDataStore by preferencesDataStore(name = "configuracion_voz")
+
 /**
  * Persistencia local de la configuración de voz usando Jetpack DataStore
  * (Preferences) con serialización JSON manual vía kotlinx.serialization —
@@ -21,8 +23,6 @@ import kotlinx.serialization.json.Json
  * clave de Preferences.
  */
 internal class ConfiguracionDeVozLocalStore(private val context: Context) {
-
-    private val Context.dataStore by preferencesDataStore(name = "configuracion_voz")
 
     private val configKey = stringPreferencesKey("configuracion_voz")
 
@@ -34,7 +34,7 @@ internal class ConfiguracionDeVozLocalStore(private val context: Context) {
 
     /** Lee la configuración persistida (null si aún no se ha guardado). */
     suspend fun leerUnaVez(): ConfiguracionDeVozDto? =
-        context.dataStore.data.map { prefs ->
+        context.configuracionVozDataStore.data.map { prefs ->
             prefs[configKey]?.let { raw ->
                 runCatching {
                     json.decodeFromString<ConfiguracionDeVozDto>(raw)
@@ -45,7 +45,7 @@ internal class ConfiguracionDeVozLocalStore(private val context: Context) {
     /** Guarda la configuración, sobrescribiendo lo anterior. */
     suspend fun guardar(config: ConfiguracionDeVoz) {
         val raw = json.encodeToString(config.aDto())
-        context.dataStore.edit { prefs ->
+        context.configuracionVozDataStore.edit { prefs ->
             prefs[configKey] = raw
         }
     }

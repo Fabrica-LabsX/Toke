@@ -50,15 +50,9 @@ suspend fun validarCodigoInvitacion(codigo: String): InvitacionTrabajador? {
     }
 
     if (CuentaStore.sesionActual.value == null) {
-        val anonRes = SupabaseAuthBridge.iniciarSesionTrabajadorAnonimo()
-        if (anonRes.isFailure) {
-            LogSeguro.e("TokeInvitacion", "sesión anónima falló", anonRes.exceptionOrNull())
-            FeedbackManager.setLoading(false)
-            FeedbackManager.showErrorMessage(
-                ErrorMapper.translateInvitacionError(anonRes.exceptionOrNull(), TokeErrorCodes.ERROR_SESION_TRABAJADOR)
-            )
-            return null
-        }
+        FeedbackManager.setLoading(false)
+        FeedbackManager.showErrorMessage("Debes iniciar sesión con tu correo para usar un código de invitación.")
+        return null
     }
 
     val cuentaReady = withTimeoutOrNull(8000L) { CuentaStore.sesionActual.filter { it != null }.first() }

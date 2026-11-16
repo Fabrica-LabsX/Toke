@@ -13,9 +13,16 @@ import kotlinx.coroutines.launch
  */
 object EventoDeNotificacionStore {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private var iniciado = false
 
     fun init(context: Context) {
+        if (iniciado) return
+        iniciado = true
         val appContext = context.applicationContext
-        scope.launch { EventoDeNotificacionLocalStore(appContext).borrarTodo() }
+        scope.launch {
+            runCatching {
+                EventoDeNotificacionLocalStore(appContext).borrarTodo()
+            }
+        }
     }
 }

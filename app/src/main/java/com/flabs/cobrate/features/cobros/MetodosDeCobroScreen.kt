@@ -151,8 +151,8 @@ fun MetodosDeCobroScreen(
                             onObtenerQr = { businessViewModel.obtenerImagenQr(it) },
                             onAmpliarQr = { qrAmpliado = true },
                             onCopiar = { CobrosAcciones.copiarNumero(context, it) },
-                            onEditar = if (puedeEditar) ({ metodoEnEdicion = seleccionado }) else null,
-                            onCargarQr = if (puedeEditar) {
+                            onEditar = if (puedeEditar && seleccionado.tipo == com.flabs.cobrate.core.model.TipoMetodoCobro.YAPE) ({ metodoEnEdicion = seleccionado }) else null,
+                            onCargarQr = if (puedeEditar && seleccionado.tipo == com.flabs.cobrate.core.model.TipoMetodoCobro.YAPE) {
                                 {
                                     metodoEnSubida = seleccionado.id
                                     selectorDeFoto.launch(
@@ -213,6 +213,9 @@ fun MetodosDeCobroScreen(
             existentes = metodos,
             onDismiss = { mostrarCrear = false },
             onConfirm = { tipo, dato, titular ->
+                if (!NuevoMetodoLogica.esTipoPermitidoParaCrear(tipo)) {
+                    return@NuevoMetodoHoja
+                }
                 if (!puedeVincularOtro) {
                     onIrAPlanes()
                 } else {

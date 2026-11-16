@@ -12,6 +12,8 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
+private val Context.negociosDataStore by preferencesDataStore(name = "negocios")
+
 /**
  * Persistencia local de negocios usando Jetpack DataStore (Preferences) con
  * serialización JSON manual vía kotlinx.serialization — MISMO patrón que
@@ -21,8 +23,6 @@ import kotlinx.serialization.json.Json
  * clave de Preferences.
  */
 internal class NegocioLocalStore(private val context: Context) {
-
-    private val Context.dataStore by preferencesDataStore(name = "negocios")
 
     /**
      * CAPA 8-SANEAMIENTO: La clave ahora incluye el UID para aislamiento físico.
@@ -35,7 +35,7 @@ internal class NegocioLocalStore(private val context: Context) {
 
     /** Lee los negocios persistidos una sola vez para un usuario específico. */
     suspend fun leerUnaVez(uid: String): List<NegocioDto> =
-        context.dataStore.data.map { prefs ->
+        context.negociosDataStore.data.map { prefs ->
             prefs[keyParaUsuario(uid)]?.let { raw ->
                 runCatching {
                     json.decodeFromString<List<NegocioDto>>(raw)
@@ -46,14 +46,14 @@ internal class NegocioLocalStore(private val context: Context) {
     /** Guarda la lista completa de negocios para un usuario (espera finalización). */
     suspend fun guardar(uid: String, negocios: List<Negocio>) {
         val raw = json.encodeToString(negocios.map { it.aDto() })
-        context.dataStore.edit { prefs ->
+        context.negociosDataStore.edit { prefs ->
             prefs[keyParaUsuario(uid)] = raw
         }
     }
 
     /** Borra los datos de un usuario específico. */
     suspend fun borrarParaUsuario(uid: String) {
-        context.dataStore.edit { it.remove(keyParaUsuario(uid)) }
+        context.negociosDataStore.edit { it.remove(keyParaUsuario(uid)) }
     }
 
     // ---- DTO serializable (espejo del dominio) ----

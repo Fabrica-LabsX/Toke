@@ -71,6 +71,10 @@ fun CobrosTarjeta(
                     colorBarrera = paleta.bordeControl,
                     modifier = Modifier.weight(1f),
                 )
+                if (metodo.tipo != com.flabs.cobrate.core.model.TipoMetodoCobro.YAPE) {
+                    Spacer(modifier = Modifier.width(8.dp))
+                    PillProximamente(paleta = paleta)
+                }
                 if (onEditar != null) {
                     Spacer(modifier = Modifier.width(8.dp))
                     ChipAccion(paleta = paleta, texto = "Editar", icono = TokeIcons.Editar, onClick = onEditar)

@@ -17,6 +17,7 @@ data class PreviewInvitacion(
     @SerialName("estado") val estado: EstadoInvitacion,
     @SerialName("expiracion") val expiracion: Long,
     @SerialName("fecha_creacion") val fechaCreacion: Long,
+    @SerialName("requiere_aprobacion") val requiereAprobacion: Boolean = true,
     @SerialName("negocio_nombre") val negocioNombre: String,
     @SerialName("dueno_username") val duenoUsername: String,
     @SerialName("dueno_nombre_visible") val duenoNombreVisible: String? = null
@@ -29,5 +30,6 @@ fun PreviewInvitacion.toInvitacion() = InvitacionTrabajador(
     codigo = codigo,
     estado = estado,
     fechaCreacion = fechaCreacion,
-    expiracion = expiracion
+    expiracion = expiracion,
+    requiereAprobacion = requiereAprobacion
 )

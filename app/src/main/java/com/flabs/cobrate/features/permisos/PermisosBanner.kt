@@ -39,9 +39,9 @@ fun PermisosBanner(
 ) {
     val datos = when (estado) {
         EstadoServicio.OPERATIVO -> DatosBanner(
-            color = paleta.activo,
-            fondo = paleta.verdeFondo,
-            borde = paleta.verdeBorde,
+            color = paleta.verde,
+            fondo = paleta.tarjeta,
+            borde = paleta.borde,
             icono = TokeIcons.Check,
             titulo = "Sincronización activa",
             mensaje = "¡Genial!, TOKE está listo para recibir cobros y avisar a tu equipo en tiempo real.",
@@ -49,8 +49,8 @@ fun PermisosBanner(
         )
         EstadoServicio.PARCIAL -> DatosBanner(
             color = paleta.ambar,
-            fondo = paleta.ambarFondo,
-            borde = paleta.ambarBorde,
+            fondo = paleta.tarjeta,
+            borde = paleta.borde,
             icono = TokeIcons.Advertencia,
             titulo = "Avisos en pausa al bloquear",
             mensaje = "TOKE funciona, pero dejará de enviar alertas cuando la pantalla se apague.",
@@ -58,8 +58,8 @@ fun PermisosBanner(
         )
         EstadoServicio.DESACTIVADO -> DatosBanner(
             color = Rojo,
-            fondo = paleta.rojoFondo,
-            borde = paleta.rojoBorde,
+            fondo = paleta.tarjeta,
+            borde = paleta.borde,
             icono = TokeIcons.Bloqueado,
             titulo = "Falta activar TOKE",
             mensaje = "Activa los accesos de abajo para que TOKE pueda avisarte de cada cobro.",
@@ -117,8 +117,8 @@ fun PermisosBanner(
                 Spacer(modifier = Modifier.width(8.dp))
                 Surface(
                     shape = RoundedCornerShape(9999.dp),
-                    color = paleta.tarjeta,
-                    border = BorderStroke(1.dp, datos.borde),
+                    color = paleta.tileFondo,
+                    border = BorderStroke(1.dp, paleta.bordeControl),
                 ) {
                     Text(
                         text = datos.etiqueta,
@@ -127,7 +127,7 @@ fun PermisosBanner(
                             fontWeight = FontWeight.Bold,
                             fontSize = 12.sp,
                         ),
-                        color = if (estado == EstadoServicio.PARCIAL) TokeAmbarTexto else Rojo,
+                        color = if (estado == EstadoServicio.PARCIAL) paleta.ambar else Rojo,
                         modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
                     )
                 }

@@ -77,6 +77,7 @@ fun PantallaEsperandoAceptacion(
         ) {
             Box(
                 modifier = Modifier
+                    .weight(1f)
                     .fillMaxWidth(),
                 contentAlignment = Alignment.Center
             ) {

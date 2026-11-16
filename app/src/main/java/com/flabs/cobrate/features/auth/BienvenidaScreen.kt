@@ -44,7 +44,7 @@ import com.flabs.cobrate.ui.theme.tokePaleta
 
 /**
  * Pantalla de bienvenida: se muestra al abrir la app sin sesión o al cerrarla.
- * Ofrece iniciar sesión, crear la cuenta o entrar con un código de trabajador.
+ * Ofrece iniciar sesión o crear la cuenta con correo verificado.
  */
 @Composable
 fun BienvenidaScreen(
@@ -66,6 +66,19 @@ fun BienvenidaScreen(
         Spacer(modifier = Modifier.height(10.dp))
         BotonAcceso(paleta, stringResource(R.string.bienvenida_iniciar_sesion), principal = false, altura = 44.dp, onClick = onIniciarSesion)
         BotonAcceso(paleta, "+ " + stringResource(R.string.bienvenida_crear_cuenta), principal = true, altura = 44.dp, onClick = onCrearCuenta)
-        EnlaceAcceso(paleta, "Tengo un código de trabajador", onIngresarCodigo)
+        Spacer(modifier = Modifier.height(10.dp))
+        Text(
+            text = "Versión 1.5.1 - FLABS",
+            style = TextStyle(
+                fontFamily = PlusJakartaSans,
+                fontWeight = FontWeight.Medium,
+                fontSize = 12.sp,
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+            ),
+            color = paleta.textoSecundario,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 6.dp),
+        )
     }
 }

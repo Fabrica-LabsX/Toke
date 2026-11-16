@@ -1,9 +1,12 @@
 // TEXTOS SINTÉTICOS: validar contra notificaciones reales del dispositivo
 package com.flabs.cobrate
 
+import com.flabs.cobrate.core.logic.AppsDePagoConfiables
 import com.flabs.cobrate.core.logic.NotificationParser
 import com.flabs.cobrate.core.logic.ResultadoParseo
+import com.flabs.cobrate.core.logic.YapeNotificationParser
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.util.Random
@@ -47,7 +50,8 @@ class NotificationParserEquivalenciaTest {
         "", "Yape!", "Hola", "Juan P.", "Ana R.", "en tu cuenta", "de", "por", "BCP", "Interbank",
         "para ti", "ahora", "Saldo disponible", "novedades", "un pago", "una transferencia", "Plin"
     )
-    private val paquetes = listOf("com.bcp.innovacxion.yapeapp", "com.bcp.bank.bcp", "pe.com.interbank.mobilebanking")
+    // Derivado directamente de la fuente de verdad excluyendo Yape (exactamente 12 paquetes)
+    private val paquetes = (AppsDePagoConfiables.paquetesConfiables - YapeNotificationParser.PAQUETE_YAPE).toList().sorted()
 
     private fun elige(r: Random, lista: List<String>) = lista[r.nextInt(lista.size)]
 
@@ -72,6 +76,7 @@ class NotificationParserEquivalenciaTest {
     @Test
     fun elParserNuevoDaElMismoResultadoQueElOriginal() {
         val r = Random(20261106L)
+        val paquetesProbados = mutableSetOf<String>()
         var pagos = 0
         var noPagos = 0
         repeat(60_000) { i ->
@@ -79,6 +84,7 @@ class NotificationParserEquivalenciaTest {
             val cuerpo = texto(r)
             val extras = if (r.nextInt(4) == 0) texto(r) else null
             val paquete = elige(r, paquetes)
+            paquetesProbados.add(paquete)
 
             val esperado = NotificationParserLegacy.parsear(titulo, cuerpo, paquete, extras)
             val actual = NotificationParser.parsear(titulo, cuerpo, paquete, extras)
@@ -90,8 +96,44 @@ class NotificationParserEquivalenciaTest {
             )
             if (esperado is ResultadoParseo.MontoDetectado) pagos++ else noPagos++
         }
+        // Verificar que los 12 paquetes fueron efectivamente probados
+        assertEquals(12, paquetes.size)
+        assertEquals(12, paquetesProbados.size)
+        assertEquals(paquetes.toSet(), paquetesProbados)
+
         // El corpus tiene que ejercitar los dos resultados, si no la prueba no demuestra nada.
         assertTrue("Muy pocos pagos en el corpus: $pagos", pagos > 1_000)
         assertTrue("Muy pocos no-pagos en el corpus: $noPagos", noPagos > 1_000)
+    }
+
+    @Test
+    fun ningunPaqueteNoYapeEsDirigidoAlParserDeYape() {
+        val paquetesNoYape = AppsDePagoConfiables.paquetesConfiables - YapeNotificationParser.PAQUETE_YAPE
+        assertEquals(12, paquetesNoYape.size)
+        val textoTipicoYape = "Yape! Juan Perez te envió un pago por S/ 25. El cód. de seguridad es: 123"
+
+        for (paquete in paquetesNoYape) {
+            // YapeNotificationParser rechaza directamente cualquier paquete que no sea Yape
+            val resultadoYapeDirecto = YapeNotificationParser.parsear("Confirmación de Pago", textoTipicoYape, paquete)
+            assertEquals(
+                "YapeNotificationParser debe rechazar paquete $paquete",
+                ResultadoParseo.NoEsPago,
+                resultadoYapeDirecto
+            )
+
+            // NotificationParser deriva a legacy para paquetes no-Yape
+            val resultadoCoord = NotificationParser.parsear("Confirmación de Pago", textoTipicoYape, paquete)
+            val resultadoLegacy = NotificationParserLegacy.parsear("Confirmación de Pago", textoTipicoYape, paquete)
+            assertEquals(
+                "NotificationParser debe derivar $paquete a legacy de forma idéntica",
+                resultadoLegacy,
+                resultadoCoord
+            )
+
+            // En legacy, MontoDetectado nunca contiene pagador
+            if (resultadoCoord is ResultadoParseo.MontoDetectado) {
+                assertNull("Un paquete no-Yape no debe recibir pagador del parser de Yape", resultadoCoord.pagador)
+            }
+        }
     }
 }

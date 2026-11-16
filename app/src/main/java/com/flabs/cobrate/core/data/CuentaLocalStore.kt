@@ -24,9 +24,9 @@ import kotlinx.serialization.json.Json
  * el modelo de dominio [Cuenta]. Es una representación mínima de desarrollo
  * local, no un estándar de seguridad de producción.
  */
-internal class CuentaLocalStore(private val context: Context) {
+private val Context.cuentaDataStore by preferencesDataStore(name = "cuentas")
 
-    private val Context.dataStore by preferencesDataStore(name = "cuentas")
+internal class CuentaLocalStore(private val context: Context) {
 
     private val cuentasKey = stringPreferencesKey("lista_cuentas")
     private val sesionActivaIdKey = stringPreferencesKey("sesion_activa_id")
@@ -39,7 +39,7 @@ internal class CuentaLocalStore(private val context: Context) {
 
     /** Lee las cuentas persistidas una sola vez (DTOs, incluyen el hash). */
     suspend fun leerUnaVez(): List<CuentaDto> =
-        context.dataStore.data.map { prefs ->
+        context.cuentaDataStore.data.map { prefs ->
             prefs[cuentasKey]?.let { raw ->
                 runCatching {
                     json.decodeFromString<List<CuentaDto>>(raw)
@@ -65,7 +65,7 @@ internal class CuentaLocalStore(private val context: Context) {
                 )
             }
         )
-        context.dataStore.edit { prefs ->
+        context.cuentaDataStore.edit { prefs ->
             prefs[cuentasKey] = raw
         }
     }

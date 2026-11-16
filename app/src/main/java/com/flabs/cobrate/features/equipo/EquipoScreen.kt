@@ -62,6 +62,11 @@ fun EquipoScreen(
     var mostrandoInvitar by remember { mutableStateOf(false) }
     var trabajadorAExpulsar by remember { mutableStateOf<TrabajadorRealInfo?>(null) }
 
+    LaunchedEffect(negocioId) {
+        businessViewModel.cargarEquipoDelNegocio()
+        businessViewModel.cargarEquipoVisible()
+    }
+
     LaunchedEffect(cantidadSolicitudes) {
         pestana = FiltroEquipo.pestanaTrasCambioDeSolicitudes(pestana, cantidadSolicitudes)
     }
@@ -85,12 +90,20 @@ fun EquipoScreen(
                 puedeAdministrar = puedeAdministrar,
                 onSeleccionar = { pestana = it },
             )
-            CampoBusqueda(
-                paleta = paleta,
-                texto = texto,
-                placeholder = FiltroEquipo.placeholder(pestana),
-                onTextoCambia = { texto = it },
-            )
+
+            val mostrarBusqueda = when (pestana) {
+                PestanaEquipo.MI_EQUIPO -> true
+                PestanaEquipo.CODIGOS -> !mostrandoInvitar && (codigosActivos.size > 1 || texto.isNotEmpty())
+                PestanaEquipo.SOLICITUDES -> solicitudes.size > 2 || texto.isNotEmpty()
+            }
+            if (mostrarBusqueda) {
+                CampoBusqueda(
+                    paleta = paleta,
+                    texto = texto,
+                    placeholder = FiltroEquipo.placeholder(pestana),
+                    onTextoCambia = { texto = it },
+                )
+            }
 
             LazyColumn(
                 modifier = Modifier.weight(1f),

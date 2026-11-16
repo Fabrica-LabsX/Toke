@@ -42,8 +42,38 @@ import com.flabs.cobrate.ui.theme.TokePaleta
  */
 
 /**
- * Fila de una billetera o banco. Si [yaExiste], queda atenuada, no se puede tocar y muestra
- * "(Ya existe)" a su lado.
+ * Pill amarilla/ámbar sólida para indicar métodos en estado "Próximamente".
+ * Fondo ámbar sólido de TokePaleta, texto con contraste accesible y esquinas redondeadas.
+ * Sin gradientes, transparencias ni glassmorphism.
+ */
+@Composable
+fun PillProximamente(
+    paleta: TokePaleta,
+    modifier: Modifier = Modifier,
+) {
+    Surface(
+        shape = RoundedCornerShape(9999.dp),
+        color = paleta.ambar,
+        modifier = modifier,
+    ) {
+        Text(
+            text = "Próximamente",
+            style = TextStyle(
+                fontFamily = PlusJakartaSans,
+                fontWeight = FontWeight.Bold,
+                fontSize = 11.sp,
+                letterSpacing = 0.2.sp,
+            ),
+            color = paleta.ambarTexto,
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
+            maxLines = 1,
+        )
+    }
+}
+
+/**
+ * Fila de una billetera o banco. Si [proximamente] o [yaExiste], queda deshabilitada,
+ * no se puede tocar y muestra el indicador correspondiente.
  */
 @Composable
 fun OpcionMetodoFila(
@@ -52,6 +82,7 @@ fun OpcionMetodoFila(
     subtitulo: String?,
     habilitada: Boolean,
     yaExiste: Boolean,
+    proximamente: Boolean = false,
     onClick: () -> Unit,
 ) {
     Surface(
@@ -69,7 +100,10 @@ fun OpcionMetodoFila(
             IconoMetodoPago(tipo = tipo, tamano = 44.dp)
             Spacer(modifier = Modifier.width(14.dp))
             Column(modifier = Modifier.weight(1f)) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
                     Text(
                         text = MetodosCobroLogica.nombreLegible(tipo),
                         style = TextStyle(
@@ -77,11 +111,13 @@ fun OpcionMetodoFila(
                             fontWeight = FontWeight.ExtraBold,
                             fontSize = 17.sp,
                         ),
-                        color = paleta.textoPrincipal,
+                        color = if (habilitada) paleta.textoPrincipal else paleta.textoSecundario,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )
-                    if (yaExiste) {
+                    if (proximamente) {
+                        PillProximamente(paleta = paleta)
+                    } else if (yaExiste) {
                         Text(
                             text = " (Ya existe)",
                             style = TextStyle(
@@ -94,7 +130,7 @@ fun OpcionMetodoFila(
                         )
                     }
                 }
-                if (subtitulo != null && !yaExiste) {
+                if (subtitulo != null && !yaExiste && !proximamente) {
                     Text(
                         text = subtitulo,
                         style = TextStyle(

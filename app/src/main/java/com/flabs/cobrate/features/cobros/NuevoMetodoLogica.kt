@@ -4,13 +4,11 @@ import com.flabs.cobrate.core.model.MetodoDeCobro
 import com.flabs.cobrate.core.model.TipoMetodoCobro
 
 /**
- * Lógica de la ventana "Vincular un método de cobro". Sin nada de interfaz: qué opciones se
- * ofrecen, cuáles pertenecen a la red Plin y cuáles ya existen.
+ * Lógica de la ventana "Vincular un método de cobro".
  *
- * Plin no es una billetera aparte: al elegirlo se escoge el banco o billetera de la red Plin donde
- * se recibe. El método que se crea es esa billetera, sin marca ni dato extra, y cada billetera solo
- * puede existir una vez; por eso se pueden tener varios Plin siempre que sean de billeteras
- * distintas.
+ * En esta versión, exclusivamente Yape está habilitado para vinculación.
+ * Plin y todas las demás entidades bancarias y billeteras se presentan visibles
+ * pero deshabilitadas con la etiqueta "Próximamente".
  */
 
 enum class PasoNuevoMetodo { ELEGIR, ELEGIR_PARA_PLIN, DATOS }
@@ -24,9 +22,6 @@ object NuevoMetodoLogica {
      * Entidades de TOKE que forman parte de la red Plin (verificado en fuentes públicas: ver
      * docs/PLIN_ENTIDADES.md). BBVA, Interbank y Scotiabank son sus administradores; BanBif es
      * participante; Agora/Tunki es la billetera de Interbank y cobra con el QR de Plin.
-     *
-     * Quedan fuera, por no haber confirmación de que ofrezcan Plin: BCP (es de Yape), Pichincha,
-     * BIM, Ligo, Sip y Lemon Cash. Para mover una entidad basta con agregarla o quitarla aquí.
      */
     private val bancosPlin = listOf(
         TipoMetodoCobro.INTERBANK,
@@ -52,19 +47,22 @@ object NuevoMetodoLogica {
     )
 
     /**
-     * Grupos de la primera pantalla. Las entidades de la red Plin no salen aquí: se llega a ellas
-     * eligiendo Plin.
+     * Grupos del catálogo principal para vincular métodos de cobro.
+     * Incluye todas las opciones del sistema:
+     * - Billeteras: Yape (disponible), Plin y demás billeteras ("Próximamente").
+     * - Bancos: todos los bancos ("Próximamente").
+     * - Otros: transferencia ("Próximamente").
      */
     fun gruposPrincipales(): List<GrupoMetodos> = listOf(
         GrupoMetodos(
             titulo = "Billeteras",
-            tipos = listOf(TipoMetodoCobro.YAPE, TipoMetodoCobro.PLIN) + billeterasComunes,
+            tipos = listOf(TipoMetodoCobro.YAPE, TipoMetodoCobro.PLIN) + billeterasComunes + billeterasPlin,
         ),
-        GrupoMetodos(titulo = "Bancos", tipos = bancosComunes),
+        GrupoMetodos(titulo = "Bancos", tipos = bancosComunes + bancosPlin),
         GrupoMetodos(titulo = "Otros", tipos = listOf(TipoMetodoCobro.TRANSFERENCIA)),
     )
 
-    /** Lo que se ve dentro de Plin: solo las entidades de la red Plin. */
+    /** Lo que se ve dentro de Plin: entidades de la red Plin conservadas como referencia. */
     fun gruposParaPlin(): List<GrupoMetodos> = listOf(
         GrupoMetodos(titulo = "Bancos", tipos = bancosPlin),
         GrupoMetodos(titulo = "Billeteras", tipos = billeterasPlin),
@@ -80,19 +78,31 @@ object NuevoMetodoLogica {
         existentes.any { it.tipo == tipo }
 
     /**
-     * Plin siempre se puede elegir mientras quede al menos una billetera o banco de su red libre;
-     * el resto solo si no existe ya.
+     * Indica si un método está en estado "Próximamente".
+     * En esta versión, solo Yape está disponible; todos los demás tipos están en Próximamente.
+     */
+    fun esProximamente(tipo: TipoMetodoCobro): Boolean =
+        tipo != TipoMetodoCobro.YAPE
+
+    /**
+     * Solo Yape puede elegirse, siempre que no exista ya en el negocio.
+     * Plin y todos los demás métodos no se pueden elegir.
      */
     fun puedeElegir(tipo: TipoMetodoCobro, existentes: List<MetodoDeCobro>): Boolean =
-        if (tipo == TipoMetodoCobro.PLIN) {
-            tiposParaPlin().any { !yaExiste(it, existentes) }
+        if (tipo == TipoMetodoCobro.YAPE) {
+            !yaExiste(TipoMetodoCobro.YAPE, existentes)
         } else {
-            !yaExiste(tipo, existentes)
+            false
         }
+
+    /**
+     * Regla estricta de elegibilidad de negocio: rechaza cualquier tipo distinto de YAPE.
+     */
+    fun esTipoPermitidoParaCrear(tipo: TipoMetodoCobro): Boolean =
+        tipo == TipoMetodoCobro.YAPE
 
     /** El número o cuenta es obligatorio; el titular es opcional. */
     fun datosValidos(dato: String): Boolean = com.flabs.cobrate.core.logic.EntradaSegura.datoDeCobroSeguro(dato)
 
-    fun subtituloDe(tipo: TipoMetodoCobro): String? =
-        if (tipo == TipoMetodoCobro.PLIN) "Elige tu banco o billetera" else null
+    fun subtituloDe(tipo: TipoMetodoCobro): String? = null
 }
