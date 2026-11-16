@@ -73,6 +73,11 @@ CLAUDE.md
 supabase/migrations/*.sql
 *.sql
 
+# Proyectos y artefactos desacoplados del cliente Android
+One/
+web/
+supabase/
+
 # Video publicitario independiente (repositorio privado TokeAdds)
 hyperframes-video/
 
